@@ -1,20 +1,19 @@
 import React, { useState } from "react";
 
 export default function ModalAddTask({ onClose, onAdd }) {
-  // Productos predefinidos
   const availableProducts = [
-    { id: "1", name: "Pizza" },
-    { id: "2", name: "Hamburguesa" },
-    { id: "3", name: "Coca-Cola" },
-    { id: "4", name: "Fanta" },
-    { id: "5", name: "Agua Mineral" },
-    { id: "6", name: "Ensalada" },
+    { id: "1", name: "Pizza", category: "Comidas" },
+    { id: "2", name: "Hamburguesa", category: "Comidas" },
+    { id: "3", name: "Coca-Cola", category: "Bebidas" },
+    { id: "4", name: "Fanta", category: "Bebidas" },
+    { id: "5", name: "Agua Mineral", category: "Bebidas" },
+    { id: "6", name: "Ensalada", category: "Comidas" },
   ];
+  
 
   const [taskDetails, setTaskDetails] = useState({
-    id: "",
     nombre: "",
-    productos: [{ productoId: "", cantidad: 1 }],
+    productos: [],
   });
 
   const handleInputChange = (e) => {
@@ -25,18 +24,33 @@ export default function ModalAddTask({ onClose, onAdd }) {
     }));
   };
 
+  const handleAddProduct = (productId) => {
+    setTaskDetails((prev) => {
+      const existingIndex = prev.productos.findIndex(
+        (p) => p.productoId === productId
+      );
+  
+      const updatedProductos = [...prev.productos];
+  
+      if (existingIndex !== -1) {
+        const currentCantidad = updatedProductos[existingIndex].cantidad || 0;
+        updatedProductos[existingIndex] = {
+          ...updatedProductos[existingIndex],
+          cantidad: currentCantidad + 1,
+        };
+      } else {
+        updatedProductos.push({ productoId: productId, cantidad: 1 });
+      }
+  
+      return { ...prev, productos: updatedProductos };
+    });
+  };
+
   const handleProductChange = (index, e) => {
     const { name, value } = e.target;
     const newProductos = [...taskDetails.productos];
-    newProductos[index][name] = value;
+    newProductos[index][name] = parseInt(value);
     setTaskDetails({ ...taskDetails, productos: newProductos });
-  };
-
-  const handleAddProduct = () => {
-    setTaskDetails((prev) => ({
-      ...prev,
-      productos: [...prev.productos, { productoId: "", cantidad: 1 }],
-    }));
   };
 
   const handleSubmit = (e) => {
@@ -46,7 +60,6 @@ export default function ModalAddTask({ onClose, onAdd }) {
     onClose();
   };
 
-  // Obtener el nombre del producto a partir del productoId
   const getProductNameById = (id) => {
     const product = availableProducts.find((prod) => prod.id === id);
     return product ? product.name : "";
@@ -72,11 +85,14 @@ export default function ModalAddTask({ onClose, onAdd }) {
           backgroundColor: "#fff",
           padding: "20px",
           borderRadius: "10px",
-          width: "300px",
+          width: "800px",
+          maxHeight: "90vh",
+          overflowY: "auto",
           boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
         }}
       >
         <h3>Agregar Comanda</h3>
+
         <form onSubmit={handleSubmit}>
           <div>
             <label>Nombre de la Comanda</label>
@@ -87,73 +103,111 @@ export default function ModalAddTask({ onClose, onAdd }) {
               onChange={handleInputChange}
               placeholder="Nombre de la comanda"
               required
-              style={{ width: "100%", padding: "8px", marginBottom: "10px" }}
+              style={{
+                width: "100%",
+                padding: "8px",
+                marginBottom: "15px",
+              }}
             />
           </div>
 
-          {taskDetails.productos.map((producto, index) => (
-            <div key={index} style={{ marginBottom: "10px" }}>
-              <label>Producto #{index + 1}</label>
-              <select
-                name="productoId"
-                value={producto.productoId}
-                onChange={(e) => handleProductChange(index, e)}
-                required
-                style={{ width: "100%", padding: "8px", marginBottom: "5px" }}
-              >
-                <option value="">Selecciona un producto</option>
-                {availableProducts.map((product) => (
-                  <option key={product.id} value={product.id}>
-                    {product.name}
-                  </option>
-                ))}
-              </select>
-
-              {/* Mostrar el nombre del producto seleccionado */}
-              {producto.productoId && (
-                <div>
-                  <strong>Producto Seleccionado:</strong> {getProductNameById(producto.productoId)}
-                </div>
-              )}
-
-              <label>Cantidad</label>
-              <input
-                type="number"
-                name="cantidad"
-                value={producto.cantidad}
-                onChange={(e) => handleProductChange(index, e)}
-                min="1"
-                required
-                style={{ width: "100%", padding: "8px" }}
-              />
-            </div>
-          ))}
-
-          <button
-            type="button"
-            onClick={handleAddProduct}
+          <div
             style={{
-              backgroundColor: "#28a745",
-              color: "#fff",
-              padding: "8px 12px",
-              marginBottom: "10px",
-              borderRadius: "4px",
-              border: "none",
-              cursor: "pointer",
+              display: "flex",
+              gap: "20px",
             }}
           >
-            Agregar Producto
-          </button>
-          <br />
+            {/* Lista de productos agrupados por categoría en UNA columna */}
+<div style={{ flex: 1 }}>
+  <h4>Productos disponibles</h4>
+  {["Comidas", "Bebidas"].map((category) => (
+    <div key={category} style={{ marginBottom: "20px" }}>
+      <h5 style={{ borderBottom: "1px solid #ddd", paddingBottom: "5px" }}>{category}</h5>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "10px" }}>
+        {availableProducts
+          .filter((product) => product.category === category)
+          .map((product) => (
+            <div
+              key={product.id}
+              onClick={() => handleAddProduct(product.id)}
+              style={{
+                width: "100px",
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                padding: "10px",
+                textAlign: "center",
+                cursor: "pointer",
+                backgroundColor: "#f9f9f9",
+              }}
+            >
+              <img
+                src={`/img/${product.id}.jpg`}
+                alt={product.name}
+                style={{
+                  width: "100%",
+                  height: "60px",
+                  objectFit: "cover",
+                  marginBottom: "5px",
+                }}
+              />
+              <div>{product.name}</div>
+            </div>
+          ))}
+      </div>
+    </div>
+  ))}
+</div>
+
+
+            {/* Comanda actual */}
+            <div style={{ flex: 1 }}>
+              <h4>Comanda actual</h4>
+              {taskDetails.productos.length === 0 ? (
+                <p>No hay productos en la comanda.</p>
+              ) : (
+                taskDetails.productos.map((producto, index) => {
+                  const product = availableProducts.find(
+                    (p) => p.id === producto.productoId
+                  );
+                  return (
+                    <div
+                      key={index}
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        marginBottom: "10px",
+                        borderBottom: "1px solid #ddd",
+                        paddingBottom: "5px",
+                      }}
+                    >
+                      <div>{product?.name}</div>
+                      <input
+                        type="number"
+                        name="cantidad"
+                        value={producto.cantidad}
+                        onChange={(e) => handleProductChange(index, e)}
+                        min="1"
+                        style={{ width: "60px", padding: "5px" }}
+                      />
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
           <button
             type="submit"
             style={{
               backgroundColor: "#007bff",
               color: "#fff",
-              padding: "8px 12px",
+              padding: "10px 16px",
               borderRadius: "4px",
               border: "none",
               cursor: "pointer",
+              width: "100%",
+              marginTop: "20px",
             }}
           >
             Crear Comanda
@@ -165,11 +219,12 @@ export default function ModalAddTask({ onClose, onAdd }) {
           style={{
             backgroundColor: "#dc3545",
             color: "#fff",
-            padding: "8px 12px",
+            padding: "10px 16px",
             marginTop: "10px",
             borderRadius: "4px",
             border: "none",
             cursor: "pointer",
+            width: "100%",
           }}
         >
           Cancelar
