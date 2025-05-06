@@ -1,0 +1,49 @@
+/* TaskBoard.module.css */
+.boardContainer {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+  flex-wrap: wrap; /* Asegura que las columnas se ajusten si hay mucho contenido */
+}
+
+.column {
+  min-height: 150px;
+  width: 220px;
+  padding: 15px;
+  background-color: #f4f4f4;
+  border-radius: 10px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+  flex: 1; /* Asegura que todas las columnas tengan el mismo tamaño */
+}
+
+.columnTitle {
+  font-weight: bold;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.task {
+  padding: 10px;
+  margin: 8px 0;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  cursor: grab;
+  transition: box-shadow 0.2s ease;
+}
+
+.task:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.task h4 {
+  margin-bottom: 10px;
+}
+
+.task ul {
+  padding-left: 20px;
+}
+
+.task li {
+  margin-bottom: 5px;
+}

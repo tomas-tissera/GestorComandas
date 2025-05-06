@@ -1,0 +1,38 @@
+.active {
+    border-bottom: 2px solid black;
+}
+
+.tab {
+    font-size: 18px;
+    font-weight: 600;
+    padding-bottom: 4px;
+    margin: 40px;
+    cursor: pointer;
+    transition: opacity 0.2s ease;
+
+}
+
+.tab:hover {
+    opacity: 0.8;
+}
+
+.tabsContainer {
+    margin: 12px 0;
+    padding: 10px;
+    justify-items: stretch;
+    justify-content: space-between;
+    display: flex;
+}
+
+.homeLink {
+    text-decoration: none;
+}
+.homeContainer{
+    width: 100%;
+    align-items: center;    
+}
+.homeIcon{
+    color: #9ee3ff;
+    height: 35px;
+    width: 35px;
+}
