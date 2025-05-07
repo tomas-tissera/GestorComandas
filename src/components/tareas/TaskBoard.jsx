@@ -40,11 +40,11 @@ function DraggableItem({ task }) {
     transform: transform
       ? `translate(${transform.x}px, ${transform.y}px)`
       : undefined,
-    border: "1px solid #ccc",
     padding: "10px",
     borderRadius: "6px",
-    backgroundColor: "#fff",
     marginBottom: "10px",
+    
+    backgroundColor: "#fff",
     cursor: "grab",
   };
 
@@ -191,9 +191,9 @@ export default function TaskBoard() {
           {columns.map((col) => (
             <DroppableColumn key={col} id={col}>
               {tasks[col].map((task) => (
-                <div key={task.id}>
+                <div key={task.id} className={styles.boardItem}>
                   <DraggableItem task={task} />
-                  <div style={{ display: "flex", gap: "5px" }}>
+                  <div className={styles.boardIcon} >
                     <button
                       onClick={() => handleEditComanda(task)}
                       style={{

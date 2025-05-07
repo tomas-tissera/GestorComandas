@@ -25,9 +25,6 @@
 .task {
   padding: 10px;
   margin: 8px 0;
-  background-color: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
   cursor: grab;
   transition: box-shadow 0.2s ease;
 }
@@ -46,4 +43,16 @@
 
 .task li {
   margin-bottom: 5px;
+}
+.boardItem{
+  background-color: red;
+  padding: 5px;
+  margin: 25px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+}
+.boardIcon{
+ display: flex;
+ justify-content: space-evenly;
 }
