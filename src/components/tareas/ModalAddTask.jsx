@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
-export default function ModalAddTask({ onClose, onAdd }) {
+export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
   const availableProducts = [
     { id: "1", name: "Pizza", category: "Comidas" },
     { id: "2", name: "Hamburguesa", category: "Comidas" },
@@ -9,12 +9,22 @@ export default function ModalAddTask({ onClose, onAdd }) {
     { id: "5", name: "Agua Mineral", category: "Bebidas" },
     { id: "6", name: "Ensalada", category: "Comidas" },
   ];
-  
+
+  const isEditing = !!taskToEdit;
 
   const [taskDetails, setTaskDetails] = useState({
     nombre: "",
     productos: [],
   });
+
+  useEffect(() => {
+    if (isEditing) {
+      setTaskDetails({
+        nombre: taskToEdit.nombre || "",
+        productos: taskToEdit.productos || [],
+      });
+    }
+  }, [taskToEdit]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -29,19 +39,22 @@ export default function ModalAddTask({ onClose, onAdd }) {
       const existingIndex = prev.productos.findIndex(
         (p) => p.productoId === productId
       );
-  
+
       const updatedProductos = [...prev.productos];
-  
+
       if (existingIndex !== -1) {
-        const currentCantidad = updatedProductos[existingIndex].cantidad || 0;
         updatedProductos[existingIndex] = {
           ...updatedProductos[existingIndex],
-          cantidad: currentCantidad + 1,
+          cantidad: updatedProductos[existingIndex].cantidad + 1,
         };
       } else {
-        updatedProductos.push({ productoId: productId, cantidad: 1 });
+        updatedProductos.push({
+          productoId: productId,
+          cantidad: 1,
+          aclaracion: "",  // Añadimos un campo de aclaración vacío al inicio
+        });
       }
-  
+
       return { ...prev, productos: updatedProductos };
     });
   };
@@ -53,45 +66,35 @@ export default function ModalAddTask({ onClose, onAdd }) {
     setTaskDetails({ ...taskDetails, productos: newProductos });
   };
 
+  const handleAclaracionChange = (index, e) => {
+    const { value } = e.target;
+    const newProductos = [...taskDetails.productos];
+    newProductos[index].aclaracion = value;
+    setTaskDetails({ ...taskDetails, productos: newProductos });
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!taskDetails.nombre || !taskDetails.productos.length) return;
-    onAdd(taskDetails);
+
+    const payload = {
+      ...taskDetails,
+      id: isEditing ? taskToEdit.id : undefined,
+    };
+
+    if (isEditing && onEdit) {
+      onEdit(payload);
+    } else {
+      onAdd(payload);
+    }
+
     onClose();
   };
 
-  const getProductNameById = (id) => {
-    const product = availableProducts.find((prod) => prod.id === id);
-    return product ? product.name : "";
-  };
-
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: "rgba(0, 0, 0, 0.5)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 1000,
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: "#fff",
-          padding: "20px",
-          borderRadius: "10px",
-          width: "800px",
-          maxHeight: "90vh",
-          overflowY: "auto",
-          boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
-        }}
-      >
-        <h3>Agregar Comanda</h3>
+    <div style={overlayStyle}>
+      <div style={modalStyle}>
+        <h3>{isEditing ? "Editar Comanda" : "Agregar Comanda"}</h3>
 
         <form onSubmit={handleSubmit}>
           <div>
@@ -103,61 +106,41 @@ export default function ModalAddTask({ onClose, onAdd }) {
               onChange={handleInputChange}
               placeholder="Nombre de la comanda"
               required
-              style={{
-                width: "100%",
-                padding: "8px",
-                marginBottom: "15px",
-              }}
+              style={{ width: "100%", padding: "8px", marginBottom: "15px" }}
             />
           </div>
 
-          <div
-            style={{
-              display: "flex",
-              gap: "20px",
-            }}
-          >
-            {/* Lista de productos agrupados por categoría en UNA columna */}
-<div style={{ flex: 1 }}>
-  <h4>Productos disponibles</h4>
-  {["Comidas", "Bebidas"].map((category) => (
-    <div key={category} style={{ marginBottom: "20px" }}>
-      <h5 style={{ borderBottom: "1px solid #ddd", paddingBottom: "5px" }}>{category}</h5>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "10px" }}>
-        {availableProducts
-          .filter((product) => product.category === category)
-          .map((product) => (
-            <div
-              key={product.id}
-              onClick={() => handleAddProduct(product.id)}
-              style={{
-                width: "100px",
-                border: "1px solid #ccc",
-                borderRadius: "8px",
-                padding: "10px",
-                textAlign: "center",
-                cursor: "pointer",
-                backgroundColor: "#f9f9f9",
-              }}
-            >
-              <img
-                src={`/img/${product.id}.jpg`}
-                alt={product.name}
-                style={{
-                  width: "100%",
-                  height: "60px",
-                  objectFit: "cover",
-                  marginBottom: "5px",
-                }}
-              />
-              <div>{product.name}</div>
+          <div style={{ display: "flex", gap: "20px" }}>
+            {/* Productos disponibles */}
+            <div style={{ flex: 1 }}>
+              <h4>Productos disponibles</h4>
+              {["Comidas", "Bebidas"].map((category) => (
+                <div key={category} style={{ marginBottom: "20px" }}>
+                  <h5 style={{ borderBottom: "1px solid #ddd", paddingBottom: "5px" }}>{category}</h5>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "10px", marginTop: "10px" }}>
+                    {availableProducts
+                      .filter((product) => product.category === category)
+                      .map((product) => (
+                        <div
+                          key={product.id}
+                          onClick={() => handleAddProduct(product.id)}
+                          style={{
+                            width: "100px",
+                            border: "1px solid #ccc",
+                            borderRadius: "8px",
+                            padding: "10px",
+                            textAlign: "center",
+                            cursor: "pointer",
+                            backgroundColor: "#f9f9f9",
+                          }}
+                        >
+                          {product.name}
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              ))}
             </div>
-          ))}
-      </div>
-    </div>
-  ))}
-</div>
-
 
             {/* Comanda actual */}
             <div style={{ flex: 1 }}>
@@ -166,22 +149,19 @@ export default function ModalAddTask({ onClose, onAdd }) {
                 <p>No hay productos en la comanda.</p>
               ) : (
                 taskDetails.productos.map((producto, index) => {
-                  const product = availableProducts.find(
-                    (p) => p.id === producto.productoId
-                  );
+                  const product = availableProducts.find((p) => p.id === producto.productoId);
                   return (
                     <div
                       key={index}
                       style={{
                         display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
+                        flexDirection: "column",
                         marginBottom: "10px",
                         borderBottom: "1px solid #ddd",
                         paddingBottom: "5px",
                       }}
                     >
-                      <div>{product?.name}</div>
+                      <div style={{ fontWeight: "bold" }}>{product?.name}</div>
                       <input
                         type="number"
                         name="cantidad"
@@ -190,6 +170,14 @@ export default function ModalAddTask({ onClose, onAdd }) {
                         min="1"
                         style={{ width: "60px", padding: "5px" }}
                       />
+                      <input
+                        type="text"
+                        name="aclaracion"
+                        value={producto.aclaracion || ""}
+                        onChange={(e) => handleAclaracionChange(index, e)}
+                        placeholder="Escribe una aclaración (opcional)"
+                        style={{ padding: "5px", marginTop: "5px" }}
+                      />
                     </div>
                   );
                 })
@@ -197,39 +185,61 @@ export default function ModalAddTask({ onClose, onAdd }) {
             </div>
           </div>
 
-          <button
-            type="submit"
-            style={{
-              backgroundColor: "#007bff",
-              color: "#fff",
-              padding: "10px 16px",
-              borderRadius: "4px",
-              border: "none",
-              cursor: "pointer",
-              width: "100%",
-              marginTop: "20px",
-            }}
-          >
-            Crear Comanda
+          <button type="submit" style={submitButtonStyle}>
+            {isEditing ? "Guardar Cambios" : "Crear Comanda"}
           </button>
         </form>
 
-        <button
-          onClick={onClose}
-          style={{
-            backgroundColor: "#dc3545",
-            color: "#fff",
-            padding: "10px 16px",
-            marginTop: "10px",
-            borderRadius: "4px",
-            border: "none",
-            cursor: "pointer",
-            width: "100%",
-          }}
-        >
+        <button onClick={onClose} style={cancelButtonStyle}>
           Cancelar
         </button>
       </div>
     </div>
   );
 }
+
+// Styles
+const overlayStyle = {
+  position: "fixed",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: "rgba(0, 0, 0, 0.5)",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 1000,
+};
+
+const modalStyle = {
+  backgroundColor: "#fff",
+  padding: "20px",
+  borderRadius: "10px",
+  width: "800px",
+  maxHeight: "90vh",
+  overflowY: "auto",
+  boxShadow: "0 4px 10px rgba(0, 0, 0, 0.2)",
+};
+
+const submitButtonStyle = {
+  backgroundColor: "#007bff",
+  color: "#fff",
+  padding: "10px 16px",
+  borderRadius: "4px",
+  border: "none",
+  cursor: "pointer",
+  width: "100%",
+  marginTop: "20px",
+};
+
+const cancelButtonStyle = {
+  backgroundColor: "#dc3545",
+  color: "#fff",
+  padding: "10px 16px",
+  marginTop: "10px",
+  borderRadius: "4px",
+  border: "none",
+  cursor: "pointer",
+  width: "100%",
+};
