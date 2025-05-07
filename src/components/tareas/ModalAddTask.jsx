@@ -10,11 +10,19 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
     { id: "6", name: "Ensalada", category: "Comidas" },
   ];
 
+  const condicionesEspeciales = [
+    { id: "celiaco", label: "Celíaco", icon: "🥖🚫" },
+    { id: "vegetariano", label: "Vegetariano", icon: "🥦" },
+    { id: "sinSal", label: "Sin Sal", icon: "🧂🚫" },
+    { id: "sinAzucar", label: "Sin Azúcar", icon: "🍬🚫" },
+  ];
+
   const isEditing = !!taskToEdit;
 
   const [taskDetails, setTaskDetails] = useState({
     nombre: "",
     productos: [],
+    condiciones: [],  // Añadimos las condiciones especiales a las comanda
   });
 
   useEffect(() => {
@@ -22,6 +30,7 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
       setTaskDetails({
         nombre: taskToEdit.nombre || "",
         productos: taskToEdit.productos || [],
+        condiciones: taskToEdit.condiciones || [],
       });
     }
   }, [taskToEdit]);
@@ -51,7 +60,7 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
         updatedProductos.push({
           productoId: productId,
           cantidad: 1,
-          aclaracion: "",  // Añadimos un campo de aclaración vacío al inicio
+          aclaracion: "",
         });
       }
 
@@ -71,6 +80,16 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
     const newProductos = [...taskDetails.productos];
     newProductos[index].aclaracion = value;
     setTaskDetails({ ...taskDetails, productos: newProductos });
+  };
+
+  const handleToggleCondicion = (condicionId) => {
+    setTaskDetails((prev) => {
+      const newCondiciones = prev.condiciones.includes(condicionId)
+        ? prev.condiciones.filter((id) => id !== condicionId)
+        : [...prev.condiciones, condicionId];
+
+      return { ...prev, condiciones: newCondiciones };
+    });
   };
 
   const handleSubmit = (e) => {
@@ -182,6 +201,31 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
                   );
                 })
               )}
+            </div>
+          </div>
+
+          {/* Condiciones Especiales */}
+          <div>
+            <h4>Condiciones Especiales</h4>
+            <div style={{ display: "flex", gap: "15px", flexWrap: "wrap" }}>
+              {condicionesEspeciales.map((condicion) => (
+                <div
+                  key={condicion.id}
+                  onClick={() => handleToggleCondicion(condicion.id)}
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: "6px",
+                    cursor: "pointer",
+                    backgroundColor: taskDetails.condiciones.includes(condicion.id) ? "#007bff" : "#f1f1f1",
+                    color: taskDetails.condiciones.includes(condicion.id) ? "#fff" : "#000",
+                    display: "flex",
+                    alignItems: "center",
+                    fontSize: "14px",
+                  }}
+                >
+                  <span>{condicion.icon}</span> {condicion.label}
+                </div>
+              ))}
             </div>
           </div>
 

@@ -1,58 +1,151 @@
-/* TaskBoard.module.css */
 .boardContainer {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   margin-top: 20px;
-  flex-wrap: wrap; /* Asegura que las columnas se ajusten si hay mucho contenido */
+  flex-wrap: wrap;
+  justify-content: center;
 }
 
+/* Columnas (Sala, Cocina, Entregado) */
 .column {
-  min-height: 150px;
-  width: 220px;
-  padding: 15px;
-  background-color: #f4f4f4;
-  border-radius: 10px;
-  box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-  flex: 1; /* Asegura que todas las columnas tengan el mismo tamaño */
+  background-color: #fafafa;
+  border-radius: 12px;
+  padding: 16px;
+  width: 280px;
+  min-height: 240px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease-in-out;
 }
 
-.columnTitle {
-  font-weight: bold;
-  margin-bottom: 10px;
+.column:hover {
+  transform: translateY(-2px);
+}
+
+.column h3 {
   text-align: center;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 14px;
+  color: #333;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 6px;
 }
 
+/* Comanda */
+.boardItem {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 18px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s ease-in-out;
+}
+
+.boardItem:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+/* Botones de acción (editar, eliminar) */
+.boardIcon {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+
+.boardIcon button {
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.boardIcon button:hover {
+  filter: brightness(1.1);
+}
+
+/* Tarea draggable */
 .task {
-  padding: 10px;
-  margin: 8px 0;
   cursor: grab;
-  transition: box-shadow 0.2s ease;
-}
-
-.task:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.task h4 {
-  margin-bottom: 10px;
+  background-color: #fefefe;
+  border-radius: 8px;
+  padding: 10px 0;
 }
 
 .task ul {
   padding-left: 20px;
+  margin: 0;
 }
 
 .task li {
-  margin-bottom: 5px;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
 }
-.boardItem{
-  background-color: red;
-  padding: 5px;
-  margin: 25px;
-  background-color: #ffffff;
-  border: 1px solid #ddd;
+
+.task strong {
+  display: block;
+  font-size: 1rem;
+  color: #007bff;
+  margin-bottom: 6px;
+}
+
+.task div {
+  font-style: italic;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+/* Botón Agregar */
+button {
+  background-color: #007bff;
+  color: white;
+  border: none;
   border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 1rem;
+  cursor: pointer;
+  margin-bottom: 20px;
 }
-.boardIcon{
- display: flex;
- justify-content: space-evenly;
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Media Queries */
+@media (max-width: 1024px) {
+  .column {
+    width: 45%;
+  }
+}
+
+@media (max-width: 768px) {
+  .boardContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .column {
+    width: 90%;
+    max-width: 500px;
+  }
+
+  .boardIcon {
+    justify-content: space-around;
+  }
+}
+
+@media (max-width: 480px) {
+  .column {
+    padding: 12px;
+    width: 95%;
+  }
+
+  .task strong {
+    font-size: 0.95rem;
+  }
+
+  .task li {
+    font-size: 0.85rem;
+  }
 }
