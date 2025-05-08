@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+// TaskBoard
+import React, { useState, useCallback } from "react";
 import { DndContext, useDraggable, useDroppable, closestCenter } from "@dnd-kit/core";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import ModalAddTask from "./ModalAddTask";
 import styles from "./TaskBoard.module.css";
 
-const availableProducts = [
+const AVAILABLE_PRODUCTS = [
   { id: "1", name: "Pizza" },
   { id: "2", name: "Hamburguesa" },
   { id: "3", name: "Coca-Cola" },
@@ -13,16 +14,16 @@ const availableProducts = [
   { id: "6", name: "Ensalada" },
 ];
 
-const columns = ["Sala", "Cocina", "Entregado"];
+const COLUMNS = ["Sala", "Cocina", "Entregado"];
 
-const initialTasks = {
+const INITIAL_TASKS = {
   Sala: [
     {
       id: 1,
       nombre: "Mesa 1",
       productos: [
-        { productoId: "1", cantidad: 2, aclaracion: "Sin cebolla" },
-        { productoId: "3", cantidad: 1, aclaracion: "Con hielo extra" },
+        { productoId: "1", cantidad: 2, aclaracion: "Sin cebolla", condiciones: ["celiaco"] },
+        { productoId: "3", cantidad: 1, aclaracion: "Con hielo extra", condiciones: [] },
       ],
     },
   ],
@@ -30,20 +31,14 @@ const initialTasks = {
   Entregado: [],
 };
 
-// 🔹 Componente arrastrable
-function DraggableItem({ task }) {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({
-    id: task.id,
-  });
+const DraggableItem = React.memo(({ task }) => {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: task.id });
 
   const style = {
-    transform: transform
-      ? `translate(${transform.x}px, ${transform.y}px)`
-      : undefined,
+    transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined,
     padding: "10px",
     borderRadius: "6px",
     marginBottom: "10px",
-    
     backgroundColor: "#fff",
     cursor: "grab",
   };
@@ -65,10 +60,9 @@ function DraggableItem({ task }) {
       </ul>
     </div>
   );
-}
+});
 
-// 🔹 Zona receptora de drop
-function DroppableColumn({ id, children }) {
+const DroppableColumn = React.memo(({ id, children }) => {
   const { setNodeRef } = useDroppable({ id });
   return (
     <div ref={setNodeRef} className={styles.column}>
@@ -76,43 +70,43 @@ function DroppableColumn({ id, children }) {
       {children}
     </div>
   );
-}
+});
 
-// 🔹 Buscar nombre de producto
 function getProductNameById(id) {
-  const p = availableProducts.find((prod) => prod.id === id);
+  const p = AVAILABLE_PRODUCTS.find((prod) => prod.id === id);
   return p?.name || "Desconocido";
 }
 
 export default function TaskBoard() {
-  const [tasks, setTasks] = useState(initialTasks);
+  const [tasks, setTasks] = useState(INITIAL_TASKS);
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const handleAddTask = (newTask) => {
-    const newId = Date.now(); // ID único
-    newTask.id = newId;
-    setTasks((prev) => ({
-      ...prev,
-      Sala: [...prev.Sala, newTask],
+  const handleAddTask = useCallback((newTask) => {
+    newTask.id = Date.now();
+    newTask.productos = newTask.productos.map((prod) => ({
+      ...prod,
+      condiciones: prod.condiciones || [],
     }));
-  };
+    setTasks((prev) => ({ ...prev, Sala: [...prev.Sala, newTask] }));
+  }, []);
 
-  const handleEditComanda = (task) => {
+  const handleEditComanda = useCallback((task) => {
     setEditingTask(task);
     setShowEditModal(true);
-  };
+  }, []);
 
-  const handleCloseEditModal = () => {
+  const handleCloseEditModal = useCallback(() => {
     setShowEditModal(false);
     setEditingTask(null);
-  };
+  }, []);
 
-  const handleUpdateComanda = (updatedTask) => {
+  const handleUpdateComanda = useCallback((updatedTask) => {
+    console.log("Tarea a actualizar:", updatedTask);
     setTasks((prev) => {
       const updated = { ...prev };
-      for (const col of columns) {
+      for (const col of COLUMNS) {
         updated[col] = updated[col].map((task) =>
           task.id === updatedTask.id ? updatedTask : task
         );
@@ -120,23 +114,23 @@ export default function TaskBoard() {
       return updated;
     });
     handleCloseEditModal();
-  };
+  }, [handleCloseEditModal]);
 
-  const handleDeleteComanda = (taskId) => {
+  const handleDeleteComanda = useCallback((taskId) => {
     setTasks((prev) => {
       const updated = {};
-      for (const col of columns) {
+      for (const col of COLUMNS) {
         updated[col] = prev[col].filter((task) => task.id !== taskId);
       }
       return updated;
     });
-  };
+  }, []);
 
-  const handleDragEnd = ({ active, over }) => {
+  const handleDragEnd = useCallback(({ active, over }) => {
     if (!over || active.id === over.id) return;
 
     let sourceCol, targetCol;
-    for (const col of columns) {
+    for (const col of COLUMNS) {
       if (tasks[col].some((task) => task.id === active.id)) {
         sourceCol = col;
         break;
@@ -155,63 +149,41 @@ export default function TaskBoard() {
         };
       });
     }
-  };
+  }, [tasks]);
 
   return (
     <div>
-      <button
-        onClick={() => setShowModal(true)}
-        style={{ padding: "10px 20px", marginBottom: "20px" }}
-      >
-        Agregar Comanda
-      </button>
+      <button onClick={() => setShowModal(true)}>Agregar Comanda</button>
 
-      {/* Modal para agregar */}
       {showModal && (
         <ModalAddTask
           onClose={() => setShowModal(false)}
           onAdd={handleAddTask}
-          availableProducts={availableProducts}
+          availableProducts={AVAILABLE_PRODUCTS}
         />
       )}
 
-      {/* ✅ Modal para editar */}
       {showEditModal && (
         <ModalAddTask
           onClose={handleCloseEditModal}
-          onAdd={handleAddTask}
           onEdit={handleUpdateComanda}
-          availableProducts={availableProducts}
           taskToEdit={editingTask}
+          availableProducts={AVAILABLE_PRODUCTS}
         />
       )}
 
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <div className={styles.boardContainer}>
-          {columns.map((col) => (
+          {COLUMNS.map((col) => (
             <DroppableColumn key={col} id={col}>
               {tasks[col].map((task) => (
                 <div key={task.id} className={styles.boardItem}>
                   <DraggableItem task={task} />
-                  <div className={styles.boardIcon} >
-                    <button
-                      onClick={() => handleEditComanda(task)}
-                      style={{
-                        backgroundColor: "#007bff",
-                        color: "#fff",
-                        padding: "5px 10px",
-                      }}
-                    >
+                  <div className={styles.boardIcon}>
+                    <button onClick={() => handleEditComanda(task)}>
                       <FaEdit />
                     </button>
-                    <button
-                      onClick={() => handleDeleteComanda(task.id)}
-                      style={{
-                        backgroundColor: "#dc3545",
-                        color: "#fff",
-                        padding: "5px 10px",
-                      }}
-                    >
+                    <button onClick={() => handleDeleteComanda(task.id)}>
                       <FaTrash />
                     </button>
                   </div>
