@@ -4,6 +4,7 @@ import { DndContext, useDraggable, useDroppable, closestCenter } from "@dnd-kit/
 import { FaEdit, FaTrash } from "react-icons/fa";
 import ModalAddTask from "./ModalAddTask";
 import styles from "./TaskBoard.module.css";
+import CrearMesa from "./CrearMesa";
 
 const AVAILABLE_PRODUCTS = [
   { id: "1", name: "Pizza" },
@@ -153,6 +154,8 @@ export default function TaskBoard() {
 
   return (
     <div>
+            <CrearMesa />
++
       <button onClick={() => setShowModal(true)}>Agregar Comanda</button>
 
       {showModal && (

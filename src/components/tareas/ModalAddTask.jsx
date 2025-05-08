@@ -1,6 +1,7 @@
 // ModalAddTask.jsx
 import React, { useState, useEffect, useCallback } from "react";
-
+import { useMesas, agregarMesa } from "../../hooks/useMesas" // al principio del archivo
+import CrearMesa from "./CrearMesa";
 const AVAILABLE_PRODUCTS_MODAL = [
   { id: "1", name: "Pizza", category: "Comidas" },
   { id: "2", name: "Hamburguesa", category: "Comidas" },
@@ -10,16 +11,10 @@ const AVAILABLE_PRODUCTS_MODAL = [
   { id: "6", name: "Ensalada", category: "Comidas" },
 ];
 
-const MESAS_DISPONIBLES = [
-  "Mesa 1",
-  "Mesa 2",
-  "Mesa 3",
-  "Mesa 4",
-  "Mesa 5",
-];
-
 
 export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
+  const mesas = useMesas();
+  const [nuevaMesa, setNuevaMesa] = useState("");
   const isEditing = !!taskToEdit;
 
   const [taskDetails, setTaskDetails] = useState({
@@ -112,9 +107,9 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
               style={{ width: "100%", padding: "8px", marginBottom: "15px" }}
             >
               <option value="">Seleccionar mesa</option>
-              {MESAS_DISPONIBLES.map((mesa) => (
-                <option key={mesa} value={mesa}>
-                  {mesa}
+              {mesas.map((mesa) => (
+                <option key={mesa.id} value={mesa.nombre}>
+                  {mesa.nombre}
                 </option>
               ))}
             </select>
@@ -142,7 +137,6 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
                 </div>
               ))}
             </div>
-
             <div style={{ flex: 1 }}>
               <h4>Comanda actual</h4>
               {taskDetails.productos.length === 0 ? (
