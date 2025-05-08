@@ -10,12 +10,14 @@ const AVAILABLE_PRODUCTS_MODAL = [
   { id: "6", name: "Ensalada", category: "Comidas" },
 ];
 
-const CONDICIONES_ESPECIALES_MODAL = [
-  { id: "celiaco", label: "Celíaco", icon: "🥖🚫" },
-  { id: "vegetariano", label: "Vegetariano", icon: "🥦" },
-  { id: "sinSal", label: "Sin Sal", icon: "🧂🚫" },
-  { id: "sinAzucar", label: "Sin Azúcar", icon: "🍬🚫" },
+const MESAS_DISPONIBLES = [
+  "Mesa 1",
+  "Mesa 2",
+  "Mesa 3",
+  "Mesa 4",
+  "Mesa 5",
 ];
+
 
 export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
   const isEditing = !!taskToEdit;
@@ -101,16 +103,21 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
 
         <form onSubmit={handleSubmit}>
           <div>
-            <label>Nombre de la Comanda</label>
-            <input
-              type="text"
+            <label>Mesa</label>
+            <select
               name="nombre"
               value={taskDetails.nombre}
               onChange={handleInputChange}
-              placeholder="Nombre de la comanda"
               required
               style={{ width: "100%", padding: "8px", marginBottom: "15px" }}
-            />
+            >
+              <option value="">Seleccionar mesa</option>
+              {MESAS_DISPONIBLES.map((mesa) => (
+                <option key={mesa} value={mesa}>
+                  {mesa}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div style={{ display: "flex", gap: "20px" }}>
