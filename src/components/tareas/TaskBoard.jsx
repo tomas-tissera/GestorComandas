@@ -165,9 +165,9 @@ export default function TaskBoard() {
     });
   }, []);
 
-  const handleDragEnd = useCallback(({ active, over }) => {
+  const handleDragEnd = useCallback(async ({ active, over }) => {
     if (!over || active.id === over.id) return;
-
+  
     let sourceCol, targetCol;
     for (const col of COLUMNS) {
       if (tasks[col].some((task) => task.id === active.id)) {
@@ -175,22 +175,29 @@ export default function TaskBoard() {
         break;
       }
     }
-
+  
     targetCol = over.id;
-
+  
     if (sourceCol && targetCol && sourceCol !== targetCol) {
       setTasks((prev) => {
         const movedTask = prev[sourceCol].find((task) => task.id === active.id);
-        movedTask.estado = targetCol;
-
+        if (!movedTask) return prev;
+  
+        // Actualiza el estado local
+        const updatedTask = { ...movedTask, estado: targetCol };
+  
+        // Actualiza en Firebase
+        actualizarComanda(updatedTask.id, { estado: targetCol });
+  
         return {
           ...prev,
           [sourceCol]: prev[sourceCol].filter((task) => task.id !== active.id),
-          [targetCol]: [...prev[targetCol], movedTask],
+          [targetCol]: [...prev[targetCol], updatedTask],
         };
       });
     }
   }, [tasks]);
+  
 
   return (
     <div>
