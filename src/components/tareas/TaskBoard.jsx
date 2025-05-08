@@ -1,10 +1,12 @@
-// TaskBoard
-import React, { useState, useCallback } from "react";
+// src/TaskBoard.jsx
+import React, { useState, useCallback ,useEffect} from "react";
 import { DndContext, useDraggable, useDroppable, closestCenter } from "@dnd-kit/core";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import ModalAddTask from "./ModalAddTask";
 import styles from "./TaskBoard.module.css";
 import CrearMesa from "./CrearMesa";
+import { guardarComanda } from "../../hooks/useComandas";  // Importamos la función para guardar comandas
+import { useComandas } from "../../hooks/useComandas";  // Importamos el hook para obtener las comandas
 
 const AVAILABLE_PRODUCTS = [
   { id: "1", name: "Pizza" },
@@ -16,21 +18,6 @@ const AVAILABLE_PRODUCTS = [
 ];
 
 const COLUMNS = ["Sala", "Cocina", "Entregado"];
-
-const INITIAL_TASKS = {
-  Sala: [
-    {
-      id: 1,
-      nombre: "Mesa 1",
-      productos: [
-        { productoId: "1", cantidad: 2, aclaracion: "Sin cebolla", condiciones: ["celiaco"] },
-        { productoId: "3", cantidad: 1, aclaracion: "Con hielo extra", condiciones: [] },
-      ],
-    },
-  ],
-  Cocina: [],
-  Entregado: [],
-};
 
 const DraggableItem = React.memo(({ task }) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: task.id });
@@ -79,10 +66,33 @@ function getProductNameById(id) {
 }
 
 export default function TaskBoard() {
-  const [tasks, setTasks] = useState(INITIAL_TASKS);
+  const [tasks, setTasks] = useState({
+    Sala: [],
+    Cocina: [],
+    Entregado: [],
+  });
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
+  
+  // Usamos el hook para obtener las comandas de Firebase
+  const comandas = useComandas();
+
+  // Convertir las comandas en el formato adecuado para mostrar
+  useEffect(() => {
+    const updatedTasks = {
+      Sala: [],
+      Cocina: [],
+      Entregado: [],
+    };
+
+    comandas.forEach((comanda) => {
+      // Se asigna cada comanda a su columna correspondiente, según el estado de la comanda
+      updatedTasks.Sala.push(comanda);
+    });
+
+    setTasks(updatedTasks);
+  }, [comandas]);
 
   const handleAddTask = useCallback((newTask) => {
     newTask.id = Date.now();
@@ -90,7 +100,14 @@ export default function TaskBoard() {
       ...prod,
       condiciones: prod.condiciones || [],
     }));
-    setTasks((prev) => ({ ...prev, Sala: [...prev.Sala, newTask] }));
+
+    // Guardar la nueva comanda en Firebase
+    guardarComanda(newTask).then(() => {
+      // Después de guardarla, actualizamos la UI
+      setTasks((prev) => ({ ...prev, Sala: [...prev.Sala, newTask] }));
+    }).catch((error) => {
+      console.error("Error al guardar la comanda:", error);
+    });
   }, []);
 
   const handleEditComanda = useCallback((task) => {
@@ -104,7 +121,6 @@ export default function TaskBoard() {
   }, []);
 
   const handleUpdateComanda = useCallback((updatedTask) => {
-    console.log("Tarea a actualizar:", updatedTask);
     setTasks((prev) => {
       const updated = { ...prev };
       for (const col of COLUMNS) {
@@ -154,8 +170,7 @@ export default function TaskBoard() {
 
   return (
     <div>
-            <CrearMesa />
-+
+      <CrearMesa />
       <button onClick={() => setShowModal(true)}>Agregar Comanda</button>
 
       {showModal && (
