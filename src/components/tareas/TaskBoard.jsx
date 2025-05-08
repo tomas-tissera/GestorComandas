@@ -1,12 +1,10 @@
-// src/TaskBoard.jsx
-import React, { useState, useCallback ,useEffect} from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { DndContext, useDraggable, useDroppable, closestCenter } from "@dnd-kit/core";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import ModalAddTask from "./ModalAddTask";
 import styles from "./TaskBoard.module.css";
 import CrearMesa from "./CrearMesa";
-import { guardarComanda } from "../../hooks/useComandas";  // Importamos la función para guardar comandas
-import { useComandas } from "../../hooks/useComandas";  // Importamos el hook para obtener las comandas
+import { useComandas, guardarComanda, eliminarComanda , actualizarComanda  } from "../../hooks/useComandas";
 
 const AVAILABLE_PRODUCTS = [
   { id: "1", name: "Pizza" },
@@ -74,41 +72,60 @@ export default function TaskBoard() {
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  
+  const [isSaving, setIsSaving] = useState(false); // Estado para gestionar la espera
+
   // Usamos el hook para obtener las comandas de Firebase
   const comandas = useComandas();
 
   // Convertir las comandas en el formato adecuado para mostrar
   useEffect(() => {
+    // Evitar la ejecución innecesaria si las comandas no cambiaron
+    if (comandas.length === 0) return;
+  
     const updatedTasks = {
       Sala: [],
       Cocina: [],
       Entregado: [],
     };
-
+  
     comandas.forEach((comanda) => {
-      // Se asigna cada comanda a su columna correspondiente, según el estado de la comanda
-      updatedTasks.Sala.push(comanda);
+      const estadoValido = ["Sala", "Cocina", "Entregado"].includes(comanda.estado)
+        ? comanda.estado
+        : "Sala";
+  
+      updatedTasks[estadoValido].push(comanda);
     });
-
+  
     setTasks(updatedTasks);
-  }, [comandas]);
+  }, [comandas]); // Solo se ejecuta cuando `comandas` cambia
+  
 
-  const handleAddTask = useCallback((newTask) => {
-    newTask.id = Date.now();
-    newTask.productos = newTask.productos.map((prod) => ({
-      ...prod,
-      condiciones: prod.condiciones || [],
-    }));
-
-    // Guardar la nueva comanda en Firebase
-    guardarComanda(newTask).then(() => {
-      // Después de guardarla, actualizamos la UI
-      setTasks((prev) => ({ ...prev, Sala: [...prev.Sala, newTask] }));
-    }).catch((error) => {
+  const handleAddTask = useCallback(async (newTask) => {
+    if (isSaving) return;  // Prevenir múltiples clics mientras se guarda
+  
+    setIsSaving(true);  // Estado para indicar que estamos guardando la comanda
+  
+    newTask.estado = "Sala"; // Estado inicial
+    
+    try {
+      // Verificar si ya existe una comanda con el mismo nombre en la base de datos (Firebase)
+      const existingComanda = comandas.find((comanda) => comanda.nombre === newTask.nombre);
+      if (existingComanda) {
+        console.log("Comanda ya existe:", existingComanda);
+        return; // Evitar guardar una comanda duplicada
+      }
+  
+      // Si no existe duplicado, guardamos la comanda en Firebase
+      await guardarComanda(newTask);
+      setShowModal(false); // Cerrar el modal después de guardar la comanda
+    } catch (error) {
       console.error("Error al guardar la comanda:", error);
-    });
-  }, []);
+    } finally {
+      setIsSaving(false); // Finaliza el proceso de guardado
+    }
+  }, [isSaving, comandas]); // Dependencias: isSaving para bloquear el proceso y comandas para verificar duplicados
+    
+  
 
   const handleEditComanda = useCallback((task) => {
     setEditingTask(task);
@@ -130,16 +147,21 @@ export default function TaskBoard() {
       }
       return updated;
     });
+  
+    // Actualizar la comanda en Firebase después de modificarla
+    actualizarComanda(updatedTask.id, updatedTask);
     handleCloseEditModal();
   }, [handleCloseEditModal]);
 
   const handleDeleteComanda = useCallback((taskId) => {
-    setTasks((prev) => {
-      const updated = {};
-      for (const col of COLUMNS) {
-        updated[col] = prev[col].filter((task) => task.id !== taskId);
-      }
-      return updated;
+    eliminarComanda(taskId).then(() => {
+      setTasks((prev) => {
+        const updated = {};
+        for (const col of COLUMNS) {
+          updated[col] = prev[col].filter((task) => task.id !== taskId);
+        }
+        return updated;
+      });
     });
   }, []);
 
@@ -159,6 +181,8 @@ export default function TaskBoard() {
     if (sourceCol && targetCol && sourceCol !== targetCol) {
       setTasks((prev) => {
         const movedTask = prev[sourceCol].find((task) => task.id === active.id);
+        movedTask.estado = targetCol;
+
         return {
           ...prev,
           [sourceCol]: prev[sourceCol].filter((task) => task.id !== active.id),
@@ -171,8 +195,7 @@ export default function TaskBoard() {
   return (
     <div>
       <CrearMesa />
-      <button onClick={() => setShowModal(true)}>Agregar Comanda</button>
-
+      <button onClick={() => setShowModal(true)} disabled={isSaving}>Agregar Comanda</button>
       {showModal && (
         <ModalAddTask
           onClose={() => setShowModal(false)}

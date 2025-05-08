@@ -1,13 +1,6 @@
-// src/hooks/useComandas.js
-// src/hooks/useComandas.js
-
-// Importación correcta
-import { ref, push, onValue } from "firebase/database";
-import { database } from "../firebase"; // Asegúrate de que esta importación es correcta
+import { ref, push, onValue, remove ,update } from "firebase/database";
+import { database } from "../firebase";
 import React, { useState, useEffect } from 'react';
-
-// Aquí ya no necesitas volver a importar 'database' o cualquier otro módulo más de una vez.
-
 
 // Leer las comandas desde Firebase
 export function useComandas() {
@@ -21,7 +14,8 @@ export function useComandas() {
         const parsed = Object.entries(data).map(([id, value]) => ({
           id,
           nombre: value.nombre,
-          productos: value.productos || [], // Asume que cada comanda tiene productos
+          productos: value.productos || [],
+          estado: value.estado || "Sala", // Asegúrate de mantener el estado
         }));
         setComandas(parsed);
       } else {
@@ -29,13 +23,37 @@ export function useComandas() {
       }
     });
 
-    return () => unsubscribe(); // Limpiar el listener cuando el componente se desmonte
+    return () => unsubscribe();
   }, []);
 
-  return comandas; // Devuelve las comandas leídas
+  return comandas;
 }
 
-export function guardarComanda(comanda) {
-  const comandasRef = ref(database, "comandas/");
-  return push(comandasRef, comanda);
-}
+export async function guardarComanda(comanda) {
+    const comandasRef = ref(database, "comandas/");
+    // Usamos `push` para crear una nueva comanda única
+    const newComandaRef = await push(comandasRef, comanda);
+    console.log("Comanda guardada con ID:", newComandaRef.key);
+    return newComandaRef.key; // Este es el id real generado por Firebase
+  }
+  
+// Actualizar una comanda específica
+export async function actualizarComanda(id, updatedComanda) {
+    const comandaRef = ref(database, `comandas/${id}`);
+    
+    try {
+      await update(comandaRef, updatedComanda);
+      console.log("✅ Comanda actualizada correctamente");
+    } catch (error) {
+      console.error("❌ Error al actualizar la comanda en Firebase:", error);
+    }
+  }
+export const eliminarComanda = async (id) => {
+  try {
+    const comandaRef = ref(database, `comandas/${id}`);
+    await remove(comandaRef);
+    console.log("✅ Comanda eliminada correctamente");
+  } catch (error) {
+    console.error("❌ Error al eliminar la comanda de Firebase:", error);
+  }
+};
