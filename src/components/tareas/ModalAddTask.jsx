@@ -1,7 +1,8 @@
 // ModalAddTask.jsx
 import React, { useState, useEffect, useCallback } from "react";
 import { useMesas, agregarMesa } from "../../hooks/useMesas" // al principio del archivo
-import CrearMesa from "./CrearMesa";
+import { guardarComanda } from "../../hooks/useComandas";
+
 const AVAILABLE_PRODUCTS_MODAL = [
   { id: "1", name: "Pizza", category: "Comidas" },
   { id: "2", name: "Hamburguesa", category: "Comidas" },
@@ -84,10 +85,15 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
 
     const payload = {
       ...taskDetails,
-      id: isEditing ? taskToEdit.id : undefined,
+      ...(isEditing && { id: taskToEdit.id }), // solo agrega 'id' si estás editando
     };
 
-    isEditing ? onEdit?.(payload) : onAdd?.(payload);
+    if (isEditing) {
+      onEdit?.(payload); // Esto depende si querés implementar edición en Firebase también
+    } else {
+      guardarComanda(payload);
+      onAdd?.(payload); // Podés dejar esto si usás estado local
+    }
     onClose();
   }, [isEditing, taskToEdit, taskDetails, onEdit, onAdd, onClose]);
 
