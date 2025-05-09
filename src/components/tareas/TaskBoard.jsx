@@ -178,41 +178,83 @@ export default function TaskBoard() {
   }, [tasks]);
 
   const handlePrint = (task) => {
-    const win = window.open("", "PRINT", "height=600,width=800");
+  const now = new Date();
+  const fecha = now.toLocaleDateString();
+  const hora = now.toLocaleTimeString();
 
-    win.document.write(`
-      <html>
-        <head>
-          <title>Ticket - ${task.nombre}</title>
-          <style>
-            body { font-family: Arial; padding: 20px; }
-            h1 { font-size: 24px; }
-            ul { list-style: none; padding: 0; }
-            li { margin-bottom: 5px; }
-            .aclaracion { font-style: italic; font-size: 0.9em; }
-          </style>
-        </head>
-        <body>
-          <h1>Ticket de Venta</h1>
-          <p><strong>Mesa:</strong> ${task.nombre}</p>
-          <ul>
-            ${task.productos.map(p => `
-              <li>
-                ${p.cantidad} x ${getProductNameById(p.productoId, productosDisponibles)}
-                ${p.aclaracion ? `<div class="aclaracion">Aclaración: ${p.aclaracion}</div>` : ""}
-              </li>
-            `).join("")}
-          </ul>
-          <p><strong>Estado:</strong> ${task.estado}</p>
-        </body>
-      </html>
-    `);
-
-    win.document.close();
-    win.focus();
-    win.print();
-    win.close();
+  const getPrecio = (id) => {
+    const prod = productosDisponibles.find((p) => p.id === id);
+    return prod ? parseFloat(prod.precio) : 0;
   };
+
+  const lineItems = task.productos.map((p) => {
+    const nombre = getProductNameById(p.productoId, productosDisponibles);
+    const precio = getPrecio(p.productoId);
+    const subtotal = precio * p.cantidad;
+    return {
+      ...p,
+      nombre,
+      precio,
+      subtotal,
+    };
+  });
+
+  const total = lineItems.reduce((acc, item) => acc + item.subtotal, 0);
+
+  const win = window.open("", "PRINT", "height=600,width=800");
+  win.document.write(`
+    <html>
+      <head>
+        <title>Ticket - ${task.nombre}</title>
+        <style>
+          body { font-family: monospace; padding: 20px; }
+          h1, h2, h3, p { margin: 0; padding: 4px 0; }
+          .ticket { max-width: 300px; margin: auto; }
+          .header, .footer { text-align: center; }
+          .line { border-bottom: 1px dashed #000; margin: 6px 0; }
+          .item { display: flex; justify-content: space-between; margin-bottom: 4px; }
+          .aclaracion { font-style: italic; font-size: 0.9em; margin-left: 10px; }
+          .bold { font-weight: bold; }
+        </style>
+      </head>
+      <body>
+        <div class="ticket">
+          <div class="header">
+            <h1>Restaurante XYZ</h1>
+            <p>${fecha} ${hora}</p>
+            <div class="line"></div>
+            <p><strong>Mesa:</strong> ${task.nombre}</p>
+            <div class="line"></div>
+          </div>
+          
+          ${lineItems.map(item => `
+            <div class="item">
+              <span>${item.cantidad} x ${item.nombre}</span>
+              <span>$${item.subtotal.toFixed(2)}</span>
+            </div>
+            ${item.aclaracion ? `<div class="aclaracion">↳ ${item.aclaracion}</div>` : ""}
+          `).join("")}
+
+          <div class="line"></div>
+          <div class="item bold">
+            <span>Total:</span>
+            <span>$${total.toFixed(2)}</span>
+          </div>
+          <div class="line"></div>
+          <div class="footer">
+            <p>Estado: ${task.estado}</p>
+            <p>¡Gracias por su visita!</p>
+          </div>
+        </div>
+      </body>
+    </html>
+  `);
+
+  win.document.close();
+  win.focus();
+  win.print();
+  win.close();
+};
 
   return (
     <div>
