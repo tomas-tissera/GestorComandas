@@ -4,20 +4,19 @@ import { FaEdit, FaTrash } from "react-icons/fa";
 import ModalAddTask from "./ModalAddTask";
 import styles from "./TaskBoard.module.css";
 import CrearMesa from "./CrearMesa";
-import { useComandas, guardarComanda, eliminarComanda , actualizarComanda  } from "../../hooks/useComandas";
-
-const AVAILABLE_PRODUCTS = [
-  { id: "1", name: "Pizza" },
-  { id: "2", name: "Hamburguesa" },
-  { id: "3", name: "Coca-Cola" },
-  { id: "4", name: "Fanta" },
-  { id: "5", name: "Agua Mineral" },
-  { id: "6", name: "Ensalada" },
-];
+import CrearProducto from "./CrearProducto";
+import CrearCategoria from "./CrearCategoria";
+import { useComandas, guardarComanda, eliminarComanda, actualizarComanda } from "../../hooks/useComandas";
+import { useProductos } from "../../hooks/useProductos";
 
 const COLUMNS = ["Sala", "Cocina", "Entregado"];
 
-const DraggableItem = React.memo(({ task }) => {
+function getProductNameById(id, productosDisponibles) {
+  const p = productosDisponibles.find((prod) => prod.id === id);
+  return p?.nombre || "Desconocido";
+}
+
+const DraggableItem = React.memo(({ task, productosDisponibles }) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: task.id });
 
   const style = {
@@ -35,7 +34,7 @@ const DraggableItem = React.memo(({ task }) => {
       <ul>
         {task.productos.map((prod, index) => (
           <li key={index}>
-            {prod.cantidad} x {getProductNameById(prod.productoId)}
+            {prod.cantidad} x {getProductNameById(prod.productoId, productosDisponibles)}
             {prod.aclaracion && (
               <div style={{ fontStyle: "italic", fontSize: "0.9em" }}>
                 Aclaración: {prod.aclaracion}
@@ -58,11 +57,6 @@ const DroppableColumn = React.memo(({ id, children }) => {
   );
 });
 
-function getProductNameById(id) {
-  const p = AVAILABLE_PRODUCTS.find((prod) => prod.id === id);
-  return p?.name || "Desconocido";
-}
-
 export default function TaskBoard() {
   const [tasks, setTasks] = useState({
     Sala: [],
@@ -72,60 +66,49 @@ export default function TaskBoard() {
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [isSaving, setIsSaving] = useState(false); // Estado para gestionar la espera
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Usamos el hook para obtener las comandas de Firebase
   const comandas = useComandas();
+  const productosDisponibles = useProductos();
 
-  // Convertir las comandas en el formato adecuado para mostrar
   useEffect(() => {
-    // Evitar la ejecución innecesaria si las comandas no cambiaron
     if (comandas.length === 0) return;
-  
+
     const updatedTasks = {
       Sala: [],
       Cocina: [],
       Entregado: [],
     };
-  
+
     comandas.forEach((comanda) => {
-      const estadoValido = ["Sala", "Cocina", "Entregado"].includes(comanda.estado)
-        ? comanda.estado
-        : "Sala";
-  
+      const estadoValido = COLUMNS.includes(comanda.estado) ? comanda.estado : "Sala";
       updatedTasks[estadoValido].push(comanda);
     });
-  
+
     setTasks(updatedTasks);
-  }, [comandas]); // Solo se ejecuta cuando `comandas` cambia
-  
+  }, [comandas]);
 
   const handleAddTask = useCallback(async (newTask) => {
-    if (isSaving) return;  // Prevenir múltiples clics mientras se guarda
-  
-    setIsSaving(true);  // Estado para indicar que estamos guardando la comanda
-  
-    newTask.estado = "Sala"; // Estado inicial
-    
+    if (isSaving) return;
+
+    setIsSaving(true);
+    newTask.estado = "Sala";
+
     try {
-      // Verificar si ya existe una comanda con el mismo nombre en la base de datos (Firebase)
       const existingComanda = comandas.find((comanda) => comanda.nombre === newTask.nombre);
       if (existingComanda) {
         console.log("Comanda ya existe:", existingComanda);
-        return; // Evitar guardar una comanda duplicada
+        return;
       }
-  
-      // Si no existe duplicado, guardamos la comanda en Firebase
+
       await guardarComanda(newTask);
-      setShowModal(false); // Cerrar el modal después de guardar la comanda
+      setShowModal(false);
     } catch (error) {
       console.error("Error al guardar la comanda:", error);
     } finally {
-      setIsSaving(false); // Finaliza el proceso de guardado
+      setIsSaving(false);
     }
-  }, [isSaving, comandas]); // Dependencias: isSaving para bloquear el proceso y comandas para verificar duplicados
-    
-  
+  }, [isSaving, comandas]);
 
   const handleEditComanda = useCallback((task) => {
     setEditingTask(task);
@@ -147,8 +130,7 @@ export default function TaskBoard() {
       }
       return updated;
     });
-  
-    // Actualizar la comanda en Firebase después de modificarla
+
     actualizarComanda(updatedTask.id, updatedTask);
     handleCloseEditModal();
   }, [handleCloseEditModal]);
@@ -165,9 +147,9 @@ export default function TaskBoard() {
     });
   }, []);
 
-  const handleDragEnd = useCallback(async ({ active, over }) => {
+  const handleDragEnd = useCallback(({ active, over }) => {
     if (!over || active.id === over.id) return;
-  
+
     let sourceCol, targetCol;
     for (const col of COLUMNS) {
       if (tasks[col].some((task) => task.id === active.id)) {
@@ -175,20 +157,17 @@ export default function TaskBoard() {
         break;
       }
     }
-  
+
     targetCol = over.id;
-  
+
     if (sourceCol && targetCol && sourceCol !== targetCol) {
       setTasks((prev) => {
         const movedTask = prev[sourceCol].find((task) => task.id === active.id);
         if (!movedTask) return prev;
-  
-        // Actualiza el estado local
+
         const updatedTask = { ...movedTask, estado: targetCol };
-  
-        // Actualiza en Firebase
         actualizarComanda(updatedTask.id, { estado: targetCol });
-  
+
         return {
           ...prev,
           [sourceCol]: prev[sourceCol].filter((task) => task.id !== active.id),
@@ -197,17 +176,59 @@ export default function TaskBoard() {
       });
     }
   }, [tasks]);
-  
+
+  const handlePrint = (task) => {
+    const win = window.open("", "PRINT", "height=600,width=800");
+
+    win.document.write(`
+      <html>
+        <head>
+          <title>Ticket - ${task.nombre}</title>
+          <style>
+            body { font-family: Arial; padding: 20px; }
+            h1 { font-size: 24px; }
+            ul { list-style: none; padding: 0; }
+            li { margin-bottom: 5px; }
+            .aclaracion { font-style: italic; font-size: 0.9em; }
+          </style>
+        </head>
+        <body>
+          <h1>Ticket de Venta</h1>
+          <p><strong>Mesa:</strong> ${task.nombre}</p>
+          <ul>
+            ${task.productos.map(p => `
+              <li>
+                ${p.cantidad} x ${getProductNameById(p.productoId, productosDisponibles)}
+                ${p.aclaracion ? `<div class="aclaracion">Aclaración: ${p.aclaracion}</div>` : ""}
+              </li>
+            `).join("")}
+          </ul>
+          <p><strong>Estado:</strong> ${task.estado}</p>
+        </body>
+      </html>
+    `);
+
+    win.document.close();
+    win.focus();
+    win.print();
+    win.close();
+  };
 
   return (
     <div>
+      <CrearCategoria />
+      <CrearProducto />
       <CrearMesa />
-      <button onClick={() => setShowModal(true)} disabled={isSaving}>Agregar Comanda</button>
+
+      <button onClick={() => setShowModal(true)} disabled={isSaving}>
+        Agregar Comanda
+      </button>
+
       {showModal && (
         <ModalAddTask
           onClose={() => setShowModal(false)}
           onAdd={handleAddTask}
-          availableProducts={AVAILABLE_PRODUCTS}
+          productosDisponibles={productosDisponibles}
         />
       )}
 
@@ -216,7 +237,7 @@ export default function TaskBoard() {
           onClose={handleCloseEditModal}
           onEdit={handleUpdateComanda}
           taskToEdit={editingTask}
-          availableProducts={AVAILABLE_PRODUCTS}
+          productosDisponibles={productosDisponibles}
         />
       )}
 
@@ -226,7 +247,7 @@ export default function TaskBoard() {
             <DroppableColumn key={col} id={col}>
               {tasks[col].map((task) => (
                 <div key={task.id} className={styles.boardItem}>
-                  <DraggableItem task={task} />
+                  <DraggableItem task={task} productosDisponibles={productosDisponibles} />
                   <div className={styles.boardIcon}>
                     <button onClick={() => handleEditComanda(task)}>
                       <FaEdit />
@@ -234,6 +255,11 @@ export default function TaskBoard() {
                     <button onClick={() => handleDeleteComanda(task.id)}>
                       <FaTrash />
                     </button>
+                    {col === "Entregado" && (
+                      <button onClick={() => handlePrint(task)}>
+                        🖨️
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

@@ -1,23 +1,13 @@
-// ModalAddTask.jsx
 import React, { useState, useEffect, useCallback } from "react";
-import { useMesas, agregarMesa } from "../../hooks/useMesas" // al principio del archivo
+import { useMesas } from "../../hooks/useMesas"; // Hook para obtener mesas
 import { guardarComanda } from "../../hooks/useComandas";
-
-const AVAILABLE_PRODUCTS_MODAL = [
-  { id: "1", name: "Pizza", category: "Comidas" },
-  { id: "2", name: "Hamburguesa", category: "Comidas" },
-  { id: "3", name: "Coca-Cola", category: "Bebidas" },
-  { id: "4", name: "Fanta", category: "Bebidas" },
-  { id: "5", name: "Agua Mineral", category: "Bebidas" },
-  { id: "6", name: "Ensalada", category: "Comidas" },
-];
-
+import { useProductos } from "../../hooks/useProductos"; // Hook para obtener productos de Firebase
 
 export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
   const mesas = useMesas();
+  const productosDisponibles = useProductos(); // Hook para obtener productos de Firebase
   const [nuevaMesa, setNuevaMesa] = useState("");
   const isEditing = !!taskToEdit;
-
   const [taskDetails, setTaskDetails] = useState({
     nombre: "",
     productos: [],
@@ -39,20 +29,36 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
     setTaskDetails((prev) => ({ ...prev, [name]: value }));
   }, []);
 
+  // Agregar producto con una unidad más, asegurando que no se agregue duplicado
   const handleAddProduct = useCallback((productId) => {
     setTaskDetails((prev) => {
-      const updatedProductos = [...prev.productos];
-      const index = updatedProductos.findIndex((p) => p.productoId === productId);
-
-      if (index !== -1) {
-        updatedProductos[index].cantidad += 1;
+      const existingIndex = prev.productos.findIndex(p => p.productoId === productId);
+  
+      if (existingIndex !== -1) {
+        // Producto ya existe: actualizar su cantidad de forma inmutable
+        const updatedProductos = prev.productos.map((producto, index) =>
+          index === existingIndex
+            ? { ...producto, cantidad: producto.cantidad + 1 }
+            : producto
+        );
+  
+        return { ...prev, productos: updatedProductos };
       } else {
-        updatedProductos.push({ productoId: productId, cantidad: 1, aclaracion: "", condiciones: [] });
+        // Nuevo producto: buscarlo y agregarlo
+        const product = productosDisponibles.find(p => p.id === productId);
+        const newProducto = {
+          productoId: productId,
+          cantidad: 1,
+          aclaracion: "",
+          nombre: product.nombre,
+          precio: product.precio
+        };
+  
+        return { ...prev, productos: [...prev.productos, newProducto] };
       }
-
-      return { ...prev, productos: updatedProductos };
     });
-  }, []);
+  }, [productosDisponibles]);
+  
 
   const handleProductChange = useCallback((index, e) => {
     const { name, value } = e.target;
@@ -66,18 +72,6 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
     updatedProductos[index].aclaracion = e.target.value;
     setTaskDetails({ ...taskDetails, productos: updatedProductos });
   }, [taskDetails.productos]);
-
-  const handleToggleCondicion = useCallback((productIndex, condicionId) => {
-    setTaskDetails((prev) => {
-      const productos = [...prev.productos];
-      const condiciones = productos[productIndex].condiciones || [];
-      const hasCondicion = condiciones.includes(condicionId);
-      productos[productIndex].condiciones = hasCondicion
-        ? condiciones.filter((c) => c !== condicionId)
-        : [...condiciones, condicionId];
-      return { ...prev, productos };
-    });
-  }, []);
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
@@ -96,6 +90,22 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
     }
     onClose();
   }, [isEditing, taskToEdit, taskDetails, onEdit, onAdd, onClose]);
+
+  // Calcular el total de la comanda
+  const calculateTotal = () => {
+    return taskDetails.productos.reduce((total, producto) => {
+      return total + producto.precio * producto.cantidad; // Sumar el precio por cantidad
+    }, 0);
+  };
+
+  // Agrupamos los productos por categoría
+  const productosPorCategoria = productosDisponibles.reduce((acc, producto) => {
+    if (!acc[producto.categoria]) {
+      acc[producto.categoria] = [];
+    }
+    acc[producto.categoria].push(producto);
+    return acc;
+  }, {});
 
   return (
     <div style={overlayStyle}>
@@ -124,21 +134,19 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
           <div style={{ display: "flex", gap: "20px" }}>
             <div style={{ flex: 1 }}>
               <h4>Productos disponibles</h4>
-              {["Comidas", "Bebidas"].map((cat) => (
-                <div key={cat}>
-                  <h5>{cat}</h5>
+              {Object.keys(productosPorCategoria).map((categoria) => (
+                <div key={categoria}>
+                  <h5>{categoria}</h5>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-                    {AVAILABLE_PRODUCTS_MODAL
-                      .filter((p) => p.category === cat)
-                      .map((p) => (
-                        <div
-                          key={p.id}
-                          onClick={() => handleAddProduct(p.id)}
-                          style={productCardStyle}
-                        >
-                          {p.name}
-                        </div>
-                      ))}
+                    {productosPorCategoria[categoria].map((producto) => (
+                      <div
+                        key={producto.id}
+                        onClick={() => handleAddProduct(producto.id)}
+                        style={productCardStyle}
+                      >
+                        {producto.nombre} - ${producto.precio}
+                      </div>
+                    ))}
                   </div>
                 </div>
               ))}
@@ -149,30 +157,38 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
                 <p>No hay productos agregados.</p>
               ) : (
                 taskDetails.productos.map((producto, index) => {
-                  const prod = AVAILABLE_PRODUCTS_MODAL.find((p) => p.id === producto.productoId);
+                  const prod = productosDisponibles.find((p) => p.id === producto.productoId);
                   return (
                     <div key={index} style={commandItemStyle}>
-                      <strong>{prod?.name}</strong>
-                      <input
-                        type="number"
-                        name="cantidad"
-                        min="1"
-                        value={producto.cantidad}
-                        onChange={(e) => handleProductChange(index, e)}
-                        style={{ width: "60px", margin: "5px 0" }}
-                      />
+                      <strong>{prod?.nombre}</strong>
+                      <div>
+                        <input
+                          type="number"
+                          name="cantidad"
+                          min="1"
+                          value={producto.cantidad}
+                          onChange={(e) => handleProductChange(index, e)}
+                          style={{ width: "60px", margin: "5px 0" }}
+                        />
+                        <span> x ${producto.precio}</span>
+                        <span> = ${producto.precio * producto.cantidad}</span>
+                      </div>
                       <input
                         type="text"
                         placeholder="Aclaración"
                         value={producto.aclaracion}
                         onChange={(e) => handleAclaracionChange(index, e)}
-                        style={{ width: "100%", padding: "5px" }}
+                        style={{ width: "100%", padding: "5px", marginTop: "5px" }}
                       />
                     </div>
                   );
                 })
               )}
             </div>
+          </div>
+
+          <div style={{ marginTop: "20px", fontWeight: "bold" }}>
+            <h4>Total: ${calculateTotal()}</h4>
           </div>
 
           <button type="submit" style={submitButtonStyle}>
