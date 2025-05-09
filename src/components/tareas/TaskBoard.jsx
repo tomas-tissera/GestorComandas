@@ -8,6 +8,7 @@ import CrearProducto from "./CrearProducto";
 import CrearCategoria from "./CrearCategoria";
 import { useComandas, guardarComanda, eliminarComanda, actualizarComanda } from "../../hooks/useComandas";
 import { useProductos } from "../../hooks/useProductos";
+import ModalPago from "./ModalPago";
 
 const COLUMNS = ["Sala", "Cocina", "Entregado"];
 
@@ -256,6 +257,37 @@ export default function TaskBoard() {
   win.close();
 };
 
+const [showPagoModal, setShowPagoModal] = useState(false);
+const [taskToPagar, setTaskToPagar] = useState(null);
+
+const handleAbrirPago = (task) => {
+  setTaskToPagar(task);
+  setShowPagoModal(true);
+};
+
+const handleCerrarPago = () => {
+  setShowPagoModal(false);
+  setTaskToPagar(null);
+};
+
+const handleConfirmarPago = async (comandaActualizada) => {
+  try {
+    await actualizarComanda(comandaActualizada.id, comandaActualizada);
+    setTasks((prev) => {
+      const updated = { ...prev };
+      for (const col of COLUMNS) {
+        updated[col] = updated[col].map((t) =>
+          t.id === comandaActualizada.id ? comandaActualizada : t
+        );
+      }
+      return updated;
+    });
+    handleCerrarPago();
+  } catch (error) {
+    console.error("Error al guardar el pago:", error);
+  }
+};
+
   return (
     <div>
       <CrearCategoria />
@@ -282,6 +314,14 @@ export default function TaskBoard() {
           productosDisponibles={productosDisponibles}
         />
       )}
+      {showPagoModal && taskToPagar && (
+        <ModalPago
+          task={taskToPagar}
+          productosDisponibles={productosDisponibles}
+          onClose={handleCerrarPago}
+          onPagar={handleConfirmarPago}
+        />
+      )}
 
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <div className={styles.boardContainer}>
@@ -298,9 +338,10 @@ export default function TaskBoard() {
                       <FaTrash />
                     </button>
                     {col === "Entregado" && (
-                      <button onClick={() => handlePrint(task)}>
-                        🖨️
-                      </button>
+                      <>
+                        <button onClick={() => handlePrint(task)}>🖨️</button>
+                        <button onClick={() => handleAbrirPago(task)}>💳</button>
+                      </>
                     )}
                   </div>
                 </div>
