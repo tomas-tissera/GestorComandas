@@ -46,6 +46,7 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
       } else {
         // Nuevo producto: buscarlo y agregarlo
         const product = productosDisponibles.find(p => p.id === productId);
+        if (!product) return prev; // protección contra errores
         const newProducto = {
           productoId: productId,
           cantidad: 1,
@@ -75,7 +76,10 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
-    if (!taskDetails.nombre || !taskDetails.productos.length) return;
+    if (!taskDetails.nombre || !taskDetails.productos.length) {
+      alert("Debes seleccionar una mesa y al menos un producto.");
+      return;
+    } 
 
     const payload = {
       ...taskDetails,
@@ -86,7 +90,6 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
       onEdit?.(payload); // Esto depende si querés implementar edición en Firebase también
     } else {
       guardarComanda(payload);
-      onAdd?.(payload); // Podés dejar esto si usás estado local
     }
     onClose();
   }, [isEditing, taskToEdit, taskDetails, onEdit, onAdd, onClose]);

@@ -73,8 +73,6 @@ export default function TaskBoard() {
   const productosDisponibles = useProductos();
 
   useEffect(() => {
-    if (comandas.length === 0) return;
-
     const updatedTasks = {
       Sala: [],
       Cocina: [],
@@ -91,19 +89,20 @@ export default function TaskBoard() {
 
   const handleAddTask = useCallback(async (newTask) => {
     if (isSaving) return;
-
     setIsSaving(true);
-    newTask.estado = "Sala";
 
     try {
-      const existingComanda = comandas.find((comanda) => comanda.nombre === newTask.nombre);
-      if (existingComanda) {
-        console.log("Comanda ya existe:", existingComanda);
+      newTask.estado = "Sala";
+
+      const yaExiste = comandas.some((c) => c.nombre === newTask.nombre);
+      if (yaExiste) {
+        console.warn("Comanda ya existe:", newTask.nombre);
+        setIsSaving(false);
         return;
       }
 
       await guardarComanda(newTask);
-      setShowModal(false);
+      setShowModal(false); // El useComandas actualizará tasks automáticamente
     } catch (error) {
       console.error("Error al guardar la comanda:", error);
     } finally {
@@ -122,16 +121,6 @@ export default function TaskBoard() {
   }, []);
 
   const handleUpdateComanda = useCallback((updatedTask) => {
-    setTasks((prev) => {
-      const updated = { ...prev };
-      for (const col of COLUMNS) {
-        updated[col] = updated[col].map((task) =>
-          task.id === updatedTask.id ? updatedTask : task
-        );
-      }
-      return updated;
-    });
-
     actualizarComanda(updatedTask.id, updatedTask);
     handleCloseEditModal();
   }, [handleCloseEditModal]);
@@ -151,7 +140,7 @@ export default function TaskBoard() {
   const handleDragEnd = useCallback(({ active, over }) => {
     if (!over || active.id === over.id) return;
 
-    let sourceCol, targetCol;
+    let sourceCol = null;
     for (const col of COLUMNS) {
       if (tasks[col].some((task) => task.id === active.id)) {
         sourceCol = col;
@@ -159,8 +148,7 @@ export default function TaskBoard() {
       }
     }
 
-    targetCol = over.id;
-
+    const targetCol = over.id;
     if (sourceCol && targetCol && sourceCol !== targetCol) {
       setTasks((prev) => {
         const movedTask = prev[sourceCol].find((task) => task.id === active.id);
@@ -179,114 +167,91 @@ export default function TaskBoard() {
   }, [tasks]);
 
   const handlePrint = (task) => {
-  const now = new Date();
-  const fecha = now.toLocaleDateString();
-  const hora = now.toLocaleTimeString();
+    const now = new Date();
+    const fecha = now.toLocaleDateString();
+    const hora = now.toLocaleTimeString();
 
-  const getPrecio = (id) => {
-    const prod = productosDisponibles.find((p) => p.id === id);
-    return prod ? parseFloat(prod.precio) : 0;
-  };
-
-  const lineItems = task.productos.map((p) => {
-    const nombre = getProductNameById(p.productoId, productosDisponibles);
-    const precio = getPrecio(p.productoId);
-    const subtotal = precio * p.cantidad;
-    return {
-      ...p,
-      nombre,
-      precio,
-      subtotal,
+    const getPrecio = (id) => {
+      const prod = productosDisponibles.find((p) => p.id === id);
+      return prod ? parseFloat(prod.precio) : 0;
     };
-  });
 
-  const total = lineItems.reduce((acc, item) => acc + item.subtotal, 0);
+    const lineItems = task.productos.map((p) => {
+      const nombre = getProductNameById(p.productoId, productosDisponibles);
+      const precio = getPrecio(p.productoId);
+      const subtotal = precio * p.cantidad;
+      return { ...p, nombre, precio, subtotal };
+    });
 
-  const win = window.open("", "PRINT", "height=600,width=800");
-  win.document.write(`
-    <html>
-      <head>
-        <title>Ticket - ${task.nombre}</title>
-        <style>
-          body { font-family: monospace; padding: 20px; }
-          h1, h2, h3, p { margin: 0; padding: 4px 0; }
-          .ticket { max-width: 300px; margin: auto; }
-          .header, .footer { text-align: center; }
-          .line { border-bottom: 1px dashed #000; margin: 6px 0; }
-          .item { display: flex; justify-content: space-between; margin-bottom: 4px; }
-          .aclaracion { font-style: italic; font-size: 0.9em; margin-left: 10px; }
-          .bold { font-weight: bold; }
-        </style>
-      </head>
-      <body>
-        <div class="ticket">
-          <div class="header">
+    const total = lineItems.reduce((acc, item) => acc + item.subtotal, 0);
+
+    const win = window.open("", "PRINT", "height=600,width=800");
+    win.document.write(`
+      <html>
+        <head>
+          <title>Ticket - ${task.nombre}</title>
+          <style>
+            body { font-family: monospace; padding: 20px; }
+            .ticket { max-width: 300px; margin: auto; }
+            .line { border-bottom: 1px dashed #000; margin: 6px 0; }
+            .item { display: flex; justify-content: space-between; }
+            .aclaracion { font-style: italic; font-size: 0.9em; margin-left: 10px; }
+            .bold { font-weight: bold; }
+          </style>
+        </head>
+        <body>
+          <div class="ticket">
             <h1>Restaurante XYZ</h1>
             <p>${fecha} ${hora}</p>
             <div class="line"></div>
             <p><strong>Mesa:</strong> ${task.nombre}</p>
             <div class="line"></div>
-          </div>
-          
-          ${lineItems.map(item => `
-            <div class="item">
-              <span>${item.cantidad} x ${item.nombre}</span>
-              <span>$${item.subtotal.toFixed(2)}</span>
+            ${lineItems.map(item => `
+              <div class="item">
+                <span>${item.cantidad} x ${item.nombre}</span>
+                <span>$${item.subtotal.toFixed(2)}</span>
+              </div>
+              ${item.aclaracion ? `<div class="aclaracion">↳ ${item.aclaracion}</div>` : ""}
+            `).join("")}
+            <div class="line"></div>
+            <div class="item bold">
+              <span>Total:</span>
+              <span>$${total.toFixed(2)}</span>
             </div>
-            ${item.aclaracion ? `<div class="aclaracion">↳ ${item.aclaracion}</div>` : ""}
-          `).join("")}
-
-          <div class="line"></div>
-          <div class="item bold">
-            <span>Total:</span>
-            <span>$${total.toFixed(2)}</span>
-          </div>
-          <div class="line"></div>
-          <div class="footer">
+            <div class="line"></div>
             <p>Estado: ${task.estado}</p>
             <p>¡Gracias por su visita!</p>
           </div>
-        </div>
-      </body>
-    </html>
-  `);
+        </body>
+      </html>
+    `);
+    win.document.close();
+    win.focus();
+    win.print();
+    win.close();
+  };
 
-  win.document.close();
-  win.focus();
-  win.print();
-  win.close();
-};
+  const [showPagoModal, setShowPagoModal] = useState(false);
+  const [taskToPagar, setTaskToPagar] = useState(null);
 
-const [showPagoModal, setShowPagoModal] = useState(false);
-const [taskToPagar, setTaskToPagar] = useState(null);
+  const handleAbrirPago = (task) => {
+    setTaskToPagar(task);
+    setShowPagoModal(true);
+  };
 
-const handleAbrirPago = (task) => {
-  setTaskToPagar(task);
-  setShowPagoModal(true);
-};
+  const handleCerrarPago = () => {
+    setShowPagoModal(false);
+    setTaskToPagar(null);
+  };
 
-const handleCerrarPago = () => {
-  setShowPagoModal(false);
-  setTaskToPagar(null);
-};
-
-const handleConfirmarPago = async (comandaActualizada) => {
-  try {
-    await actualizarComanda(comandaActualizada.id, comandaActualizada);
-    setTasks((prev) => {
-      const updated = { ...prev };
-      for (const col of COLUMNS) {
-        updated[col] = updated[col].map((t) =>
-          t.id === comandaActualizada.id ? comandaActualizada : t
-        );
-      }
-      return updated;
-    });
-    handleCerrarPago();
-  } catch (error) {
-    console.error("Error al guardar el pago:", error);
-  }
-};
+  const handleConfirmarPago = async (comandaActualizada) => {
+    try {
+      await actualizarComanda(comandaActualizada.id, comandaActualizada);
+      handleCerrarPago();
+    } catch (error) {
+      console.error("Error al guardar el pago:", error);
+    }
+  };
 
   return (
     <div>
@@ -303,6 +268,7 @@ const handleConfirmarPago = async (comandaActualizada) => {
           onClose={() => setShowModal(false)}
           onAdd={handleAddTask}
           productosDisponibles={productosDisponibles}
+          isSaving={isSaving}
         />
       )}
 
@@ -314,6 +280,7 @@ const handleConfirmarPago = async (comandaActualizada) => {
           productosDisponibles={productosDisponibles}
         />
       )}
+
       {showPagoModal && taskToPagar && (
         <ModalPago
           task={taskToPagar}
