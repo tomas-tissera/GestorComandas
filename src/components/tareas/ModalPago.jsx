@@ -22,14 +22,24 @@ export default function ModalPago({ task, productosDisponibles, onClose, onPagar
       alert("El monto cobrado es menor que el total.");
       return;
     }
-
-    onPagar({
+    
+    const now = new Date();
+    const fecha = now.toLocaleDateString(); // Ej: "12/05/2025"
+    const hora = now.toLocaleTimeString();  // Ej: "14:32:15"
+    
+    // Aquí agregamos la fecha y hora de pago
+    const updatedTask = {
       ...task,
       cobrado,
       metodoPago: metodo,
       cambio,
-      estadoPago: "pagado"
-    });
+      estadoPago: "pagado",
+      fechaPago: fecha,
+      horaPago: hora,
+    };
+  
+    // Llamamos a la función de pago con la tarea actualizada
+    onPagar(updatedTask);
     onClose();
   };
 

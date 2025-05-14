@@ -1,3 +1,4 @@
+// useComandas.js
 import { ref, push, onValue, remove ,update } from "firebase/database";
 import { database } from "../firebase";
 import React, { useState, useEffect } from 'react';
@@ -39,15 +40,21 @@ export async function guardarComanda(comanda) {
   
 // Actualizar una comanda específica
 export async function actualizarComanda(id, updatedComanda) {
-    const comandaRef = ref(database, `comandas/${id}`);
-    
-    try {
-      await update(comandaRef, updatedComanda);
-      console.log("✅ Comanda actualizada correctamente");
-    } catch (error) {
-      console.error("❌ Error al actualizar la comanda en Firebase:", error);
-    }
+  const comandaRef = ref(database, `comandas/${id}`);
+  
+  // Si la comanda ha sido pagada, se añaden las fechas y la hora de pago
+  if (updatedComanda.estadoPago === "pagado") {
+    updatedComanda.fechaPago = updatedComanda.fechaPago || new Date().toLocaleDateString();
+    updatedComanda.horaPago = updatedComanda.horaPago || new Date().toLocaleTimeString();
   }
+
+  try {
+    await update(comandaRef, updatedComanda);
+    console.log("✅ Comanda actualizada correctamente");
+  } catch (error) {
+    console.error("❌ Error al actualizar la comanda en Firebase:", error);
+  }
+}
 export const eliminarComanda = async (id) => {
   try {
     const comandaRef = ref(database, `comandas/${id}`);

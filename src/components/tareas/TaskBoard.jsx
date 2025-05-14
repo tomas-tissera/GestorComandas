@@ -63,6 +63,7 @@ export default function TaskBoard() {
     Sala: [],
     Cocina: [],
     Entregado: [],
+    Pagadas: [], // Asegúrate de agregar esta clave
   });
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
@@ -77,11 +78,16 @@ export default function TaskBoard() {
       Sala: [],
       Cocina: [],
       Entregado: [],
+      Pagadas: [],  // Nueva columna para las comandas pagadas
     };
 
     comandas.forEach((comanda) => {
-      const estadoValido = COLUMNS.includes(comanda.estado) ? comanda.estado : "Sala";
-      updatedTasks[estadoValido].push(comanda);
+      if (comanda.estadoPago === "pagado") {
+        updatedTasks.Pagadas.push(comanda); // Si la comanda está pagada, va a la columna Pagadas
+      } else {
+        const estadoValido = COLUMNS.includes(comanda.estado) ? comanda.estado : "Sala";
+        updatedTasks[estadoValido].push(comanda); // Si no, se procesa normalmente
+      }
     });
 
     setTasks(updatedTasks);
@@ -289,7 +295,19 @@ export default function TaskBoard() {
           onPagar={handleConfirmarPago}
         />
       )}
-
+      {tasks.Pagadas.length > 0 && (
+        <DroppableColumn key="Pagadas" id="Pagadas">
+          <h3>Comandas Pagadas</h3>
+          {tasks.Pagadas.map((task) => (
+            <div key={task.id} className={styles.boardItem}>
+              <DraggableItem task={task} productosDisponibles={productosDisponibles} />
+              <div className={styles.boardIcon}>
+                {/* Aquí puedes agregar un botón de impresión o pago si lo necesitas */}
+              </div>
+            </div>
+          ))}
+        </DroppableColumn>
+      )}
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <div className={styles.boardContainer}>
           {COLUMNS.map((col) => (
