@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { DndContext, useDraggable, useDroppable, closestCenter } from "@dnd-kit/core";
-import { FaEdit, FaTrash } from "react-icons/fa";
+import { FaEdit, FaTrash } from "react-icons/fa"; // <--- ADD THIS LINE: Import FaEdit and FaTrash
 import ModalAddTask from "./ModalAddTask";
 import styles from "./TaskBoard.module.css";
 import CrearMesa from "./CrearMesa";
@@ -9,14 +9,17 @@ import CrearCategoria from "./CrearCategoria";
 import { useComandas, guardarComanda, eliminarComanda, actualizarComanda } from "../../hooks/useComandas";
 import { useProductos } from "../../hooks/useProductos";
 import ModalPago from "./ModalPago";
+import HistorialComandas from "./HistorialComandas"; // Import the new History Component
 
 const COLUMNS = ["Sala", "Cocina", "Entregado"];
 
+// Helper function to get product name by ID
 function getProductNameById(id, productosDisponibles) {
   const p = productosDisponibles.find((prod) => prod.id === id);
   return p?.nombre || "Desconocido";
 }
 
+// Draggable Item Component (memoized for performance)
 const DraggableItem = React.memo(({ task, productosDisponibles }) => {
   const { attributes, listeners, setNodeRef, transform } = useDraggable({ id: task.id });
 
@@ -27,6 +30,7 @@ const DraggableItem = React.memo(({ task, productosDisponibles }) => {
     marginBottom: "10px",
     backgroundColor: "#fff",
     cursor: "grab",
+    boxShadow: "0 2px 4px rgba(0,0,0,0.1)", // Added for better visual
   };
 
   return (
@@ -48,6 +52,7 @@ const DraggableItem = React.memo(({ task, productosDisponibles }) => {
   );
 });
 
+// Droppable Column Component (memoized for performance)
 const DroppableColumn = React.memo(({ id, children }) => {
   const { setNodeRef } = useDroppable({ id });
   return (
@@ -58,120 +63,144 @@ const DroppableColumn = React.memo(({ id, children }) => {
   );
 });
 
+// Main TaskBoard Component
 export default function TaskBoard() {
-  const [tasks, setTasks] = useState({
-    Sala: [],
-    Cocina: [],
-    Entregado: [],
-    Pagadas: [], // Asegúrate de agregar esta clave
-  });
   const [showModal, setShowModal] = useState(false);
   const [editingTask, setEditingTask] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [showPagoModal, setShowPagoModal] = useState(false);
+  const [taskToPagar, setTaskToPagar] = useState(null);
+  const [showHistoryModal, setShowHistoryModal] = useState(false); // New state for history modal
 
-  const comandas = useComandas();
+  const comandas = useComandas(); // All comandas from the hook
   const productosDisponibles = useProductos();
 
+  // State to hold only the active comandas for the board
+  const [activeComandas, setActiveComandas] = useState({
+    Sala: [],
+    Cocina: [],
+    Entregado: [],
+  });
+
+  // Effect to filter comandas for the active board
   useEffect(() => {
-    const updatedTasks = {
+    const newActiveComandas = {
       Sala: [],
       Cocina: [],
       Entregado: [],
-      Pagadas: [],  // Nueva columna para las comandas pagadas
     };
 
     comandas.forEach((comanda) => {
-      if (comanda.estadoPago === "pagado") {
-        updatedTasks.Pagadas.push(comanda); // Si la comanda está pagada, va a la columna Pagadas
-      } else {
+      // Only include comandas that are NOT paid in the active board
+      // Assuming 'estado: "pagado"' is the marker for paid comandas
+      if (comanda.estado !== "pagado") {
         const estadoValido = COLUMNS.includes(comanda.estado) ? comanda.estado : "Sala";
-        updatedTasks[estadoValido].push(comanda); // Si no, se procesa normalmente
+        newActiveComandas[estadoValido].push(comanda);
       }
     });
 
-    setTasks(updatedTasks);
-  }, [comandas]);
+    setActiveComandas(newActiveComandas);
+  }, [comandas]); // Re-run this effect whenever the raw 'comandas' data changes
 
+  // Callback for adding a new comanda
   const handleAddTask = useCallback(async (newTask) => {
     if (isSaving) return;
     setIsSaving(true);
 
     try {
       newTask.estado = "Sala";
+      // Initialize estadoPago, or ensure your backend defaults it appropriately
+      newTask.estadoPago = "pendiente"; // Or some other initial non-paid state
 
       const yaExiste = comandas.some((c) => c.nombre === newTask.nombre);
       if (yaExiste) {
         console.warn("Comanda ya existe:", newTask.nombre);
+        alert(`La comanda con el nombre "${newTask.nombre}" ya existe.`);
         setIsSaving(false);
         return;
       }
 
       await guardarComanda(newTask);
-      setShowModal(false); // El useComandas actualizará tasks automáticamente
+      setShowModal(false);
     } catch (error) {
       console.error("Error al guardar la comanda:", error);
+      alert("Hubo un error al guardar la comanda. Por favor, inténtalo de nuevo.");
     } finally {
       setIsSaving(false);
     }
   }, [isSaving, comandas]);
 
+  // Callback for editing a comanda
   const handleEditComanda = useCallback((task) => {
     setEditingTask(task);
     setShowEditModal(true);
   }, []);
 
+  // Callback for closing edit modal
   const handleCloseEditModal = useCallback(() => {
     setShowEditModal(false);
     setEditingTask(null);
   }, []);
 
-  const handleUpdateComanda = useCallback((updatedTask) => {
-    actualizarComanda(updatedTask.id, updatedTask);
-    handleCloseEditModal();
+  // Callback for updating a comanda (from edit modal)
+  const handleUpdateComanda = useCallback(async (updatedTask) => {
+    try {
+      await actualizarComanda(updatedTask.id, updatedTask);
+      handleCloseEditModal();
+    } catch (error) {
+      console.error("Error al actualizar la comanda:", error);
+      alert("Hubo un error al actualizar la comanda. Por favor, inténtalo de nuevo.");
+    }
   }, [handleCloseEditModal]);
 
+  // Callback for deleting a comanda
   const handleDeleteComanda = useCallback((taskId) => {
-    eliminarComanda(taskId).then(() => {
-      setTasks((prev) => {
-        const updated = {};
-        for (const col of COLUMNS) {
-          updated[col] = prev[col].filter((task) => task.id !== taskId);
-        }
-        return updated;
+    if (!window.confirm("¿Estás seguro de que quieres eliminar esta comanda?")) {
+      return;
+    }
+    eliminarComanda(taskId)
+      .then(() => {
+        console.log(`Comanda con ID ${taskId} eliminada.`);
+        // The `useEffect` listening to `comandas` will update `activeComandas`
+      })
+      .catch((error) => {
+        console.error("Error al eliminar la comanda:", error);
+        alert("Hubo un error al intentar eliminar la comanda. Por favor, inténtalo de nuevo.");
       });
-    });
   }, []);
 
+  // Callback for drag and drop end
   const handleDragEnd = useCallback(({ active, over }) => {
     if (!over || active.id === over.id) return;
 
     let sourceCol = null;
+    // Determine the source column from activeComandas
     for (const col of COLUMNS) {
-      if (tasks[col].some((task) => task.id === active.id)) {
+      if (activeComandas[col].some((task) => task.id === active.id)) {
         sourceCol = col;
         break;
       }
     }
 
     const targetCol = over.id;
-    if (sourceCol && targetCol && sourceCol !== targetCol) {
-      setTasks((prev) => {
-        const movedTask = prev[sourceCol].find((task) => task.id === active.id);
-        if (!movedTask) return prev;
 
-        const updatedTask = { ...movedTask, estado: targetCol };
-        actualizarComanda(updatedTask.id, { estado: targetCol });
+    // Proceed only if valid source, target is a column, and it's a different column
+    if (sourceCol && COLUMNS.includes(targetCol) && sourceCol !== targetCol) {
+      const movedTask = activeComandas[sourceCol].find((task) => task.id === active.id);
+      if (!movedTask) return;
 
-        return {
-          ...prev,
-          [sourceCol]: prev[sourceCol].filter((task) => task.id !== active.id),
-          [targetCol]: [...prev[targetCol], updatedTask],
-        };
-      });
+      // Update the task's status in the backend
+      // The `useComandas` hook will then update, triggering `useEffect` and `activeComandas` re-render
+      actualizarComanda(movedTask.id, { estado: targetCol })
+        .catch(error => {
+          console.error("Error al arrastrar y actualizar comanda:", error);
+          alert("No se pudo actualizar el estado de la comanda.");
+        });
     }
-  }, [tasks]);
+  }, [activeComandas]); // Dependency on activeComandas
 
+  // Function to handle printing a ticket
   const handlePrint = (task) => {
     const now = new Date();
     const fecha = now.toLocaleDateString();
@@ -237,9 +266,7 @@ export default function TaskBoard() {
     win.close();
   };
 
-  const [showPagoModal, setShowPagoModal] = useState(false);
-  const [taskToPagar, setTaskToPagar] = useState(null);
-
+  // Callbacks for payment modal
   const handleAbrirPago = (task) => {
     setTaskToPagar(task);
     setShowPagoModal(true);
@@ -250,25 +277,38 @@ export default function TaskBoard() {
     setTaskToPagar(null);
   };
 
+  // Callback to confirm payment and update comanda status
   const handleConfirmarPago = async (comandaActualizada) => {
     try {
-      await actualizarComanda(comandaActualizada.id, comandaActualizada);
+      // Important: Ensure ModalPago sets comandaActualizada.estado = "pagado"
+      // If it uses estadoPago, make sure this component's useEffect checks estadoPago
+      await actualizarComanda(comandaActualizada.id, {
+        ...comandaActualizada,
+        estado: "pagado" // Explicitly setting state to 'pagado' here
+      });
       handleCerrarPago();
     } catch (error) {
       console.error("Error al guardar el pago:", error);
+      alert("Hubo un error al procesar el pago. Por favor, inténtalo de nuevo.");
     }
   };
 
   return (
     <div>
+      {/* Configuration components (CrearCategoria, CrearProducto, CrearMesa) */}
       <CrearCategoria />
       <CrearProducto />
       <CrearMesa />
 
+      {/* Action buttons */}
       <button onClick={() => setShowModal(true)} disabled={isSaving}>
         Agregar Comanda
       </button>
+      <button onClick={() => setShowHistoryModal(true)} style={{ marginLeft: "10px" }}>
+        Ver Historial de Comandas
+      </button>
 
+      {/* Modals */}
       {showModal && (
         <ModalAddTask
           onClose={() => setShowModal(false)}
@@ -295,37 +335,40 @@ export default function TaskBoard() {
           onPagar={handleConfirmarPago}
         />
       )}
-      {tasks.Pagadas.length > 0 && (
-        <DroppableColumn key="Pagadas" id="Pagadas">
-          <h3>Comandas Pagadas</h3>
-          {tasks.Pagadas.map((task) => (
-            <div key={task.id} className={styles.boardItem}>
-              <DraggableItem task={task} productosDisponibles={productosDisponibles} />
-              <div className={styles.boardIcon}>
-                {/* Aquí puedes agregar un botón de impresión o pago si lo necesitas */}
-              </div>
-            </div>
-          ))}
-        </DroppableColumn>
+
+      {/* History Modal - Conditionally rendered */}
+      {showHistoryModal && (
+        <HistorialComandas
+          onClose={() => setShowHistoryModal(false)}
+          // You don't need to pass comandas or productosDisponibles here
+          // as HistorialComandas will fetch them via its own hooks
+        />
       )}
+
+      {/* Task Board Columns */}
       <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <div className={styles.boardContainer}>
           {COLUMNS.map((col) => (
             <DroppableColumn key={col} id={col}>
-              {tasks[col].map((task) => (
+              {/* Render only active comandas (not paid) */}
+              {activeComandas[col].map((task) => (
                 <div key={task.id} className={styles.boardItem}>
                   <DraggableItem task={task} productosDisponibles={productosDisponibles} />
                   <div className={styles.boardIcon}>
-                    <button onClick={() => handleEditComanda(task)}>
+                    <button onClick={() => handleEditComanda(task)} title="Editar Comanda">
                       <FaEdit />
                     </button>
-                    <button onClick={() => handleDeleteComanda(task.id)}>
+                    <button onClick={() => handleDeleteComanda(task.id)} title="Eliminar Comanda">
                       <FaTrash />
                     </button>
                     {col === "Entregado" && (
                       <>
-                        <button onClick={() => handlePrint(task)}>🖨️</button>
-                        <button onClick={() => handleAbrirPago(task)}>💳</button>
+                        <button onClick={() => handlePrint(task)} title="Imprimir Ticket">
+                          🖨️
+                        </button>
+                        <button onClick={() => handleAbrirPago(task)} title="Marcar como Pagado">
+                          💳
+                        </button>
                       </>
                     )}
                   </div>

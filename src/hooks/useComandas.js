@@ -15,6 +15,10 @@ export function useComandas() {
         const parsed = Object.entries(data).map(([id, value]) => ({
           id,
           nombre: value.nombre,
+          fechaPago: value.fechaPago,
+          horaPago: value.horaPago,
+          metodoPago: value.metodoPago,
+          
           productos: value.productos || [],
           estado: value.estado || "Sala", // Asegúrate de mantener el estado
         }));

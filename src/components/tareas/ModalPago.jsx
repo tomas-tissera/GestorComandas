@@ -33,7 +33,7 @@ export default function ModalPago({ task, productosDisponibles, onClose, onPagar
       cobrado,
       metodoPago: metodo,
       cambio,
-      estadoPago: "pagado",
+      estado: "pagado",
       fechaPago: fecha,
       horaPago: hora,
     };

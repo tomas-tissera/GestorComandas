@@ -1,0 +1,149 @@
+/* components/HistorialComandas.module.css */
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Slightly darker overlay */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000; /* Ensure it's above other modals */
+  }
+  
+  .historyContainer {
+    background-color: #f7f7f7; /* Lighter background for the history panel */
+    padding: 30px;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    max-height: 90vh; /* Limit height for scrollability */
+    overflow-y: auto; /* Enable scrolling for long lists */
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+  }
+  
+  .header h2 {
+    margin: 0;
+    font-size: 26px;
+    color: #333;
+  }
+  
+  .closeButton {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.2s;
+  }
+  
+  .closeButton:hover {
+    color: #333;
+  }
+  
+  .comandaList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Responsive grid */
+    gap: 20px;
+  }
+  
+  .comandaItem {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Pushes delete button to bottom */
+  }
+  
+  .comandaHeader {
+    margin-bottom: 15px;
+    border-bottom: 1px dashed #eee;
+    padding-bottom: 10px;
+  }
+  
+  .comandaHeader h4 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 20px;
+    color: #2c3e50;
+  }
+  
+  .comandaHeader p {
+    margin: 0;
+    font-size: 13px;
+    color: #777;
+  }
+  
+  .productList {
+    list-style: disc;
+    margin-left: 20px;
+    padding: 0;
+    font-size: 15px;
+    color: #555;
+    margin-bottom: 15px;
+  }
+  
+  .productList li {
+    margin-bottom: 5px;
+  }
+  
+  .aclaracion {
+    font-style: italic;
+    font-size: 0.85em;
+    color: #999;
+  }
+  
+  .comandaFooter {
+    margin-top: auto; /* Push to the bottom if content is short */
+    padding-top: 15px;
+    border-top: 1px dashed #eee;
+    font-size: 15px;
+    color: #444;
+  }
+  
+  .comandaFooter p {
+    margin: 5px 0;
+  }
+  
+  .comandaFooter strong {
+    color: #000;
+  }
+  
+  .deleteButton {
+    background-color: #dc3545; /* Red for delete */
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 15px;
+    transition: background-color 0.2s ease;
+  }
+  
+  .deleteButton:hover {
+    background-color: #c82333;
+  }

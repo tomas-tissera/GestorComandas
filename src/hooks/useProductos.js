@@ -1,3 +1,4 @@
+// useProductos.js
 import { ref, push, onValue, remove } from "firebase/database";
 import { database } from "../firebase";
 import { useState, useEffect } from "react";
