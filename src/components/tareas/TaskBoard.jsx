@@ -25,16 +25,12 @@ const DraggableItem = React.memo(({ task, productosDisponibles }) => {
 
   const style = {
     transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined,
-    padding: "10px",
-    borderRadius: "6px",
-    marginBottom: "10px",
-    backgroundColor: "#fff",
     cursor: "grab",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.1)", // Added for better visual
   };
+  
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
+    <div ref={setNodeRef} style={style} className={styles.boardItem} {...listeners} {...attributes}>
       <strong>{task.nombre}</strong>
       <ul>
         {task.productos.map((prod, index) => (
@@ -294,12 +290,8 @@ export default function TaskBoard() {
   };
 
   return (
-    <div>
-      {/* Configuration components (CrearCategoria, CrearProducto, CrearMesa) */}
-      <CrearCategoria />
-      <CrearProducto />
-      <CrearMesa />
-
+    <>
+    
       {/* Action buttons */}
       <button onClick={() => setShowModal(true)} disabled={isSaving}>
         Agregar Comanda
@@ -307,6 +299,10 @@ export default function TaskBoard() {
       <button onClick={() => setShowHistoryModal(true)} style={{ marginLeft: "10px" }}>
         Ver Historial de Comandas
       </button>
+    <div className={styles.boardContainerDad}>
+      {/* Configuration components (CrearCategoria, CrearProducto, CrearMesa) */}
+      
+
 
       {/* Modals */}
       {showModal && (
@@ -378,6 +374,9 @@ export default function TaskBoard() {
           ))}
         </div>
       </DndContext>
+      
     </div>
+    
+      </>
   );
 }

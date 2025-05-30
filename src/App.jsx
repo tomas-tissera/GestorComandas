@@ -1,52 +1,72 @@
-import Router from "./routes/index";
-import './App.css'
+// src/App.js
+import React from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './components/AuthProvider';
+import PrivateRoute from './components/PrivateRoute';
+import Navbar from './components/Navbar';
+
+// Páginas
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import Dashboard from './pages/Dashboard';
+import MeseroDashboard from './pages/MeseroDashboard';
+import CocineroDashboard from './pages/CocineroDashboard';
+import GerenteDashboard from './pages/GerenteDashboard';
+import NotFoundPage from './pages/NotFoundPage';
+
+// **Importa el CSS aquí**
+import './App.css';
 
 function App() {
-  return <Router/>
+  return (
+    <Router>
+      <AuthProvider>
+        <Navbar />
+        <div className="container"> {/* Agrega un contenedor para centrar el contenido */}
+          <Routes>
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            <Route
+              path="/dashboard"
+              element={
+                <PrivateRoute>
+                  <Dashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/mesero-dashboard"
+              element={
+                <PrivateRoute allowedRoles={['mesero', 'gerente']}>
+                  <MeseroDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/cocinero-dashboard"
+              element={
+                <PrivateRoute allowedRoles={['cocinero', 'gerente']}>
+                  <CocineroDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/gerente-dashboard"
+              element={
+                <PrivateRoute allowedRoles={['gerente']}>
+                  <GerenteDashboard />
+                </PrivateRoute>
+              }
+            />
+
+            <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
+        </div>
+      </AuthProvider>
+    </Router>
+  );
 }
 
-export default App
-
-
-
-
-
-
-// import Navbar from './components/navbar/index'
-// import './App.css'
-// import Eventos from './components/events/index'
-// const arrayOfNumbers = [1,2,3,4,5,6,7,8,9];
-// const arrayOfPeapels = [{
-//   "id":1,
-//   "name":"juan",
-//   "age":25,
-// },{
-//   "id":2,
-//   "name":"luis",
-//   "age":20,
-// }];
-// function App() {
-
-//     const items = arrayOfNumbers.map((item)=> <li key={`array-number-item-${item}`}>{item}</li>);
-//     console.log(items);
-//     const personas = arrayOfPeapels.map((persona)=> <li key={`array-number-person-${persona.id}`}>{persona.id}:{persona.name}</li>);
-//     console.log(personas);
-//     // let items = [];
-//   // for (const item of arrayOfNumbers){
-//   //   items.push(<li>{item}</li>)
-//   // }
-//   return (
-//     <>
-//       <Eventos/>
-//       <Navbar/>
-//       <ul>
-//         {items}
-//       </ul>
-//       <ul>
-//         {personas}
-//       </ul>
-//     </>
-//   )
-// }
-
-// export default App
+export default App;

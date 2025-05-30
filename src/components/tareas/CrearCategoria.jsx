@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ref, push } from "firebase/database";
 import { database } from "../../firebase";
 // import "./CrearCategoria.css";
+import "./CrearCategoria.module.css";
 
 export default function CrearCategoria() {
   const [categoria, setCategoria] = useState({

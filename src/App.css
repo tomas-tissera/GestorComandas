@@ -1,30 +1,232 @@
+/* src/App.css */
+
+/* Fuentes y Estilos Básicos */
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f4f7f6; /* Un gris claro para el fondo */
+  color: #333;
+}
+
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  width: 100%;
-  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+/* Contenedor Principal (para centrar contenido) */
+.container {
+  max-width: 960px;
+  margin: 20px auto;
+  padding: 0 20px;
+  flex-grow: 1; /* Permite que el contenido ocupe el espacio disponible */
+}
+
+/* --- */
+
+/* Barra de Navegación */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: #ffffff; /* Blanco */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Sombra suave */
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.navbar-links a {
+  margin-right: 20px;
+  text-decoration: none;
+  color: #007bff; /* Azul primario */
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.navbar-links a:hover {
+  color: #0056b3; /* Azul más oscuro al pasar el mouse */
+}
+
+.navbar-user-info {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-user-info span {
+  margin-right: 15px;
+  color: #555;
+  font-size: 0.95em;
+}
+
+/* --- */
+
+/* Formularios (Login, Register) */
+.form-container {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  max-width: 450px;
+  margin: 50px auto; /* Centrar el formulario */
+}
+
+.form-container h2 {
+  text-align: center;
+  color: #333;
+  margin-bottom: 25px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #555;
+}
+
+.form-group input[type="email"],
+.form-group input[type="password"],
+.form-group select {
+  width: calc(100% - 20px); /* Ajuste para padding */
+  padding: 12px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1em;
+  box-sizing: border-box; /* Incluir padding en el ancho */
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
+}
+
+.error-message {
+  color: #dc3545; /* Rojo */
+  font-size: 0.9em;
+  margin-top: 10px;
   text-align: center;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* --- */
+
+/* Botones */
+.btn {
+  display: inline-block;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.btn-primary {
+  background-color: #007bff; /* Azul */
+  color: white;
 }
 
-.card {
-  padding: 2em;
+.btn-primary:hover {
+  background-color: #0056b3;
+  transform: translateY(-1px);
 }
 
-.read-the-docs {
-  color: #888;
+.btn-danger {
+  background-color: #dc3545; /* Rojo */
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* --- */
+
+/* Dashboards (Estilos básicos) */
+.dashboard-container {
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-top: 30px;
+}
+
+.dashboard-container h2 {
+  color: #333;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #eee;
+  padding-bottom: 10px;
+}
+
+.dashboard-container p {
+  line-height: 1.6;
+  color: #555;
+}
+
+.dashboard-container ul {
+  list-style: none;
+  padding: 0;
+}
+
+.dashboard-container ul li {
+  background-color: #f9f9f9;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  padding: 12px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* --- */
+
+/* Loading Spinner */
+.loading-spinner-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 1.5em;
+  color: #666;
+}
+
+/* --- */
+
+/* Not Found Page */
+.not-found-container {
+  text-align: center;
+  padding: 50px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin: 50px auto;
+  max-width: 600px;
+}
+
+.not-found-container h1 {
+  color: #dc3545;
+  font-size: 3em;
+  margin-bottom: 15px;
+}
+
+.not-found-container p {
+  color: #555;
+  font-size: 1.1em;
 }
