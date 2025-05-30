@@ -1,6 +1,7 @@
 // CrearMesa.jsx
 import { useState } from "react";
 import { agregarMesa } from "../../hooks/useMesas";
+import "./CrearMesa.css";
 
 export default function CrearMesa() {
   const [nombreMesa, setNombreMesa] = useState("");
@@ -19,37 +20,17 @@ export default function CrearMesa() {
   };
 
   return (
-    <form onSubmit={handleSubmit} style={formStyle}>
+    <form className="crear-mesa-form" onSubmit={handleSubmit}>
       <input
         type="text"
         value={nombreMesa}
         onChange={(e) => setNombreMesa(e.target.value)}
         placeholder="Nombre de la mesa"
-        style={inputStyle}
+        className="crear-mesa-input"
       />
-      <button type="submit" style={buttonStyle}>
+      <button type="submit" className="crear-mesa-button">
         Crear Mesa
       </button>
     </form>
   );
 }
-
-const formStyle = {
-  display: "flex",
-  gap: "10px",
-  marginBottom: "20px",
-};
-
-const inputStyle = {
-  flex: 1,
-  padding: "8px",
-};
-
-const buttonStyle = {
-  padding: "8px 16px",
-  backgroundColor: "#28a745",
-  color: "#fff",
-  border: "none",
-  borderRadius: "4px",
-  cursor: "pointer",
-};

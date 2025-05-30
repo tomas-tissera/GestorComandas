@@ -16,6 +16,7 @@ export default function DroppableColumn({ id, children }) {
         padding: "15px",
         backgroundColor: "#f4f4f4",
         borderRadius: "8px",
+        border:'solid 1px black',
       }}
     >
       <h3 style={{ textAlign: "center" }}></h3>

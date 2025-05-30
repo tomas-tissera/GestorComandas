@@ -5,6 +5,7 @@
   background: #fdfdfd;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  border: #333 solid 1px;
 }
 
 .form-producto h2 {
@@ -31,6 +32,8 @@
   border: 1px solid #ccc;
   border-radius: 8px;
   font-size: 1rem;
+  background-color: var(--color-surface);
+  color: var(--color-text-dark);
 }
 
 .btn-guardar {

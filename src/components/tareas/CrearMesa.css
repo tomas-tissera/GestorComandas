@@ -1,0 +1,32 @@
+.crear-mesa-form {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    
+  }
+  
+  .crear-mesa-input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    background-color: var(--color-surface);
+    color: var(--color-text-dark);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .crear-mesa-button {
+    padding: 8px 16px;
+    background-color: var(--color-accent);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: background-color 0.2s ease;
+  }
+  
+  .crear-mesa-button:hover {
+    background-color: var(--color-accent-dark);
+  }
+  

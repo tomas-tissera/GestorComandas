@@ -10,7 +10,8 @@ import { useComandas, guardarComanda, eliminarComanda, actualizarComanda } from 
 import { useProductos } from "../../hooks/useProductos";
 import ModalPago from "./ModalPago";
 import HistorialComandas from "./HistorialComandas"; // Import the new History Component
-
+import { IoMdPrint } from "react-icons/io";
+import { IoCardOutline } from "react-icons/io5";
 const COLUMNS = ["Sala", "Cocina", "Entregado"];
 
 // Helper function to get product name by ID
@@ -293,12 +294,14 @@ export default function TaskBoard() {
     <>
     
       {/* Action buttons */}
-      <button onClick={() => setShowModal(true)} disabled={isSaving}>
-        Agregar Comanda
-      </button>
-      <button onClick={() => setShowHistoryModal(true)} style={{ marginLeft: "10px" }}>
-        Ver Historial de Comandas
-      </button>
+      <div className={styles.divButton}>
+        <button onClick={() => setShowModal(true)} disabled={isSaving} className={styles.boardButton}>
+          Agregar Comanda
+        </button>
+        <button onClick={() => setShowHistoryModal(true)} style={{ marginLeft: "10px" }} className={styles.boardButton}>
+          Ver Historial de Comandas
+        </button>
+      </div>
     <div className={styles.boardContainerDad}>
       {/* Configuration components (CrearCategoria, CrearProducto, CrearMesa) */}
       
@@ -360,10 +363,10 @@ export default function TaskBoard() {
                     {col === "Entregado" && (
                       <>
                         <button onClick={() => handlePrint(task)} title="Imprimir Ticket">
-                          🖨️
+                        <IoMdPrint />
                         </button>
                         <button onClick={() => handleAbrirPago(task)} title="Marcar como Pagado">
-                          💳
+                        <IoCardOutline />
                         </button>
                       </>
                     )}

@@ -1,8 +1,8 @@
+// CrearCategoria.jsx
 import React, { useState } from "react";
 import { ref, push } from "firebase/database";
 import { database } from "../../firebase";
-// import "./CrearCategoria.css";
-import "./CrearCategoria.module.css";
+import styles from "./CrearCategoria.module.css";
 
 export default function CrearCategoria() {
   const [categoria, setCategoria] = useState({
@@ -11,39 +11,60 @@ export default function CrearCategoria() {
     imagen: "",
   });
 
+  const [mensaje, setMensaje] = useState({ tipo: "", texto: "" });
+
+  const mostrarMensaje = (texto, tipo = "exito") => {
+    setMensaje({ tipo, texto });
+    setTimeout(() => setMensaje({ tipo: "", texto: "" }), 3000);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!categoria.nombre.trim()) {
-      alert("El nombre es obligatorio");
+      mostrarMensaje("⚠️ El nombre es obligatorio", "error");
       return;
     }
 
     try {
       const categoriasRef = ref(database, "categorias/");
       await push(categoriasRef, categoria);
-      alert("✅ Categoría guardada correctamente");
-
+      mostrarMensaje("✅ Categoría guardada correctamente", "exito");
       setCategoria({ nombre: "", descripcion: "", imagen: "" });
     } catch (error) {
       console.error("❌ Error al guardar categoría:", error);
+      mostrarMensaje("❌ Error al guardar categoría", "error");
     }
   };
 
   return (
-    <form className="form-categoria" onSubmit={handleSubmit}>
+    <form className={styles.formCategoria} onSubmit={handleSubmit}>
       <h2>Crear Categoría</h2>
 
-      <div className="form-group">
+      {mensaje.texto && (
+        <div
+          className={`${styles.alerta} ${
+            mensaje.tipo === "error" ? styles.error : styles.exito
+          }`}
+        >
+          {mensaje.texto}
+        </div>
+      )}
+
+      <div className={styles.formGroup}>
         <label>Nombre:</label>
         <input
           type="text"
           value={categoria.nombre}
-          onChange={(e) => setCategoria({ ...categoria, nombre: e.target.value })}
+          onChange={(e) =>
+            setCategoria({ ...categoria, nombre: e.target.value })
+          }
         />
       </div>
 
-      <button type="submit" className="btn-guardar">Guardar Categoría</button>
+      <button type="submit" className={styles.btnGuardar}>
+        Guardar Categoría
+      </button>
     </form>
   );
 }

@@ -1,5 +1,36 @@
 /* src/App.css */
 
+:root {
+  /* Colores Primarios */
+  --color-primary: #007bff; /* Azul vibrante, para botones principales, enlaces */
+  --color-primary-dark: #0056b3; /* Azul más oscuro para estados hover/active */
+  --color-primary-light: #e0f0ff; /* Azul muy claro para fondos sutiles o resaltados */
+
+  /* Colores Secundarios/Acento */
+  --color-accent: #28a745; /* Verde para acciones de éxito, confirmaciones */
+  --color-accent-dark: #218838; /* Verde más oscuro */
+  --color-accent-light: #d4edda; /* Verde muy claro */
+
+  /* Colores de Advertencia/Error */
+  --color-danger: #dc3545; /* Rojo para errores, eliminaciones */
+  --color-danger-dark: #c82333; /* Rojo más oscuro */
+  --color-warning: #ffc107; /* Amarillo para advertencias */
+
+  /* Colores Neutros/Grises */
+  --color-text-dark: #333333; /* Texto principal oscuro */
+  --color-text-medium: #555555; /* Texto secundario o de párrafo */
+  --color-text-light: #888888; /* Texto más claro, para descripciones */
+  --color-background-light: #f4f7f6; /* Fondo general de la aplicación */
+  --color-surface: #ffffff; /* Fondo de tarjetas, modales, elementos principales */
+  --color-border: #cccccc; /* Color de bordes generales */
+  --color-divider: #eeeeee; /* Color de divisores sutiles */
+
+  /* Sombras */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+}
+
 /* Fuentes y Estilos Básicos */
 body {
   margin: 0;
