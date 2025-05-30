@@ -18,6 +18,8 @@ export function useComandas() {
           fechaPago: value.fechaPago,
           horaPago: value.horaPago,
           metodoPago: value.metodoPago,
+          cambio: value.cambio,
+          cobrado: value.cobrado,
           
           productos: value.productos || [],
           estado: value.estado || "Sala", // Asegúrate de mantener el estado
