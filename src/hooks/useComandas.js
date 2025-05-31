@@ -70,3 +70,25 @@ export const eliminarComanda = async (id) => {
     console.error("❌ Error al eliminar la comanda de Firebase:", error);
   }
 };
+export function useComandasNoPagadas() {
+  const [comandas, setComandas] = useState([]);
+
+  useEffect(() => {
+    const comandasRef = ref(database, "comandas/");
+    const unsubscribe = onValue(comandasRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        const filtered = Object.entries(data)
+          .map(([id, value]) => ({ id, ...value }))
+          .filter((comanda) => comanda.estado !== "pagado");
+        setComandas(filtered);
+      } else {
+        setComandas([]);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  return comandas;
+}

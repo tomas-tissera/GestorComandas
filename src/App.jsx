@@ -13,7 +13,7 @@ import MeseroDashboard from './pages/MeseroDashboard';
 import CocineroDashboard from './pages/CocineroDashboard';
 import GerenteDashboard from './pages/GerenteDashboard';
 import NotFoundPage from './pages/NotFoundPage';
-
+import MesasDashboard from './pages/MesasDashboard'
 // **Importa el CSS aquí**
 import './App.css';
 
@@ -40,6 +40,14 @@ function App() {
               element={
                 <PrivateRoute allowedRoles={['mesero', 'gerente']}>
                   <MeseroDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/mesas"
+              element={
+                <PrivateRoute allowedRoles={['mesero', 'gerente']}>
+                  <MesasDashboard />
                 </PrivateRoute>
               }
             />

@@ -51,8 +51,8 @@ body {
 
 /* Contenedor Principal (para centrar contenido) */
 .container {
-  max-width: 960px;
-  margin: 20px auto;
+  max-width: 90%;
+  margin: 20px 20%;
   padding: 0 20px;
   flex-grow: 1; /* Permite que el contenido ocupe el espacio disponible */
 }

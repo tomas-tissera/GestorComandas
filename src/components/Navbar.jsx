@@ -1,4 +1,3 @@
-// src/components/Navbar.js
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { signOut } from 'firebase/auth';
@@ -19,16 +18,44 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="navbar"> {/* Aplicar clase */}
-      <div className="navbar-links"> {/* Aplicar clase */}
+    <nav className="navbar">
+      <div className="navbar-links">
         <Link to="/">Inicio</Link>
-        {currentUser && <Link to="/dashboard">Dashboard</Link>}
+
+        {/* Mostrar solo si está logueado */}
+        {currentUser && (
+          <>
+            <Link to="/dashboard">Dashboard</Link>
+
+            {/* Accesos según el rol */}
+            {role === 'gerente' && (
+              <>
+                <Link to="/gestion-empleados">Empleados</Link>
+                <Link to="/reportes">Reportes</Link>
+              </>
+            )}
+
+            {role === 'cocinero' && (
+              <>
+                <Link to="/cocina">Cocina</Link>
+              </>
+            )}
+
+            {role === 'mesero' && (
+              <>
+                <Link to="/mesas">Mesas</Link>
+                <Link to="/pedidos">Pedidos</Link>
+              </>
+            )}
+          </>
+        )}
       </div>
-      <div className="navbar-user-info"> {/* Aplicar clase */}
+
+      <div className="navbar-user-info">
         {currentUser ? (
           <>
             <span>Hola, {currentUser.email} ({role})</span>
-            <button onClick={handleLogout} className="btn btn-danger"> {/* Aplicar clase */}
+            <button onClick={handleLogout} className="btn btn-danger">
               Cerrar Sesión
             </button>
           </>
