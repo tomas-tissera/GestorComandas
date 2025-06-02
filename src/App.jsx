@@ -14,6 +14,7 @@ import CocineroDashboard from './pages/CocineroDashboard';
 import GerenteDashboard from './pages/GerenteDashboard';
 import NotFoundPage from './pages/NotFoundPage';
 import MesasDashboard from './pages/MesasDashboard'
+import PedidosDashboard from './pages/PedidosDashboard'
 // **Importa el CSS aquí**
 import './App.css';
 
@@ -48,6 +49,14 @@ function App() {
               element={
                 <PrivateRoute allowedRoles={['mesero', 'gerente']}>
                   <MesasDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/pedidos"
+              element={
+                <PrivateRoute allowedRoles={['mesero', 'gerente']}>
+                  <PedidosDashboard />
                 </PrivateRoute>
               }
             />

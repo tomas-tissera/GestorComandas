@@ -1,0 +1,64 @@
+.container {
+    max-width: 900px;
+    margin: 20px auto;
+    font-family: Arial, sans-serif;
+    padding: 0 15px;
+  }
+  
+  .title {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  
+  .metricsSection {
+    margin-bottom: 40px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+  }
+  
+  .metricsList {
+    list-style: none;
+    padding-left: 0;
+    font-size: 1.1em;
+    color: #333;
+  }
+  
+  .metricsList li {
+    margin-bottom: 8px;
+  }
+  
+  .comandaCard {
+    border: 1px solid #ccc;
+    margin: 10px 0;
+    padding: 15px 20px;
+    border-radius: 6px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgb(0 0 0 / 0.05);
+  }
+  
+  .comandaCard strong {
+    color: #222;
+  }
+  
+  .productosList {
+    padding-left: 20px;
+    margin-bottom: 10px;
+  }
+  
+  .productosList li {
+    margin-bottom: 4px;
+    color: #555;
+  }
+  
+  .noComandas {
+    font-style: italic;
+    color: #777;
+    text-align: center;
+    margin-top: 20px;
+  }
+  .comandaCardTitle{
+  display: flex;
+  justify-content: space-between;
+}

@@ -20,6 +20,7 @@ export function useComandas() {
           metodoPago: value.metodoPago,
           cambio: value.cambio,
           cobrado: value.cobrado,
+          meseroId:value.meseroId,
           
           productos: value.productos || [],
           estado: value.estado || "Sala", // Asegúrate de mantener el estado

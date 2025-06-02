@@ -44,7 +44,7 @@ const Navbar = () => {
             {role === 'mesero' && (
               <>
                 <Link to="/mesas">Mesas</Link>
-                <Link to="/pedidos">Pedidos</Link>
+                <Link to="/pedidos">Comandas</Link>
               </>
             )}
           </>
