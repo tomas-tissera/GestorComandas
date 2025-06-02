@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useMesas } from "../../hooks/useMesas"; // Hook para obtener mesas
 import { guardarComanda } from "../../hooks/useComandas";
 import { useProductos } from "../../hooks/useProductos"; // Hook para obtener productos de Firebase
-
+import { auth } from "../../firebase";
 export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
   const mesas = useMesas();
   const productosDisponibles = useProductos(); // Hook para obtener productos de Firebase
@@ -80,9 +80,14 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
       alert("Debes seleccionar una mesa y al menos un producto.");
       return;
     } 
-
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      alert("Error: no hay usuario autenticado.");
+      return;
+    }
     const payload = {
       ...taskDetails,
+      meseroId: currentUser.uid, 
       ...(isEditing && { id: taskToEdit.id }), // solo agrega 'id' si estás editando
     };
 

@@ -84,8 +84,8 @@
   text-align: center;
   transition: background-color 0.2s ease, transform 0.1s ease;
   box-shadow: var(--shadow-sm);
-  background-color: #bebebe;
-  color: var(--color-text-dark);
+  background-color: #f0f0f0;
+  color: var(--color-primary-dark);
 width: 90%;}
   .boardButton:hover{
     background-color: #9c9c9c;
