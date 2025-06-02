@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useMesas } from "../../hooks/useMesas"; // Hook para obtener mesas
+import { useMesas } from "../../hooks/useMesas";
 import { guardarComanda } from "../../hooks/useComandas";
-import { useProductos } from "../../hooks/useProductos"; // Hook para obtener productos de Firebase
+import { useProductos } from "../../hooks/useProductos";
 import { auth } from "../../firebase";
+import styles from "../../css/ModalAddTask.module.css";
+
 export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
   const mesas = useMesas();
-  const productosDisponibles = useProductos(); // Hook para obtener productos de Firebase
-  const [nuevaMesa, setNuevaMesa] = useState("");
+  const productosDisponibles = useProductos();
   const isEditing = !!taskToEdit;
   const [taskDetails, setTaskDetails] = useState({
     nombre: "",
@@ -29,13 +30,11 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
     setTaskDetails((prev) => ({ ...prev, [name]: value }));
   }, []);
 
-  // Agregar producto con una unidad más, asegurando que no se agregue duplicado
   const handleAddProduct = useCallback((productId) => {
     setTaskDetails((prev) => {
       const existingIndex = prev.productos.findIndex(p => p.productoId === productId);
   
       if (existingIndex !== -1) {
-        // Producto ya existe: actualizar su cantidad de forma inmutable
         const updatedProductos = prev.productos.map((producto, index) =>
           index === existingIndex
             ? { ...producto, cantidad: producto.cantidad + 1 }
@@ -44,9 +43,8 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
   
         return { ...prev, productos: updatedProductos };
       } else {
-        // Nuevo producto: buscarlo y agregarlo
         const product = productosDisponibles.find(p => p.id === productId);
-        if (!product) return prev; // protección contra errores
+        if (!product) return prev;
         const newProducto = {
           productoId: productId,
           cantidad: 1,
@@ -59,20 +57,31 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
       }
     });
   }, [productosDisponibles]);
-  
+
+  const handleRemoveProduct = useCallback((index) => {
+    setTaskDetails((prev) => {
+      const newProductos = [...prev.productos];
+      newProductos.splice(index, 1);
+      return { ...prev, productos: newProductos };
+    });
+  }, []);
 
   const handleProductChange = useCallback((index, e) => {
     const { name, value } = e.target;
-    const updatedProductos = [...taskDetails.productos];
-    updatedProductos[index][name] = parseInt(value, 10);
-    setTaskDetails({ ...taskDetails, productos: updatedProductos });
-  }, [taskDetails.productos]);
+    setTaskDetails((prev) => {
+      const updatedProductos = [...prev.productos];
+      updatedProductos[index][name] = parseInt(value, 10);
+      return { ...prev, productos: updatedProductos };
+    });
+  }, []);
 
   const handleAclaracionChange = useCallback((index, e) => {
-    const updatedProductos = [...taskDetails.productos];
-    updatedProductos[index].aclaracion = e.target.value;
-    setTaskDetails({ ...taskDetails, productos: updatedProductos });
-  }, [taskDetails.productos]);
+    setTaskDetails((prev) => {
+      const updatedProductos = [...prev.productos];
+      updatedProductos[index].aclaracion = e.target.value;
+      return { ...prev, productos: updatedProductos };
+    });
+  }, []);
 
   const handleSubmit = useCallback((e) => {
     e.preventDefault();
@@ -88,25 +97,23 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
     const payload = {
       ...taskDetails,
       meseroId: currentUser.uid, 
-      ...(isEditing && { id: taskToEdit.id }), // solo agrega 'id' si estás editando
+      ...(isEditing && { id: taskToEdit.id }),
     };
 
     if (isEditing) {
-      onEdit?.(payload); // Esto depende si querés implementar edición en Firebase también
+      onEdit?.(payload);
     } else {
       guardarComanda(payload);
     }
     onClose();
   }, [isEditing, taskToEdit, taskDetails, onEdit, onAdd, onClose]);
 
-  // Calcular el total de la comanda
   const calculateTotal = () => {
     return taskDetails.productos.reduce((total, producto) => {
-      return total + producto.precio * producto.cantidad; // Sumar el precio por cantidad
+      return total + producto.precio * producto.cantidad;
     }, 0);
   };
 
-  // Agrupamos los productos por categoría
   const productosPorCategoria = productosDisponibles.reduce((acc, producto) => {
     if (!acc[producto.categoria]) {
       acc[producto.categoria] = [];
@@ -116,19 +123,19 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
   }, {});
 
   return (
-    <div style={overlayStyle}>
-      <div style={modalStyle}>
+    <div className={styles.overlay}>
+      <div className={styles.modal}>
         <h3>{isEditing ? "Editar Comanda" : "Agregar Comanda"}</h3>
 
         <form onSubmit={handleSubmit}>
-          <div>
+          <div className={styles.opcionMesaDiv}>
             <label>Mesa</label>
             <select
               name="nombre"
               value={taskDetails.nombre}
               onChange={handleInputChange}
               required
-              style={{ width: "100%", padding: "8px", marginBottom: "15px" }}
+              className={styles.opcionMesa}
             >
               <option value="">Seleccionar mesa</option>
               {mesas.map((mesa) => (
@@ -150,7 +157,13 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
                       <div
                         key={producto.id}
                         onClick={() => handleAddProduct(producto.id)}
-                        style={productCardStyle}
+                        className={styles.productCard}
+                        style={{
+                          backgroundImage: producto.imagen ? `url(${producto.imagen})` : undefined,
+                          color: producto.imagen ? 'white' : 'black',
+                          textShadow: producto.imagen ? '0 0 5px rgba(0,0,0,0.7)' : 'none',
+                        }}
+                        title={`${producto.nombre} - $${producto.precio}`}
                       >
                         {producto.nombre} - ${producto.precio}
                       </div>
@@ -159,6 +172,7 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
                 </div>
               ))}
             </div>
+
             <div style={{ flex: 1 }}>
               <h4>Comanda actual</h4>
               {taskDetails.productos.length === 0 ? (
@@ -167,7 +181,7 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
                 taskDetails.productos.map((producto, index) => {
                   const prod = productosDisponibles.find((p) => p.id === producto.productoId);
                   return (
-                    <div key={index} style={commandItemStyle}>
+                    <div key={index} className={styles.commandItem}>
                       <strong>{prod?.nombre}</strong>
                       <div>
                         <input
@@ -180,6 +194,14 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
                         />
                         <span> x ${producto.precio}</span>
                         <span> = ${producto.precio * producto.cantidad}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveProduct(index)}
+                          className={styles.deleteButton}
+                          title="Eliminar producto"
+                        >
+                          &times;
+                        </button>
                       </div>
                       <input
                         type="text"
@@ -199,71 +221,15 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
             <h4>Total: ${calculateTotal()}</h4>
           </div>
 
-          <button type="submit" style={submitButtonStyle}>
+          <button type="submit" className={styles.submitButton}>
             {isEditing ? "Guardar Cambios" : "Crear Comanda"}
           </button>
         </form>
 
-        <button onClick={onClose} style={cancelButtonStyle}>
+        <button onClick={onClose} className={styles.cancelButton}>
           Cancelar
         </button>
       </div>
     </div>
   );
 }
-
-// Styles
-const overlayStyle = {
-  position: "fixed",
-  inset: 0,
-  backgroundColor: "rgba(0,0,0,0.5)",
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  zIndex: 1000,
-};
-
-const modalStyle = {
-  backgroundColor: "#fff",
-  padding: "20px",
-  borderRadius: "10px",
-  width: "800px",
-  maxHeight: "90vh",
-  overflowY: "auto",
-};
-
-const productCardStyle = {
-  width: "100px",
-  border: "1px solid #ccc",
-  borderRadius: "6px",
-  padding: "10px",
-  textAlign: "center",
-  backgroundColor: "#f9f9f9",
-  cursor: "pointer",
-};
-
-const commandItemStyle = {
-  borderBottom: "1px solid #ddd",
-  paddingBottom: "10px",
-  marginBottom: "10px",
-};
-
-const submitButtonStyle = {
-  width: "100%",
-  marginTop: "20px",
-  backgroundColor: "#007bff",
-  color: "#fff",
-  padding: "10px",
-  borderRadius: "4px",
-  border: "none",
-};
-
-const cancelButtonStyle = {
-  width: "100%",
-  marginTop: "10px",
-  backgroundColor: "#dc3545",
-  color: "#fff",
-  padding: "10px",
-  borderRadius: "4px",
-  border: "none",
-};
