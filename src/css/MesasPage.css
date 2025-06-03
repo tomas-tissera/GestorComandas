@@ -1,4 +1,16 @@
 /* src/pages/MesasPage.css */
+.mesa-card-title{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.trash-btn{
+  color: var(--btn-danger-bg);
+  cursor: pointer;
+}
+.trash-btn:hover{
+  color: var(--btn-danger-hover-bg);
+}
 .mesas-container {
     padding: 2rem;
     background-color: var(--color-background-light);
@@ -76,4 +88,79 @@
     color: var(--color-text-light);
     margin-left: 8px;
   }
-      
+  .mesas-header {
+    display: flex;
+    justify-content: space-between; /* Space out the title and button */
+    align-items: center;
+    margin-bottom: 1.5rem; /* Space below the header */
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 1rem; /* Space between items if they wrap */
+}
+
+.sort-tables-button {
+    padding: 10px 20px;
+    background-color: #007bff; /* Primary blue */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sort-tables-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+    transform: translateY(-1px);
+}
+
+.sort-tables-button:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Optional: Adjust for smaller screens */
+@media (max-width: 768px) {
+    .mesas-header {
+        flex-direction: column; /* Stack header items vertically */
+        align-items: flex-start;
+    }
+    .sort-tables-button {
+        width: 100%; /* Full width button */
+        margin-top: 1rem; /* Space from title */
+    }
+}
+.mesa-card {
+  position: relative; /* Needed for positioning the delete button */
+  /* Ensure existing styles for mesa-card allow for good spacing */
+  padding-bottom: 3rem; /* Add extra padding for the button */
+}
+
+.delete-mesa-button {
+  position: absolute; /* Position the button relative to the card */
+  bottom: 1rem; /* Distance from the bottom of the card */
+  left: 50%;
+  transform: translateX(-50%); /* Center horizontally */
+  background-color: #dc3545; /* Red color for delete */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 15px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  white-space: nowrap; /* Prevent text wrapping */
+}
+
+.delete-mesa-button:hover {
+  background-color: #c82333; /* Darker red on hover */
+  transform: translateX(-50%) translateY(-2px); /* Slight lift */
+}
+
+.delete-mesa-button:active {
+  transform: translateX(-50%) translateY(0);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}

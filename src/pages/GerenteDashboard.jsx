@@ -14,7 +14,6 @@ const GerenteDashboard = () => {
       <p>Tu rol es: {role}</p>
       <CrearCategoria />
       <CrearProducto />
-      <CrearMesa />
       <TaskBoard></TaskBoard>
     </div>
   );
