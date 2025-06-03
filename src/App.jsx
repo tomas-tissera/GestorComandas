@@ -16,6 +16,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import MesasDashboard from './pages/MesasDashboard'
 import PedidosDashboard from './pages/PedidosDashboard'
 import Categorias from './components/categorias/categorias';
+import Productos from './components/Productos/Productos';
 // **Importa el CSS aquí**
 import './App.css';
 
@@ -66,6 +67,14 @@ function App() {
               element={
                 <PrivateRoute allowedRoles={['gerente']}>
                   <Categorias />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/productos"
+              element={
+                <PrivateRoute allowedRoles={['gerente']}>
+                  <Productos />
                 </PrivateRoute>
               }
             />

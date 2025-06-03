@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { ref, push, onValue } from "firebase/database";
-import { database } from "../../firebase";
+import { database, auth } from "../../firebase"; // Import auth
+import { onAuthStateChanged } from "firebase/auth"; // Import onAuthStateChanged
+import Swal from 'sweetalert2'; // Import SweetAlert2
 import "./CrearProducto.css";
 
 export default function CrearProducto() {
@@ -13,6 +15,15 @@ export default function CrearProducto() {
   });
 
   const [categorias, setCategorias] = useState([]);
+  const [user, setUser] = useState(null); // State to store the current user
+
+  // Listen for Firebase Auth state changes
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+    return () => unsubscribe();
+  }, []);
 
   // Cargar categorías desde Firebase
   useEffect(() => {
@@ -34,22 +45,44 @@ export default function CrearProducto() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validar que todos los campos estén completos
+    // Validar si el usuario está logueado
+    if (!user) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Acceso denegado',
+        text: 'Debes iniciar sesión para crear productos.',
+      });
+      return;
+    }
+
+    // Validar que todos los campos obligatorios estén completos
     if (!producto.nombre.trim() || !producto.precio || !producto.categoriaId) {
-      alert("Por favor completa todos los campos obligatorios.");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Campos incompletos',
+        text: 'Por favor, completa todos los campos obligatorios (Nombre, Precio, Categoría).',
+      });
       return;
     }
 
     // Formatear el producto a enviar a la base de datos
-    const productoConCategoria = {
+    const productoConMetaData = {
       ...producto,
       categoria: categorias.find((cat) => cat.id === producto.categoriaId)?.nombre, // Añadir nombre de la categoría al producto
+      creadoPor: user.uid, // Save the user's ID
+      creadoEn: new Date().toISOString(), // Timestamp of creation
     };
 
     try {
       const productosRef = ref(database, "productos/");
-      await push(productosRef, productoConCategoria); // Guardar el producto con la categoría
-      alert("✅ Producto guardado correctamente");
+      await push(productosRef, productoConMetaData); // Guardar el producto con la categoría y el ID del creador
+      Swal.fire({
+        icon: 'success',
+        title: '¡Producto guardado!',
+        text: 'El producto ha sido guardado correctamente.',
+        showConfirmButton: false,
+        timer: 1500
+      });
 
       setProducto({
         nombre: "",
@@ -60,6 +93,11 @@ export default function CrearProducto() {
       });
     } catch (error) {
       console.error("❌ Error al guardar el producto:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al guardar',
+        text: 'Hubo un problema al guardar el producto. Intenta de nuevo.',
+      });
     }
   };
 
