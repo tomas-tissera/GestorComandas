@@ -36,7 +36,7 @@ const Navbar = () => {
             {role === 'gerente' && (
               <>
                 <Link to="/mesas" className={isLinkActive('/mesas') ? styles.active : ''}>Mesas</Link>
-                <Link to="/reportes" className={isLinkActive('/reportes') ? styles.active : ''}>Categorias</Link>
+                <Link to="/categorias" className={isLinkActive('/categorias') ? styles.active : ''}>Categorias</Link>
                 <Link to="/reportes" className={isLinkActive('/reportes') ? styles.active : ''}>Productos</Link>
                 <Link to="/gestion-empleados" className={isLinkActive('/gestion-empleados') ? styles.active : ''}>Empleados</Link>
                 <Link to="/reportes" className={isLinkActive('/reportes') ? styles.active : ''}>Reportes</Link>
