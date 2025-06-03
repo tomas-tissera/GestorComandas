@@ -29,6 +29,22 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+  
+  --border-radius-base: 8px;
+
+  --navbar-bg: #ffffff;
+  --navbar-link-color: #007bff;
+  --navbar-link-hover-color: #0056b3;
+  --navbar-text-color: #555;
+  --navbar-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --btn-primary-bg: #007bff;
+  --btn-primary-color: #ffffff;
+  --btn-primary-hover-bg: #0056b3;
+  --btn-danger-bg: #dc3545;
+  --btn-danger-color: #ffffff;
+  --btn-danger-hover-bg: #c82333;
+  --border-radius-sm: 5px;
 }
 
 /* Fuentes y Estilos Básicos */
@@ -52,48 +68,13 @@ body {
 /* Contenedor Principal (para centrar contenido) */
 .container {
   max-width: 90%;
-  margin: 20px 20%;
+  margin: 2% 2%;
   padding: 0 20px;
   flex-grow: 1; /* Permite que el contenido ocupe el espacio disponible */
 }
 
 /* --- */
 
-/* Barra de Navegación */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 15px 30px;
-  background-color: #ffffff; /* Blanco */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Sombra suave */
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.navbar-links a {
-  margin-right: 20px;
-  text-decoration: none;
-  color: #007bff; /* Azul primario */
-  font-weight: 500;
-  transition: color 0.3s ease;
-}
-
-.navbar-links a:hover {
-  color: #0056b3; /* Azul más oscuro al pasar el mouse */
-}
-
-.navbar-user-info {
-  display: flex;
-  align-items: center;
-}
-
-.navbar-user-info span {
-  margin-right: 15px;
-  color: #555;
-  font-size: 0.95em;
-}
-
-/* --- */
 
 /* Formularios (Login, Register) */
 .form-container {

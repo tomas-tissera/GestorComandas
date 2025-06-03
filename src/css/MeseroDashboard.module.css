@@ -1,0 +1,7 @@
+.dashGeneral{
+    background-color: var(--color-surface);
+    padding: 10px;
+    border-radius: var(--border-radius-base);
+    margin-bottom: 15px;
+    box-shadow: var(--shadow-md);
+}

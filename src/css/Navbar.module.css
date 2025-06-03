@@ -1,0 +1,155 @@
+/* Navbar.module.css */
+
+/* Variables for consistent styling */
+:root {
+    --navbar-bg: #ffffff;
+    --navbar-link-color: #007bff;
+    --navbar-link-hover-color: #0056b3;
+    --navbar-text-color: #555;
+    --navbar-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    --btn-primary-bg: #007bff;
+    --btn-primary-color: #ffffff;
+    --btn-primary-hover-bg: #0056b3;
+    --btn-danger-bg: #dc3545;
+    --btn-danger-color: #ffffff;
+    --btn-danger-hover-bg: #c82333;
+    --border-radius-sm: 5px;
+  }
+  
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem; /* Adjusted padding */
+    background-color: var(--navbar-bg);
+    box-shadow: var(--navbar-shadow); /* More pronounced shadow */
+    border-bottom: 1px solid #e0e0e0;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+    gap: 1rem; /* Gap between main sections when wrapping */
+  }
+  
+  .navbarLinks {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem; /* Space between links */
+    flex-wrap: wrap; /* Allow links to wrap */
+  }
+  
+  .navbarLinks a {
+    text-decoration: none;
+    color: var(--navbar-link-color);
+    font-weight: 600; /* Slightly bolder */
+    font-size: 1rem;
+    transition: color 0.3s ease, transform 0.2s ease; /* Add transform for hover effect */
+    padding: 0.3rem 0; /* Add slight vertical padding for click area */
+    position: relative; /* For underline effect */
+  }
+  
+  .navbarLinks a::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: 0;
+    left: 0;
+    background-color: var(--navbar-link-hover-color);
+    transition: width 0.3s ease-out; /* Smooth underline animation */
+  }
+  
+  .navbarLinks a:hover {
+    color: var(--navbar-link-hover-color);
+    transform: translateY(-2px); /* Subtle lift on hover */
+  }
+  
+  .navbarLinks a:hover::after,
+  .navbarLinks a.active::after { /* Optional: active link indicator */
+    width: 100%;
+  }
+  
+  .navbarUserInfo {
+    display: flex;
+    align-items: center;
+    gap: 1rem; /* Space between info and buttons */
+    flex-wrap: wrap; /* Allow user info items to wrap */
+  }
+  
+  .navbarUserInfo span {
+    color: var(--navbar-text-color);
+    font-size: 0.9rem;
+    white-space: nowrap; /* Prevent email from breaking */
+  }
+  
+  /* Base button styles */
+  .btn {
+    padding: 0.6rem 1.2rem;
+    border: none;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Specific button colors */
+  .btnPrimary {
+    background-color: var(--btn-primary-bg);
+    color: var(--btn-primary-color);
+  }
+  
+  .btnPrimary:hover {
+    background-color: var(--btn-primary-hover-bg);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .btnDanger {
+    background-color: var(--btn-danger-bg);
+    color: var(--btn-danger-color);
+  }
+  
+  .btnDanger:hover {
+    background-color: var(--btn-danger-hover-bg);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .navbar {
+      flex-direction: column; /* Stack items vertically */
+      align-items: flex-start; /* Align to the left */
+      padding: 1rem;
+    }
+  
+    .navbarLinks,
+    .navbarUserInfo {
+      width: 100%; /* Take full width */
+      justify-content: flex-start; /* Align links to the left */
+      margin-top: 0.5rem;
+    }
+  
+    .navbarLinks a {
+      font-size: 0.95rem;
+    }
+  
+    .navbarUserInfo {
+      margin-top: 1rem;
+      border-top: 1px solid #eee; /* Separator for stacked sections */
+      padding-top: 1rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .navbarLinks,
+    .navbarUserInfo {
+      flex-direction: column; /* Stack links/buttons vertically */
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+  
+    .btn {
+      width: 100%; /* Full width buttons */
+      text-align: center;
+    }
+  }

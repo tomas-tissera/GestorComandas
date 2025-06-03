@@ -1,96 +1,250 @@
 /* TaskBoard.module.css */
 
 .boardContainerDad {
-  padding: 1rem;
+  padding: 1.5rem; /* Increased padding for more breathing room */
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2rem; /* Increased gap between sections */
+  background-color: var(--color-background-light); /* Light background for the whole board area */
+  min-height: calc(100vh - 60px); /* Adjust based on your header/footer height */
+}
+
+.divButton {
+  display: flex;
+  justify-content: center; /* Center the buttons */
+  gap: 1rem; /* Space between buttons */
+  margin-bottom: 1.5rem; /* Space below the buttons */
+  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+}
+
+.boardButton {
+  padding: 12px 24px; /* Larger padding for better touch targets */
+  font-size: 1rem; /* Readable font size */
+  font-weight: 600;
+  border: 1px solid var(--color-primary); /* Border matching primary color */
+  border-radius: var(--border-radius-base);
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.3s ease; /* Smooth transitions for hover effects */
+  background-color: var(--color-primary);
+  min-width: 200px; /* Ensure buttons have a minimum width */
+  box-shadow: var(--shadow-light);
+}
+
+.boardButton:hover {
+  background-color: var(--color-primary-dark);
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px); /* Slight lift effect */
+}
+
+.boardButton:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-light);
+}
+
+.boardButton:disabled {
+  background-color: #cccccc;
+  border-color: #999999;
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
 .boardContainer {
   display: flex;
-  gap: 1rem;
-  justify-content: space-around;
-  flex-wrap: wrap;
-  /* border-radius: 8px;
-  border: solid black 1px; */
+  gap: 1.5rem; /* Consistent spacing between columns */
+  justify-content: center; /* Center columns when there's extra space */
+  flex-wrap: wrap; /* Allow columns to wrap on smaller screens */
 }
 
 .column {
   flex: 1;
-  min-width: 250px;
-  background-color: #f0f0f0;
-  padding: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  border: solid 0.1px rgba(0, 0, 0, 0.356);
+  min-width: 280px; /* Slightly increased min-width for content */
+  max-width: 350px; /* Optional: set a max-width for very wide screens */
+  background-color: #ffffff; /* White background for columns */
+  padding: 1.5rem; /* More internal padding */
+  border-radius: var(--border-radius-base);
+  box-shadow: var(--shadow-medium); /* Stronger shadow for depth */
+  border: 1px solid #e0e0e0; /* Subtle border */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* Space between column title and items */
+}
+
+.column h3 {
+  text-align: center;
+  color: var(--color-primary-dark);
+  margin-top: 0;
+  margin-bottom: 1rem; /* Space below the heading */
+  font-size: 1.4rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--color-primary); /* Underline for column titles */
 }
 
 .boardItem {
   background-color: #fdfdfd;
-  padding: 0.75rem;
+  padding: 1rem; /* Slightly more padding */
   margin-bottom: 0.75rem;
   border-radius: 6px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  box-shadow: var(--shadow-light);
+  border: 1px solid #eee; /* Light border for items */
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  color: var(--color-text-dark);
+}
+
+.boardItem:hover {
+  transform: translateY(-3px); /* Lift effect on hover */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+.boardItem strong {
+  font-size: 1.1rem;
+  color: var(--color-primary);
+  display: block; /* Ensures it takes full width */
+  margin-bottom: 0.5rem;
+}
+
+.boardItem ul {
+  list-style: none; /* Remove default list bullets */
+  padding: 0;
+  margin: 0.5rem 0 0;
+}
+
+.boardItem li {
+  padding: 0.2rem 0;
+  border-bottom: 1px dashed #e0e0e0; /* Dashed line for items */
+  font-size: 0.95rem;
+}
+
+.boardItem li:last-child {
+  border-bottom: none; /* No border for the last item */
+}
+
+.aclaracion {
+  font-style: italic;
+  font-size: 0.85em; /* Slightly smaller for clarity */
+  margin-left: 15px; /* Indent the clarification */
+  color: #666;
+  margin-top: 0.2rem;
 }
 
 .boardIcon {
-  margin-top: 0.5rem;
-  display: flex; /* Cambia de grid a flex */
-  flex-direction: row; /* Asegura que sea en fila */
+  margin-top: 1rem; /* More space above icons */
+  display: flex;
+  flex-direction: row;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem;
+  justify-content: space-around; /* Distribute icons evenly */
+  padding: 0.75rem;
   background-color: var(--color-background-light);
-  border-radius: 8px;
-  box-shadow: var(--shadow-sm);
-  justify-content: center;
+  border-radius: var(--border-radius-base);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Inner shadow for a subtle inset look */
 }
 
-/* Estilo para los botones */
 .boardIcon button {
-  background-color: rgba(255, 255, 255, 0);
-  color: black;
+  background-color: transparent; /* Fully transparent background */
+  color: var(--color-primary-dark); /* Icons color */
   border: none;
   cursor: pointer;
-  font-size: 25px;
-  padding: 8px;
+  font-size: 28px; /* Larger icons */
+  padding: 10px; /* More padding for easier clicks */
   border-radius: 50%;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  
+  transition: all 0.2s ease;
+  display: flex; /* To center icon if padding varies */
+  justify-content: center;
+  align-items: center;
 }
 
-/* Efectos visuales */
 .boardIcon button:hover {
-  transform: scale(1.2);
+  background-color: rgba(74, 144, 226, 0.1); /* Light blue background on hover */
+  color: var(--color-primary);
+  transform: scale(1.15); /* Slightly less aggressive scale */
 }
 
 .boardIcon button:focus {
   outline: 2px solid var(--color-primary);
+  outline-offset: 2px; /* Offset outline from the button */
 }
 
 .boardIcon button:active {
-  transform: scale(0.95);
+  transform: scale(0.98);
 }
 
-.boardButton{
-  display: inline-block;
-  padding: 10px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  border: #8181817c solid 0.2px;
-  border-radius: 6px;
-  cursor: pointer;
-  text-align: center;
-  transition: background-color 0.2s ease, transform 0.1s ease;
-  box-shadow: var(--shadow-sm);
-  background-color: #f0f0f0;
-  color: var(--color-primary-dark);
-width: 90%;}
-  .boardButton:hover{
-    background-color: #9c9c9c;
-    border: #9c9b9b7c solid 0.2px;
+/* Specific icon colors for better UX */
+.boardIcon button[title="Editar Comanda"] {
+  color: #f39c12; /* Orange for edit */
+}
+.boardIcon button[title="Eliminar Comanda"] {
+  color: var(--color-danger); /* Red for delete */
+}
+.boardIcon button[title="Imprimir Ticket"] {
+  color: #6c757d; /* Gray for print */
+}
+.boardIcon button[title="Marcar como Pagado"] {
+  color: var(--color-secondary); /* Green for pay */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .boardContainer {
+    flex-direction: column; /* Stack columns vertically on smaller screens */
+    align-items: center; /* Center stacked columns */
   }
-.divButton{
+
+  .column {
+    width: 90%; /* Take more width on small screens */
+    max-width: 400px; /* Limit max width even when stacked */
+  }
+
+  .divButton {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .boardButton {
+    width: 80%; /* Make buttons take more width */
+  }
+}
+
+@media (max-width: 480px) {
+  .boardContainerDad {
+    padding: 1rem;
+  }
+
+  .column {
+    min-width: unset; /* Remove min-width to allow more flexibility */
+    width: 95%; /* Even wider on very small screens */
+    padding: 1rem;
+  }
+
+  .boardButton {
+    width: 90%;
+    font-size: 0.9rem;
+    padding: 10px 15px;
+  }
+}
+/* ... (existing CSS from previous improvement) ... */
+
+.loadingIndicator {
   display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+  color: var(--color-primary-dark);
+  font-size: 1.1rem;
+  font-weight: 500;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-top: 4px solid var(--color-primary);
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
+  margin-top: 1rem;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

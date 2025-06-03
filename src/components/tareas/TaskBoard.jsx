@@ -1,17 +1,18 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { DndContext, useDraggable, useDroppable, closestCenter } from "@dnd-kit/core";
-import { FaEdit, FaTrash } from "react-icons/fa"; // <--- ADD THIS LINE: Import FaEdit and FaTrash
+import { FaEdit, FaTrash } from "react-icons/fa";
 import ModalAddTask from "./ModalAddTask";
 import styles from "./TaskBoard.module.css";
-import CrearMesa from "./CrearMesa";
-import CrearProducto from "./CrearProducto";
-import CrearCategoria from "./CrearCategoria";
+// import CrearMesa from "./CrearMesa"; // Commented out as per original
+// import CrearProducto from "./CrearProducto"; // Commented out as per original
+// import CrearCategoria from "./CrearCategoria"; // Commented out as per original
 import { useComandas, guardarComanda, eliminarComanda, actualizarComanda } from "../../hooks/useComandas";
 import { useProductos } from "../../hooks/useProductos";
 import ModalPago from "./ModalPago";
-import HistorialComandas from "./HistorialComandas"; // Import the new History Component
+import HistorialComandas from "./HistorialComandas";
 import { IoMdPrint } from "react-icons/io";
 import { IoCardOutline } from "react-icons/io5";
+
 const COLUMNS = ["Sala", "Cocina", "Entregado"];
 
 // Helper function to get product name by ID
@@ -28,7 +29,6 @@ const DraggableItem = React.memo(({ task, productosDisponibles }) => {
     transform: transform ? `translate(${transform.x}px, ${transform.y}px)` : undefined,
     cursor: "grab",
   };
-  
 
   return (
     <div ref={setNodeRef} style={style} className={styles.boardItem} {...listeners} {...attributes}>
@@ -38,7 +38,7 @@ const DraggableItem = React.memo(({ task, productosDisponibles }) => {
           <li key={index}>
             {prod.cantidad} x {getProductNameById(prod.productoId, productosDisponibles)}
             {prod.aclaracion && (
-              <div style={{ fontStyle: "italic", fontSize: "0.9em" }}>
+              <div className={styles.aclaracion}> {/* Use module class */}
                 Aclaración: {prod.aclaracion}
               </div>
             )}
@@ -50,12 +50,19 @@ const DraggableItem = React.memo(({ task, productosDisponibles }) => {
 });
 
 // Droppable Column Component (memoized for performance)
-const DroppableColumn = React.memo(({ id, children }) => {
+const DroppableColumn = React.memo(({ id, children, isLoading }) => { // Added isLoading prop
   const { setNodeRef } = useDroppable({ id });
   return (
     <div ref={setNodeRef} className={styles.column}>
       <h3>{id}</h3>
-      {children}
+      {isLoading ? ( // Conditionally render loading state
+        <div className={styles.loadingIndicator}>
+          Cargando comandas...
+          <div className={styles.spinner}></div>
+        </div>
+      ) : (
+        children
+      )}
     </div>
   );
 });
@@ -68,7 +75,8 @@ export default function TaskBoard() {
   const [isSaving, setIsSaving] = useState(false);
   const [showPagoModal, setShowPagoModal] = useState(false);
   const [taskToPagar, setTaskToPagar] = useState(null);
-  const [showHistoryModal, setShowHistoryModal] = useState(false); // New state for history modal
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [isLoadingComandas, setIsLoadingComandas] = useState(true); // New loading state
 
   const comandas = useComandas(); // All comandas from the hook
   const productosDisponibles = useProductos();
@@ -81,7 +89,16 @@ export default function TaskBoard() {
   });
 
   // Effect to filter comandas for the active board
+  // Updated to manage loading state
   useEffect(() => {
+    if (comandas.length > 0) { // Check if comandas have been loaded
+        setIsLoadingComandas(false); // Set loading to false once data is available
+    } else if (comandas.length === 0 && !isLoadingComandas) { // If comandas become empty after loading, might be a data reset
+        // Potentially handle this case, e.g., if you delete all, it should still show as loaded.
+        // For initial load, this works.
+    }
+
+
     const newActiveComandas = {
       Sala: [],
       Cocina: [],
@@ -89,8 +106,6 @@ export default function TaskBoard() {
     };
 
     comandas.forEach((comanda) => {
-      // Only include comandas that are NOT paid in the active board
-      // Assuming 'estado: "pagado"' is the marker for paid comandas
       if (comanda.estado !== "pagado") {
         const estadoValido = COLUMNS.includes(comanda.estado) ? comanda.estado : "Sala";
         newActiveComandas[estadoValido].push(comanda);
@@ -98,7 +113,11 @@ export default function TaskBoard() {
     });
 
     setActiveComandas(newActiveComandas);
-  }, [comandas]); // Re-run this effect whenever the raw 'comandas' data changes
+  }, [comandas, isLoadingComandas]); // Re-run this effect whenever the raw 'comandas' data changes or loading state changes
+
+  // You might want to update your useComandas hook to expose a loading state
+  // or explicitly set isLoadingComandas to true before calling useComandas
+  // and then false within its success callback. For now, this useEffect provides a basic indicator.
 
   // Callback for adding a new comanda
   const handleAddTask = useCallback(async (newTask) => {
@@ -107,8 +126,7 @@ export default function TaskBoard() {
 
     try {
       newTask.estado = "Sala";
-      // Initialize estadoPago, or ensure your backend defaults it appropriately
-      newTask.estadoPago = "pendiente"; // Or some other initial non-paid state
+      newTask.estadoPago = "pendiente";
 
       const yaExiste = comandas.some((c) => c.nombre === newTask.nombre);
       if (yaExiste) {
@@ -159,7 +177,6 @@ export default function TaskBoard() {
     eliminarComanda(taskId)
       .then(() => {
         console.log(`Comanda con ID ${taskId} eliminada.`);
-        // The `useEffect` listening to `comandas` will update `activeComandas`
       })
       .catch((error) => {
         console.error("Error al eliminar la comanda:", error);
@@ -172,7 +189,6 @@ export default function TaskBoard() {
     if (!over || active.id === over.id) return;
 
     let sourceCol = null;
-    // Determine the source column from activeComandas
     for (const col of COLUMNS) {
       if (activeComandas[col].some((task) => task.id === active.id)) {
         sourceCol = col;
@@ -182,20 +198,17 @@ export default function TaskBoard() {
 
     const targetCol = over.id;
 
-    // Proceed only if valid source, target is a column, and it's a different column
     if (sourceCol && COLUMNS.includes(targetCol) && sourceCol !== targetCol) {
       const movedTask = activeComandas[sourceCol].find((task) => task.id === active.id);
       if (!movedTask) return;
 
-      // Update the task's status in the backend
-      // The `useComandas` hook will then update, triggering `useEffect` and `activeComandas` re-render
       actualizarComanda(movedTask.id, { estado: targetCol })
         .catch(error => {
           console.error("Error al arrastrar y actualizar comanda:", error);
           alert("No se pudo actualizar el estado de la comanda.");
         });
     }
-  }, [activeComandas]); // Dependency on activeComandas
+  }, [activeComandas]);
 
   // Function to handle printing a ticket
   const handlePrint = (task) => {
@@ -277,11 +290,9 @@ export default function TaskBoard() {
   // Callback to confirm payment and update comanda status
   const handleConfirmarPago = async (comandaActualizada) => {
     try {
-      // Important: Ensure ModalPago sets comandaActualizada.estado = "pagado"
-      // If it uses estadoPago, make sure this component's useEffect checks estadoPago
       await actualizarComanda(comandaActualizada.id, {
         ...comandaActualizada,
-        estado: "pagado" // Explicitly setting state to 'pagado' here
+        estado: "pagado"
       });
       handleCerrarPago();
     } catch (error) {
@@ -292,94 +303,81 @@ export default function TaskBoard() {
 
   return (
     <>
-    
-      {/* Action buttons */}
       <div className={styles.divButton}>
         <button onClick={() => setShowModal(true)} disabled={isSaving} className={styles.boardButton}>
           Agregar Comanda
         </button>
-        <button onClick={() => setShowHistoryModal(true)} style={{ marginLeft: "10px" }} className={styles.boardButton}>
+        <button onClick={() => setShowHistoryModal(true)} className={styles.boardButton}>
           Ver Historial de Comandas
         </button>
       </div>
-    <div className={styles.boardContainerDad}>
-      {/* Configuration components (CrearCategoria, CrearProducto, CrearMesa) */}
-      
+      <div className={styles.boardContainerDad}>
+        {showModal && (
+          <ModalAddTask
+            onClose={() => setShowModal(false)}
+            onAdd={handleAddTask}
+            productosDisponibles={productosDisponibles}
+            isSaving={isSaving}
+          />
+        )}
 
+        {showEditModal && (
+          <ModalAddTask
+            onClose={handleCloseEditModal}
+            onEdit={handleUpdateComanda}
+            taskToEdit={editingTask}
+            productosDisponibles={productosDisponibles}
+          />
+        )}
 
-      {/* Modals */}
-      {showModal && (
-        <ModalAddTask
-          onClose={() => setShowModal(false)}
-          onAdd={handleAddTask}
-          productosDisponibles={productosDisponibles}
-          isSaving={isSaving}
-        />
-      )}
+        {showPagoModal && taskToPagar && (
+          <ModalPago
+            task={taskToPagar}
+            productosDisponibles={productosDisponibles}
+            onClose={handleCerrarPago}
+            onPagar={handleConfirmarPago}
+          />
+        )}
 
-      {showEditModal && (
-        <ModalAddTask
-          onClose={handleCloseEditModal}
-          onEdit={handleUpdateComanda}
-          taskToEdit={editingTask}
-          productosDisponibles={productosDisponibles}
-        />
-      )}
+        {showHistoryModal && (
+          <HistorialComandas
+            onClose={() => setShowHistoryModal(false)}
+          />
+        )}
 
-      {showPagoModal && taskToPagar && (
-        <ModalPago
-          task={taskToPagar}
-          productosDisponibles={productosDisponibles}
-          onClose={handleCerrarPago}
-          onPagar={handleConfirmarPago}
-        />
-      )}
-
-      {/* History Modal - Conditionally rendered */}
-      {showHistoryModal && (
-        <HistorialComandas
-          onClose={() => setShowHistoryModal(false)}
-          // You don't need to pass comandas or productosDisponibles here
-          // as HistorialComandas will fetch them via its own hooks
-        />
-      )}
-
-      {/* Task Board Columns */}
-      <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <div className={styles.boardContainer}>
-          {COLUMNS.map((col) => (
-            <DroppableColumn key={col} id={col}>
-              {/* Render only active comandas (not paid) */}
-              {activeComandas[col].map((task) => (
-                <div key={task.id} className={styles.boardItem}>
-                  <DraggableItem task={task} productosDisponibles={productosDisponibles} />
-                  <div className={styles.boardIcon}>
-                    <button onClick={() => handleEditComanda(task)} title="Editar Comanda">
-                      <FaEdit />
-                    </button>
-                    <button onClick={() => handleDeleteComanda(task.id)} title="Eliminar Comanda">
-                      <FaTrash />
-                    </button>
-                    {col === "Entregado" && (
-                      <>
-                        <button onClick={() => handlePrint(task)} title="Imprimir Ticket">
-                        <IoMdPrint />
+        <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <div className={styles.boardContainer}>
+            {COLUMNS.map((col) => (
+              <DroppableColumn key={col} id={col} isLoading={isLoadingComandas}> {/* Pass isLoadingComandas prop */}
+                {/* (inside DroppableColumn) */}
+                  {!isLoadingComandas && activeComandas[col].map((task) => (
+                    <div key={task.id} className={styles.boardItem}>
+                      <DraggableItem task={task} productosDisponibles={productosDisponibles} />
+                      <div className={styles.boardIcon}>
+                        <button onClick={() => handleEditComanda(task)} title="Editar Comanda">
+                          <FaEdit />
                         </button>
-                        <button onClick={() => handleAbrirPago(task)} title="Marcar como Pagado">
-                        <IoCardOutline />
+                        <button onClick={() => handleDeleteComanda(task.id)} title="Eliminar Comanda">
+                          <FaTrash />
                         </button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </DroppableColumn>
-          ))}
-        </div>
-      </DndContext>
-      
-    </div>
-    
-      </>
+                        {col === "Entregado" && (
+                          <> 
+                            <button onClick={() => handlePrint(task)} title="Imprimir Ticket">
+                              <IoMdPrint />
+                            </button>
+                            <button onClick={() => handleAbrirPago(task)} title="Marcar como Pagado">
+                              <IoCardOutline />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+              </DroppableColumn>
+            ))}
+          </div>
+        </DndContext>
+      </div>
+    </>
   );
 }
