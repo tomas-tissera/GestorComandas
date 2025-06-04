@@ -258,6 +258,7 @@ const Productos = () => {
                 name="categoriaId"
                 value={formData.categoriaId || ''}
                 onChange={handleChange}
+                className={styles.select-cat}
               >
                 <option value="">Selecciona una categoría</option>
                 {categorias.map(cat => (

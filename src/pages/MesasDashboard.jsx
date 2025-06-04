@@ -97,10 +97,9 @@ export default function MesasPage() {
   return (
     <div className="mesas-container">
       {role === "gerente" && (
-        <div>
+        <div className="mesas-container-title">
           <h2>Crear Mesa:</h2>
           <CrearMesa />
-          <hr />
         </div>
       )}
 

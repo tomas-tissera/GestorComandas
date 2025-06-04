@@ -186,3 +186,13 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+.mesas-container-title{
+  flex: 1;
+  min-width: 280px;
+  background-color: #ffffff;
+  padding: 1.5rem;
+  border-radius: var(--border-radius-base);
+  box-shadow: var(--shadow-medium);
+  border: 1px solid #e0e0e0;
+  
+}

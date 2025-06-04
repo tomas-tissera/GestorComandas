@@ -3,15 +3,17 @@ import { DndContext, useDraggable, useDroppable, closestCenter } from "@dnd-kit/
 import { FaEdit, FaTrash } from "react-icons/fa";
 import ModalAddTask from "./ModalAddTask";
 import styles from "./TaskBoard.module.css";
-// import CrearMesa from "./CrearMesa"; // Commented out as per original
-// import CrearProducto from "./CrearProducto"; // Commented out as per original
-// import CrearCategoria from "./CrearCategoria"; // Commented out as per original
+import Swal from "sweetalert2";
+import { ref, remove, push } from "firebase/database";
+import { database } from "../../firebase";
+import { useAuth } from "../../components/AuthProvider";
+
 import { useComandas, guardarComanda, eliminarComanda, actualizarComanda } from "../../hooks/useComandas";
 import { useProductos } from "../../hooks/useProductos";
 import ModalPago from "./ModalPago";
 import HistorialComandas from "./HistorialComandas";
 import { IoMdPrint } from "react-icons/io";
-import { IoCardOutline } from "react-icons/io5";
+import { IoCardOutline } from "react-icons/io5"; // Assuming this is correct now
 
 const COLUMNS = ["Sala", "Cocina", "Entregado"];
 
@@ -38,7 +40,7 @@ const DraggableItem = React.memo(({ task, productosDisponibles }) => {
           <li key={index}>
             {prod.cantidad} x {getProductNameById(prod.productoId, productosDisponibles)}
             {prod.aclaracion && (
-              <div className={styles.aclaracion}> {/* Use module class */}
+              <div className={styles.aclaracion}>
                 Aclaración: {prod.aclaracion}
               </div>
             )}
@@ -50,12 +52,12 @@ const DraggableItem = React.memo(({ task, productosDisponibles }) => {
 });
 
 // Droppable Column Component (memoized for performance)
-const DroppableColumn = React.memo(({ id, children, isLoading }) => { // Added isLoading prop
+const DroppableColumn = React.memo(({ id, children, isLoading }) => {
   const { setNodeRef } = useDroppable({ id });
   return (
     <div ref={setNodeRef} className={styles.column}>
       <h3>{id}</h3>
-      {isLoading ? ( // Conditionally render loading state
+      {isLoading ? (
         <div className={styles.loadingIndicator}>
           Cargando comandas...
           <div className={styles.spinner}></div>
@@ -76,50 +78,38 @@ export default function TaskBoard() {
   const [showPagoModal, setShowPagoModal] = useState(false);
   const [taskToPagar, setTaskToPagar] = useState(null);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
-  const [isLoadingComandas, setIsLoadingComandas] = useState(true); // New loading state
+  const [isLoadingComandas, setIsLoadingComandas] = useState(true);
 
-  const comandas = useComandas(); // All comandas from the hook
+  const comandas = useComandas();
   const productosDisponibles = useProductos();
+  const { currentUser } = useAuth();
 
-  // State to hold only the active comandas for the board
   const [activeComandas, setActiveComandas] = useState({
     Sala: [],
     Cocina: [],
     Entregado: [],
   });
 
-  // Effect to filter comandas for the active board
-  // Updated to manage loading state
   useEffect(() => {
-    if (comandas.length > 0) { // Check if comandas have been loaded
-        setIsLoadingComandas(false); // Set loading to false once data is available
-    } else if (comandas.length === 0 && !isLoadingComandas) { // If comandas become empty after loading, might be a data reset
-        // Potentially handle this case, e.g., if you delete all, it should still show as loaded.
-        // For initial load, this works.
+    if (comandas !== null) {
+      setIsLoadingComandas(false);
+      const newActiveComandas = {
+        Sala: [],
+        Cocina: [],
+        Entregado: [],
+      };
+
+      comandas.forEach((comanda) => {
+        if (comanda.estado !== "pagado") {
+          const estadoValido = COLUMNS.includes(comanda.estado) ? comanda.estado : "Sala";
+          newActiveComandas[estadoValido].push(comanda);
+        }
+      });
+      setActiveComandas(newActiveComandas);
     }
+  }, [comandas]);
 
 
-    const newActiveComandas = {
-      Sala: [],
-      Cocina: [],
-      Entregado: [],
-    };
-
-    comandas.forEach((comanda) => {
-      if (comanda.estado !== "pagado") {
-        const estadoValido = COLUMNS.includes(comanda.estado) ? comanda.estado : "Sala";
-        newActiveComandas[estadoValido].push(comanda);
-      }
-    });
-
-    setActiveComandas(newActiveComandas);
-  }, [comandas, isLoadingComandas]); // Re-run this effect whenever the raw 'comandas' data changes or loading state changes
-
-  // You might want to update your useComandas hook to expose a loading state
-  // or explicitly set isLoadingComandas to true before calling useComandas
-  // and then false within its success callback. For now, this useEffect provides a basic indicator.
-
-  // Callback for adding a new comanda
   const handleAddTask = useCallback(async (newTask) => {
     if (isSaving) return;
     setIsSaving(true);
@@ -130,61 +120,170 @@ export default function TaskBoard() {
 
       const yaExiste = comandas.some((c) => c.nombre === newTask.nombre);
       if (yaExiste) {
-        console.warn("Comanda ya existe:", newTask.nombre);
-        alert(`La comanda con el nombre "${newTask.nombre}" ya existe.`);
+        Swal.fire({
+          icon: "warning",
+          title: "¡Comanda Existente!",
+          text: `Ya existe una comanda para la mesa "${newTask.nombre}". Por favor, edita la comanda existente o selecciona otra mesa.`,
+          confirmButtonText: "Entendido",
+          confirmButtonColor: "#f4a261",
+        });
         setIsSaving(false);
         return;
       }
 
       await guardarComanda(newTask);
       setShowModal(false);
+      Swal.fire({
+        icon: "success",
+        title: "¡Comanda Creada!",
+        text: `La comanda para la mesa "${newTask.nombre}" ha sido agregada a la Sala.`,
+        showConfirmButton: false,
+        timer: 1500,
+        position: 'top-end',
+        toast: true,
+      });
     } catch (error) {
       console.error("Error al guardar la comanda:", error);
-      alert("Hubo un error al guardar la comanda. Por favor, inténtalo de nuevo.");
+      Swal.fire({
+        icon: "error",
+        title: "¡Error al guardar!",
+        text: "Hubo un problema al guardar la comanda. Por favor, verifica tu conexión y vuelve a intentarlo.",
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#e63946",
+      });
     } finally {
       setIsSaving(false);
     }
   }, [isSaving, comandas]);
 
-  // Callback for editing a comanda
   const handleEditComanda = useCallback((task) => {
     setEditingTask(task);
     setShowEditModal(true);
   }, []);
 
-  // Callback for closing edit modal
   const handleCloseEditModal = useCallback(() => {
     setShowEditModal(false);
     setEditingTask(null);
   }, []);
 
-  // Callback for updating a comanda (from edit modal)
   const handleUpdateComanda = useCallback(async (updatedTask) => {
     try {
-      await actualizarComanda(updatedTask.id, updatedTask);
+      // Ensure no undefined values are passed to Firebase in updatedTask
+      const cleanedUpdatedTask = Object.fromEntries(
+        Object.entries(updatedTask).filter(([_, value]) => value !== undefined)
+      );
+
+      await actualizarComanda(updatedTask.id, cleanedUpdatedTask);
       handleCloseEditModal();
+      Swal.fire({
+        icon: "success",
+        title: "¡Comanda Actualizada!",
+        text: `Los cambios en la comanda de la mesa "${updatedTask.nombre}" han sido guardados.`,
+        showConfirmButton: false,
+        timer: 1500,
+        position: 'top-end',
+        toast: true,
+      });
     } catch (error) {
       console.error("Error al actualizar la comanda:", error);
-      alert("Hubo un error al actualizar la comanda. Por favor, inténtalo de nuevo.");
+      Swal.fire({
+        icon: "error",
+        title: "¡Error al Actualizar!",
+        text: "No pudimos guardar los cambios en la comanda. Inténtalo de nuevo.",
+        confirmButtonText: "Entendido",
+        confirmButtonColor: "#e63946",
+      });
     }
   }, [handleCloseEditModal]);
 
-  // Callback for deleting a comanda
-  const handleDeleteComanda = useCallback((taskId) => {
-    if (!window.confirm("¿Estás seguro de que quieres eliminar esta comanda?")) {
-      return;
-    }
-    eliminarComanda(taskId)
-      .then(() => {
-        console.log(`Comanda con ID ${taskId} eliminada.`);
-      })
-      .catch((error) => {
-        console.error("Error al eliminar la comanda:", error);
-        alert("Hubo un error al intentar eliminar la comanda. Por favor, inténtalo de nuevo.");
-      });
-  }, []);
 
-  // Callback for drag and drop end
+  // --- MODIFIED handleDeleteComanda to explicitly handle fechaPago ---
+  const handleDeleteComanda = useCallback(async (taskId) => {
+    const result = await Swal.fire({
+      title: "¿Eliminar esta comanda?",
+      text: "¡Esta acción es irreversible y la comanda se eliminará permanentemente! Se guardará una copia en el historial.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Sí, eliminar",
+      cancelButtonText: "Cancelar",
+      reverseButtons: true,
+    });
+
+    if (result.isConfirmed) {
+      try {
+        let comandaToDelete = null;
+        for (const col of COLUMNS) {
+            comandaToDelete = activeComandas[col].find(task => task.id === taskId);
+            if (comandaToDelete) break;
+        }
+
+        if (!comandaToDelete) {
+            console.warn(`Comanda con ID ${taskId} no encontrada en el estado activo.`);
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "No se encontró la comanda para eliminar.",
+                confirmButtonText: "Aceptar",
+                confirmButtonColor: "#e63946",
+            });
+            return;
+        }
+
+        // Prepare the comanda for history:
+        // 1. Start with a copy of comandaToDelete
+        const comandaForHistory = { ...comandaToDelete };
+
+        // 2. Explicitly handle 'fechaPago': if it's undefined, set it to null.
+        //    Firebase allows null, but not undefined.
+        if (comandaForHistory.fechaPago === undefined) {
+          comandaForHistory.fechaPago = null;
+        }
+
+        // 3. Filter out any other remaining undefined values (a good general practice)
+        const cleanedComanda = Object.fromEntries(
+            Object.entries(comandaForHistory).filter(([_, value]) => value !== undefined)
+        );
+
+        // Add deletion metadata
+        cleanedComanda.eliminadoPor = {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            nombre: currentUser.displayName || "Usuario Desconocido",
+        };
+        cleanedComanda.fechaEliminacion = new Date().toISOString();
+
+        // 1. Save to historical record
+        const historialComandasRef = ref(database, "historial/comandas");
+        await push(historialComandasRef, cleanedComanda); // Push the fully cleaned and augmented object
+
+        // 2. Delete from active comandas
+        await eliminarComanda(taskId);
+
+        Swal.fire({
+          icon: "success",
+          title: "¡Eliminada!",
+          text: "La comanda ha sido eliminada y guardada en el historial.",
+          showConfirmButton: false,
+          timer: 1500,
+          position: 'top-end',
+          toast: true,
+        });
+      } catch (error) {
+        console.error("Error al eliminar la comanda:", error);
+        Swal.fire({
+          icon: "error",
+          title: "¡Error al Eliminar!",
+          text: "Hubo un error al intentar eliminar la comanda. Por favor, inténtalo de nuevo.",
+          confirmButtonText: "Aceptar",
+          confirmButtonColor: "#e63946",
+        });
+      }
+    }
+  }, [activeComandas, currentUser, eliminarComanda]);
+
+
   const handleDragEnd = useCallback(({ active, over }) => {
     if (!over || active.id === over.id) return;
 
@@ -203,14 +302,29 @@ export default function TaskBoard() {
       if (!movedTask) return;
 
       actualizarComanda(movedTask.id, { estado: targetCol })
+        .then(() => {
+          Swal.fire({
+            icon: "info",
+            title: `Comanda movida a ${targetCol}`,
+            showConfirmButton: false,
+            timer: 1000,
+            position: 'bottom-start',
+            toast: true,
+          });
+        })
         .catch(error => {
           console.error("Error al arrastrar y actualizar comanda:", error);
-          alert("No se pudo actualizar el estado de la comanda.");
+          Swal.fire({
+            icon: "error",
+            title: "¡Error al Mover!",
+            text: "No se pudo actualizar el estado de la comanda. Inténtalo de nuevo.",
+            confirmButtonText: "Entendido",
+            confirmButtonColor: "#e63946",
+          });
         });
     }
   }, [activeComandas]);
 
-  // Function to handle printing a ticket
   const handlePrint = (task) => {
     const now = new Date();
     const fecha = now.toLocaleDateString();
@@ -276,7 +390,6 @@ export default function TaskBoard() {
     win.close();
   };
 
-  // Callbacks for payment modal
   const handleAbrirPago = (task) => {
     setTaskToPagar(task);
     setShowPagoModal(true);
@@ -287,17 +400,41 @@ export default function TaskBoard() {
     setTaskToPagar(null);
   };
 
-  // Callback to confirm payment and update comanda status
   const handleConfirmarPago = async (comandaActualizada) => {
     try {
-      await actualizarComanda(comandaActualizada.id, {
+      // Ensure fechaPago is set when updating to "pagado"
+      const updatedComanda = {
         ...comandaActualizada,
-        estado: "pagado"
-      });
+        estado: "pagado",
+        estadoPago: "pagado",
+        fechaPago: new Date().toISOString(), // Set fechaPago here
+      };
+
+      // Filter out undefined values from updatedComanda before sending to Firebase
+      const cleanedUpdatedComanda = Object.fromEntries(
+          Object.entries(updatedComanda).filter(([_, value]) => value !== undefined)
+      );
+
+      await actualizarComanda(comandaActualizada.id, cleanedUpdatedComanda);
       handleCerrarPago();
+      Swal.fire({
+        icon: "success",
+        title: "¡Pago Registrado!",
+        text: `La comanda de la mesa "${comandaActualizada.nombre}" ha sido marcada como pagada.`,
+        showConfirmButton: false,
+        timer: 2000,
+        position: 'top-end',
+        toast: true,
+      });
     } catch (error) {
       console.error("Error al guardar el pago:", error);
-      alert("Hubo un error al procesar el pago. Por favor, inténtalo de nuevo.");
+      Swal.fire({
+        icon: "error",
+        title: "¡Error al Registrar Pago!",
+        text: "Hubo un error al procesar el pago. Por favor, inténtalo de nuevo.",
+        confirmButtonText: "Aceptar",
+        confirmButtonColor: "#e63946",
+      });
     }
   };
 
@@ -348,8 +485,7 @@ export default function TaskBoard() {
         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <div className={styles.boardContainer}>
             {COLUMNS.map((col) => (
-              <DroppableColumn key={col} id={col} isLoading={isLoadingComandas}> {/* Pass isLoadingComandas prop */}
-                {/* (inside DroppableColumn) */}
+              <DroppableColumn key={col} id={col} isLoading={isLoadingComandas}>
                   {!isLoadingComandas && activeComandas[col].map((task) => (
                     <div key={task.id} className={styles.boardItem}>
                       <DraggableItem task={task} productosDisponibles={productosDisponibles} />
@@ -361,7 +497,7 @@ export default function TaskBoard() {
                           <FaTrash />
                         </button>
                         {col === "Entregado" && (
-                          <> 
+                          <>
                             <button onClick={() => handlePrint(task)} title="Imprimir Ticket">
                               <IoMdPrint />
                             </button>

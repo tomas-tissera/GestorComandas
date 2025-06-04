@@ -94,3 +94,36 @@
     color: var(--color-text-dark);
 
 }
+/* loading */
+
+.loadingIndicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 15px; /* Space between text and spinner */
+  padding: 30px;
+  font-size: 1.1em;
+  color: #555;
+}
+
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #007bff; /* Or your brand color */
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Optional: Center the modal for the loading state */
+.modalOverlay.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

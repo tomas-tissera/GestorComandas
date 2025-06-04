@@ -6,7 +6,7 @@ import { auth } from "../../firebase";
 import styles from "../../css/ModalAddTask.module.css";
 
 export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
-  const mesas = useMesas();
+  const mesas = useMesas(); // This can be null initially
   const productosDisponibles = useProductos();
   const isEditing = !!taskToEdit;
   const [taskDetails, setTaskDetails] = useState({
@@ -33,14 +33,14 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
   const handleAddProduct = useCallback((productId) => {
     setTaskDetails((prev) => {
       const existingIndex = prev.productos.findIndex(p => p.productoId === productId);
-  
+
       if (existingIndex !== -1) {
         const updatedProductos = prev.productos.map((producto, index) =>
           index === existingIndex
             ? { ...producto, cantidad: producto.cantidad + 1 }
             : producto
         );
-  
+
         return { ...prev, productos: updatedProductos };
       } else {
         const product = productosDisponibles.find(p => p.id === productId);
@@ -52,7 +52,7 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
           nombre: product.nombre,
           precio: product.precio
         };
-  
+
         return { ...prev, productos: [...prev.productos, newProducto] };
       }
     });
@@ -88,7 +88,7 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
     if (!taskDetails.nombre || !taskDetails.productos.length) {
       alert("Debes seleccionar una mesa y al menos un producto.");
       return;
-    } 
+    }
     const currentUser = auth.currentUser;
     if (!currentUser) {
       alert("Error: no hay usuario autenticado.");
@@ -96,7 +96,7 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
     }
     const payload = {
       ...taskDetails,
-      meseroId: currentUser.uid, 
+      meseroId: currentUser.uid,
       ...(isEditing && { id: taskToEdit.id }),
     };
 
@@ -106,7 +106,7 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
       guardarComanda(payload);
     }
     onClose();
-  }, [isEditing, taskToEdit, taskDetails, onEdit, onAdd, onClose]);
+  }, [isEditing, taskToEdit, taskDetails, onEdit, onClose]);
 
   const calculateTotal = () => {
     return taskDetails.productos.reduce((total, producto) => {
@@ -121,6 +121,21 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
     acc[producto.categoria].push(producto);
     return acc;
   }, {});
+
+  // --- Updated loading check with animation ---
+  if (mesas === null) {
+    return (
+      <div className={`${styles.overlay} ${styles.loading}`}> {/* Add loading class for centering */}
+        <div className={styles.modal}>
+          <div className={styles.loadingIndicator}>
+            <p>Cargando mesas...</p>
+            <div className={styles.spinner}></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  // --- End of loading check ---
 
   return (
     <div className={styles.overlay}>
@@ -138,6 +153,7 @@ export default function ModalAddTask({ onClose, onAdd, onEdit, taskToEdit }) {
               className={styles.opcionMesa}
             >
               <option value="">Seleccionar mesa</option>
+              {/* Now 'mesas' is guaranteed to be an array (possibly empty) */}
               {mesas.map((mesa) => (
                 <option key={mesa.id} value={mesa.nombre}>
                   {mesa.nombre}
