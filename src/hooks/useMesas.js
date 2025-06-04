@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import { ref, onValue, push } from "firebase/database";
 import { database } from "../firebase";
 
-// Leer las mesas
+// Leer las mesas con estado inicial null para cargar animación
 export function useMesas() {
-  const [mesas, setMesas] = useState([]);
+  const [mesas, setMesas] = useState(null);
 
   useEffect(() => {
     const mesasRef = ref(database, "mesas/");
