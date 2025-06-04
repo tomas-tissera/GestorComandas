@@ -12,8 +12,6 @@ const GerenteDashboard = () => {
       <h2>Dashboard de Gerente</h2>
       <p>Bienvenido, {currentUser?.email}!</p>
       <p>Tu rol es: {role}</p>
-      <CrearCategoria />
-      <CrearProducto />
       <TaskBoard></TaskBoard>
     </div>
   );

@@ -3,7 +3,7 @@ import { database } from "../firebase";
 import { useState, useEffect } from "react";
 
 export function useCategorias() {
-  const [categorias, setCategorias] = useState([]);
+  const [categorias, setCategorias] = useState(null); // null indica cargando
 
   useEffect(() => {
     const categoriasRef = ref(database, "categorias/");

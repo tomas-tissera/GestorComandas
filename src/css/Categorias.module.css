@@ -63,4 +63,37 @@
     color: var(--color-text-light);
     margin-top: 1rem;
   }
+  .categoriaTitle{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .categoriaTrash{
+    color: var(--color-danger);
+    cursor: pointer;
+  }
+  .categoriaTrash:hover{
+    color: var(--color-danger-dark);
+  }
+  .loaderContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 2rem 0;
+  }
+  
+  .loader {
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #3498db;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 10px;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
   
