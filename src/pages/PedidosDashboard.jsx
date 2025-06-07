@@ -2,9 +2,8 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useComandas } from "../hooks/useComandas";
 import { useProductos } from "../hooks/useProductos";
 import { getAuth } from "firebase/auth";
-import DashboardMeseroMes from '../components/mesero/meseroMes'
 import styles from "../css/DashboardMesero.module.css";
-
+import DashboardMeseroComandas from "../components/mesero/DashboardMeseroComandas";
 export default function DashboardMesero() {
   const comandas = useComandas();
   const productos = useProductos();
@@ -66,8 +65,7 @@ export default function DashboardMesero() {
 
   return (
     <div className={styles.container}>
-      <h2 className={styles.title}>Dashboard del Mesero</h2>
-        <DashboardMeseroMes/>
+        <DashboardMeseroComandas/>
 
       <section className={styles.metricsSection}>
         <h3>Estadísticas generales</h3>

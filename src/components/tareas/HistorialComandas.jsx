@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useComandas, eliminarComanda } from "../../hooks/useComandas";
 import { useProductos } from "../../hooks/useProductos";
 import { FaTrash } from "react-icons/fa";
-
+import DashboardMeseroComandas from "../mesero/DashboardMeseroComandas";
 // Helper function to get product name by ID
 function getProductNameById(id, productosDisponibles) {
   const p = productosDisponibles.find((prod) => prod.id === id);
@@ -27,23 +27,30 @@ export default function HistorialComandas({ onClose }) {
   const [filterDate, setFilterDate] = useState("");
   const [filterMesa, setFilterMesa] = useState("");
 
-  // Helper para normalizar una fecha DD/MM/AAAA a un objeto Date (a medianoche UTC)
-  const parseDDMMYYYYtoDate = (dateString) => {
+  // Helper to parse and normalize a date string (DD/MM/AAAA or ISO) to a UTC midnight Date object
+  const parseDateToUTC = (dateString) => {
     if (!dateString) return null;
+
+    // Try parsing as ISO 8601 first (e.g., "2023-11-20T10:30:00.000Z" or "2023-11-20")
+    const isoDate = new Date(dateString);
+    if (!isNaN(isoDate.getTime())) {
+      // If valid ISO format, convert to UTC midnight for consistent comparison
+      return new Date(Date.UTC(isoDate.getFullYear(), isoDate.getMonth(), isoDate.getDate()));
+    }
+
+    // If not ISO, try parsing as DD/MM/AAAA (common in some systems)
     const parts = dateString.split('/');
     if (parts.length === 3) {
       const year = parseInt(parts[2], 10);
-      const month = parseInt(parts[1], 10) - 1; // 0-11
+      const month = parseInt(parts[1], 10) - 1; // Months are 0-11 in JavaScript Date
       const day = parseInt(parts[0], 10);
       return new Date(Date.UTC(year, month, day));
     }
-    return null;
+    return null; // Return null for unparseable dates
   };
 
-  // Calcula el total para una comanda
-  // ¡MOVIDA LA FUNCIÓN calculateTotal AQUÍ!
-  const calculateTotal = (comanda) => { // Cambié 'task' a 'comanda' para mayor claridad
-    // Asegúrate de que comanda.productos sea un array válido
+  // Calculates the total for a comanda
+  const calculateTotal = (comanda) => {
     if (!comanda || !Array.isArray(comanda.productos)) {
       return 0;
     }
@@ -51,33 +58,33 @@ export default function HistorialComandas({ onClose }) {
     return comanda.productos.reduce((acc, p) => {
       const prod = productosDisponibles.find((item) => item.id === p.productoId);
       const price = prod ? parseFloat(prod.precio) : 0;
-      // Asegúrate de que p.cantidad sea un número
       const quantity = typeof p.cantidad === 'number' ? p.cantidad : parseFloat(p.cantidad) || 0;
       return acc + (price * quantity);
     }, 0);
   };
 
-
+  // Memoized filtering and sorting logic
   const filteredComandas = useMemo(() => {
     let currentFiltered = allComandas.filter(comanda => comanda.estado === "pagado");
 
     if (filterDate) {
-      const filterDateObj = new Date(filterDate + 'T00:00:00Z');
+      // `filterDate` comes from input type="date", so it's already YYYY-MM-DD
+      // Convert filter date to UTC midnight for comparison
+      const filterDateObj = new Date(filterDate + 'T00:00:00Z'); // Ensure it's UTC midnight for the given date
 
       currentFiltered = currentFiltered.filter(comanda => {
         if (!comanda.fechaPago) return false;
 
-        const comandaDateObj = parseDDMMYYYYtoDate(comanda.fechaPago);
-        
+        // Parse comanda's date to UTC midnight using the helper
+        const comandaDateObj = parseDateToUTC(comanda.fechaPago);
+
         if (!comandaDateObj || isNaN(comandaDateObj.getTime())) {
           console.warn("Fecha de pago inválida para comanda (durante filtro):", comanda.id, comanda.fechaPago);
           return false;
         }
 
-        const comandaDateISO = comandaDateObj.toISOString().slice(0, 10);
-        const filterDateISO = filterDateObj.toISOString().slice(0, 10);
-
-        return comandaDateISO === filterDateISO;
+        // Compare the ISO string (date part only) to ensure a date-only match
+        return comandaDateObj.toISOString().slice(0, 10) === filterDateObj.toISOString().slice(0, 10);
       });
     }
 
@@ -88,23 +95,36 @@ export default function HistorialComandas({ onClose }) {
       );
     }
 
+    // Sort comandas by date and time in descending order (most recent first)
     return currentFiltered.sort((a, b) => {
-      const dateA = a.fechaPago && a.horaPago 
-        ? new Date(a.fechaPago.split('/').reverse().join('-') + 'T' + a.horaPago) 
-        : new Date(0);
-      
-      const dateB = b.fechaPago && b.horaPago 
-        ? new Date(b.fechaPago.split('/').reverse().join('-') + 'T' + b.horaPago) 
-        : new Date(0);
+      let dateA, dateB;
+
+      // Prioritize combining fechaPago and horaPago for precise sorting, if available
+      // Assumes fechaPago is ISO 8601 (e.g., "YYYY-MM-DD")
+      if (a.fechaPago && a.horaPago) {
+        dateA = new Date(`${a.fechaPago.split('T')[0]}T${a.horaPago}`);
+      } else if (a.fechaPago) {
+        dateA = new Date(a.fechaPago); // Fallback to just fechaPago if horaPago is missing
+      } else {
+        dateA = new Date(0); // Epoch start if no date
+      }
+
+      if (b.fechaPago && b.horaPago) {
+        dateB = new Date(`${b.fechaPago.split('T')[0]}T${b.horaPago}`);
+      } else if (b.fechaPago) {
+        dateB = new Date(b.fechaPago);
+      } else {
+        dateB = new Date(0);
+      }
 
       const timeA = isNaN(dateA.getTime()) ? 0 : dateA.getTime();
       const timeB = isNaN(dateB.getTime()) ? 0 : dateB.getTime();
 
-      return timeB - timeA;
+      return timeB - timeA; // Descending order
     });
-  }, [allComandas, filterDate, filterMesa, productosDisponibles]); // Agrega productosDisponibles a las dependencias
+  }, [allComandas, filterDate, filterMesa, productosDisponibles]); // Re-run memo if these dependencies change
 
-
+  // Memoized list of unique mesa names for the filter dropdown
   const uniqueMesaNames = useMemo(() => {
     const names = new Set();
     allComandas.forEach(comanda => {
@@ -112,7 +132,7 @@ export default function HistorialComandas({ onClose }) {
         names.add(comanda.nombre);
       }
     });
-    return ["", ...Array.from(names).sort()];
+    return ["", ...Array.from(names).sort()]; // Add an empty option and sort alphabetically
   }, [allComandas]);
 
   // Handle deletion of a comanda from history
@@ -120,6 +140,7 @@ export default function HistorialComandas({ onClose }) {
     if (window.confirm("¿Estás seguro de que quieres eliminar esta comanda del historial? Esta acción no se puede deshacer.")) {
       try {
         await eliminarComanda(comandaId);
+        // The useComandas hook should automatically re-fetch/update, triggering a re-render
       } catch (error) {
         console.error("Error al eliminar comanda del historial:", error);
         alert("Hubo un error al eliminar la comanda. Por favor, inténtalo de nuevo.");
@@ -198,7 +219,7 @@ export default function HistorialComandas({ onClose }) {
             Limpiar Filtros
           </button>
         </div>
-        
+
         {filteredComandas.length === 0 ? (
           <p style={{ textAlign: "center", color: "#777", fontSize: "1.1em", padding: "20px" }}>
             No hay comandas pagadas en el historial que coincidan con los filtros.
@@ -209,31 +230,34 @@ export default function HistorialComandas({ onClose }) {
             gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: "20px",
           }}>
             {filteredComandas.map((comanda) => {
-              // --- PARSEANDO Y FORMATEANDO FECHA Y HORA PARA VISUALIZACIÓN ---
               let formattedDate = 'N/A';
               let formattedTime = 'N/A';
 
               if (comanda.fechaPago) {
-                const [day, month, year] = comanda.fechaPago.split('/');
-                const comandaDate = new Date(`${year}-${month}-${day}`);
-                
+                // Try to create a Date object directly from the ISO string
+                const comandaDate = new Date(comanda.fechaPago);
+
                 if (!isNaN(comandaDate.getTime())) {
+                  // Format date for display
                   formattedDate = new Intl.DateTimeFormat('es-AR', {
                     year: 'numeric', month: 'numeric', day: 'numeric'
                   }).format(comandaDate);
+
+                  // If horaPago exists, use it; otherwise, extract time from the ISO date
+                  formattedTime = comanda.horaPago || comandaDate.toLocaleTimeString('es-AR', {
+                    hour: '2-digit', minute: '2-digit'
+                  });
                 } else {
                   console.warn("Fecha de pago inválida para comanda (para mostrar):", comanda.id, comanda.fechaPago);
                 }
               }
-              
-              formattedTime = comanda.horaPago || 'N/A';
 
-              // --- RECUPERANDO MÉTODO DE PAGO, COBRADO Y CAMBIO ---
+              // Retrieve payment details
               const metodoPago = comanda.metodoPago || 'No especificado';
               const cobradoAmount = parseFloat(comanda.cobrado || 0);
               const cambioAmount = parseFloat(comanda.cambio || 0);
-              
-              const totalAmount = calculateTotal(comanda); // ¡Ahora llama a la función real!
+
+              const totalAmount = calculateTotal(comanda);
 
               return (
                 <li key={comanda.id} style={{
@@ -243,10 +267,10 @@ export default function HistorialComandas({ onClose }) {
                 }}>
                   <div style={{ marginBottom: "10px", borderBottom: "1px dashed #cfcfcf", paddingBottom: "10px" }}>
                     <h4 style={{ margin: "0 0 5px 0", fontSize: "19px", color: "#34495e" }}>
-                      Comanda: {comanda.nombre}
+                      Comanda: **{comanda.nombre}**
                     </h4>
                     <p style={{ margin: 0, fontSize: "13px", color: "#666" }}>
-                      Fecha: {formattedDate} | Hora: {formattedTime}
+                      Fecha: **{formattedDate}** | Hora: **{formattedTime}**
                     </p>
                   </div>
                   <ul style={{ listStyle: "none", padding: 0, margin: "0 0 15px 0", fontSize: "14px", color: "#555" }}>
@@ -259,7 +283,7 @@ export default function HistorialComandas({ onClose }) {
                   </ul>
                   <div style={{ paddingTop: "15px", borderTop: "1px dashed #cfcfcf", marginTop: "auto" }}>
                     <p style={{ margin: "5px 0", fontSize: "15px", color: "#555" }}>
-                      Método de Pago: <strong>{metodoPago}</strong>
+                      Método de Pago: **{metodoPago}**
                     </p>
                     <p style={{ margin: "5px 0", fontSize: "16px", fontWeight: "bold", color: "#28a745" }}>
                       Total Pagado: {formatCurrency(totalAmount)}
