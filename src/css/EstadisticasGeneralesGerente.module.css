@@ -1,0 +1,221 @@
+/* src/css/EstadisticasGeneralesGerente.module.css */
+
+.container {
+    background-color: var(--color-surface, #ffffff); /* Fondo de tarjeta principal */
+    padding: 30px;
+    border-radius: var(--border-radius-base, 8px);
+    box-shadow: var(--shadow-md, 0 4px 10px rgba(0, 0, 0, 0.1));
+    margin-bottom: 30px; /* Espacio debajo de la sección */
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
+
+.title {
+    color: var(--color-text-dark, #333333);
+    margin-bottom: 25px;
+    font-size: 2em;
+    font-weight: 700;
+    text-align: center;
+    border-bottom: 2px solid var(--color-divider, #eeeeee);
+    padding-bottom: 15px;
+}
+
+/* --- Loading State --- */
+.loadingContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 200px;
+    gap: 15px;
+    background-color: var(--color-surface, #ffffff);
+    padding: 30px;
+    border-radius: var(--border-radius-base, 8px);
+    box-shadow: var(--shadow-md, 0 4px 10px rgba(0, 0, 0, 0.1));
+    margin-bottom: 30px;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top: 4px solid var(--color-primary, #007bff);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loadingText {
+    color: var(--color-text-medium, #555555);
+    font-size: 1.1em;
+    font-weight: 500;
+}
+
+.noData {
+    text-align: center;
+    color: var(--color-text-medium, #555555);
+    font-size: 1.1em;
+    padding: 20px;
+    background-color: var(--color-background-light, #f4f7f6);
+    border-radius: var(--border-radius-base, 8px);
+    margin-top: 20px;
+}
+
+/* --- Month Selector --- */
+.monthSelectorContainer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end; /* Alinea a la derecha */
+    margin-bottom: 30px;
+    gap: 15px; /* Espacio entre label y select */
+}
+
+.monthLabel {
+    color: var(--color-text-medium, #555555);
+    font-size: 1em;
+    font-weight: 500;
+}
+
+.monthSelect {
+    padding: 10px 15px;
+    border: 1px solid var(--color-border, #cccccc);
+    border-radius: var(--border-radius-sm, 4px);
+    background-color: var(--color-surface, #ffffff);
+    color: var(--color-text-dark, #333333);
+    font-size: 1em;
+    cursor: pointer;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    -webkit-appearance: none; /* Eliminar estilo nativo de select */
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23555" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+    min-width: 180px; /* Ancho mínimo para el select */
+}
+
+.monthSelect:focus {
+    border-color: var(--color-primary, #007bff);
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    outline: none;
+}
+
+/* --- Stats Grid --- */
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); /* Columnas responsivas */
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.statCard {
+    background-color: var(--color-surface, #ffffff);
+    padding: 25px;
+    border-radius: var(--border-radius-base, 8px);
+    box-shadow: var(--shadow-sm, 0 2px 5px rgba(0, 0, 0, 0.08));
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 120px; /* Altura mínima para tarjetas uniformes */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    border: 0.1px solid var(--color-divider);
+    box-shadow: var(--shadow-md);
+}
+
+.statCard:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-md, 0 6px 15px rgba(0, 0, 0, 0.12));
+}
+
+.cardTitle {
+    color: var(--color-text-medium, #555555);
+    font-size: 1.1em;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.cardValue {
+    color: var(--color-primary, #007bff); /* Color primario para valores importantes */
+    font-size: 2.2em;
+    font-weight: 700;
+    margin-bottom: 0;
+    line-height: 1.2; /* Ajuste para espacio en línea */
+}
+
+.cardSubValue {
+    display: block; /* Para que la cantidad aparezca debajo */
+    font-size: 0.8em;
+    color: var(--color-text-light, #888888);
+    margin-top: 5px;
+    font-weight: 500;
+}
+
+
+/* --- Chart Container --- */
+.chartContainer {
+    background-color: var(--color-surface, #ffffff);
+    padding: 25px;
+    border-radius: var(--border-radius-base, 8px);
+    box-shadow: var(--shadow-md, 0 4px 10px rgba(0, 0, 0, 0.1));
+    height: 400px; /* Altura fija para el gráfico, Chart.js maneja la responsividad interna */
+    position: relative; /* Necesario para que maintainAspectRatio: false funcione bien */
+    
+    border: 0.1px solid var(--color-divider);
+}
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .statsGrid {
+        grid-template-columns: 1fr; /* Una columna en pantallas pequeñas */
+    }
+
+    .monthSelectorContainer {
+        flex-direction: column; /* Apilar label y select */
+        align-items: flex-start; /* Alinear a la izquierda */
+        margin-bottom: 20px;
+    }
+
+    .monthSelect {
+        width: 100%; /* Ocupar todo el ancho disponible */
+        min-width: unset;
+    }
+
+    .container {
+        padding: 20px;
+    }
+
+    .title {
+        font-size: 1.8em;
+    }
+
+    .chartContainer {
+        height: 300px; /* Ajusta la altura del gráfico para pantallas pequeñas */
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 15px;
+    }
+
+    .title {
+        font-size: 1.5em;
+    }
+
+    .statCard {
+        padding: 20px;
+    }
+
+    .cardValue {
+        font-size: 1.8em;
+    }
+
+    .chartContainer {
+        padding: 15px;
+    }
+}

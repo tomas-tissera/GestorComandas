@@ -1,0 +1,200 @@
+/* src/css/DashboardGerentePerformance.module.css */
+
+.dashboardContainer {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    gap: 20px; /* Espacio entre los componentes del dashboard */
+    position: relative; /* Necesario para posicionar la alerta flotante */
+    min-height: 100vh; /* Para que el contenido ocupe toda la altura */
+}
+.userStatsSection{
+    width: 80%;
+    display: flex;
+    gap: 20px; 
+}
+/* Estilos para la barra superior (ahora contiene estadísticas y el botón) */
+.topBar {
+    width: 100%;
+    display: flex;
+    justify-content: space-between; /* Espacio entre las estadísticas y el botón */
+    align-items: flex-start; /* Alinea los elementos al inicio (arriba) */
+    margin-bottom: 20px; /* Espacio debajo del botón y antes del contenido */
+    padding: 0 10px; /* Pequeño padding si es necesario */
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+    gap: 20px; /* Espacio entre las tarjetas de estadísticas y el botón */
+    background-color: var(--color-surface);
+    padding: 15px;
+    box-shadow: var(--shadow-md);
+    border-radius: var(--border-radius-base);
+}
+
+/* Contenedor para las estadísticas de usuarios */
+.userStatsContainer {
+    display: flex;
+    gap: 20px; /* Espacio entre las tarjetas de estadísticas */
+    flex-wrap: wrap; /* Permite que las tarjetas se envuelvan */
+}
+
+.statCard {
+    background-color: #f9f9f9;
+    padding: 15px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    min-width: 200px; /* Ancho mínimo para las tarjetas */
+    flex-grow: 1; /* Permite que las tarjetas crezcan */
+}
+
+.statCard h3 {
+    margin-top: 0;
+    font-size: 1.1em;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.statCard p {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: #007bff; /* Un color azul para el número */
+    margin-bottom: 0;
+}
+
+.statCard ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.statCard ul li {
+    font-size: 1em;
+    color: #555;
+    margin-bottom: 5px;
+}
+
+.statCard ul li:last-child {
+    margin-bottom: 0;
+}
+
+/* Estilos para el botón de crear usuario (ya los tenías) */
+.createButton {
+    background-color: #4CAF50; /* Un verde vibrante */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    /* Asegura que el botón no se estire y se alinee a la derecha si no hay espacio */
+    align-self: flex-start; /* Alinea el botón a la parte superior de su contenedor flex */
+    white-space: nowrap; /* Evita que el texto del botón se rompa */
+}
+
+.createButton:hover {
+    background-color: #45a049;
+}
+
+.createButton svg {
+    fill: white;
+}
+
+.errorText {
+    color: #f44336; /* Color rojo para mensajes de error */
+    font-weight: bold;
+}
+
+/* Estilos para la alerta flotante */
+.alert {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 15px 25px;
+    border-radius: 8px;
+    font-weight: bold;
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    text-align: center;
+    min-width: 300px;
+    max-width: 80%;
+}
+
+.alert.success {
+    background-color: #4CAF50;
+}
+
+.alert.error {
+    background-color: #f44336;
+}
+
+/* Modal (ya los tenías) */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+}
+
+.modalContent {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+    position: relative;
+}
+
+/* Estilos para los componentes hijos */
+.estadisticasGenerales, .ventasUsuarios {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+
+/* Media Queries para responsividad */
+@media (max-width: 768px) {
+    .dashboardContainer {
+        padding: 10px;
+        gap: 15px;
+    }
+    .topBar {
+        flex-direction: column; /* Apila las estadísticas y el botón en columnas */
+        align-items: center; /* Centra los elementos cuando están apilados */
+    }
+    .userStatsContainer {
+        flex-direction: column; /* Apila las tarjetas de estadísticas */
+        width: 100%; /* Las tarjetas ocupan todo el ancho */
+    }
+    .statCard {
+        width: 100%; /* Asegura que las tarjetas ocupen todo el ancho */
+        max-width: unset; /* Elimina el ancho máximo para dispositivos pequeños */
+    }
+    .alert {
+        top: 10px;
+        padding: 10px 15px;
+        min-width: unset;
+        width: 90%;
+    }
+    .createButton {
+        padding: 8px 15px;
+        font-size: 14px;
+        width: 100%; /* Botón ocupa todo el ancho en móviles */
+    }
+    .modalContent {
+        padding: 20px;
+    }
+}

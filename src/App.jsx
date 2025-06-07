@@ -17,6 +17,7 @@ import MesasDashboard from './pages/MesasDashboard'
 import PedidosDashboard from './pages/PedidosDashboard'
 import Categorias from './components/categorias/categorias';
 import Productos from './components/Productos/Productos';
+import DashboardGerentePerformance from './components/DashboardGerentePerformance';
 // **Importa el CSS aquí**
 import './App.css';
 
@@ -75,6 +76,14 @@ function App() {
               element={
                 <PrivateRoute allowedRoles={['gerente']}>
                   <Productos />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/gestion-empleados"
+              element={
+                <PrivateRoute allowedRoles={['gerente']}>
+                  <DashboardGerentePerformance />
                 </PrivateRoute>
               }
             />

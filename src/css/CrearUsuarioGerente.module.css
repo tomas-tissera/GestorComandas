@@ -1,0 +1,125 @@
+/* src/css/CrearUsuarioGerente.module.css */
+
+.container {
+    background-color: var(--color-surface, #fff); /* Usa color-surface */
+    padding: 30px;
+    border-radius: var(--border-radius-base, 8px); /* Usa border-radius-base */
+    box-shadow: var(--shadow-md, 0 4px 20px rgba(0, 0, 0, 0.1)); /* Usa shadow-md */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.title {
+    text-align: center;
+    color: var(--color-text-dark, #333); /* Usa color-text-dark */
+    margin-bottom: 25px;
+    font-size: 1.8em;
+    font-weight: 600;
+}
+
+.formGroup {
+    margin-bottom: 20px;
+}
+
+.label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--color-text-medium, #555); /* Usa color-text-medium */
+    font-weight: 500;
+    font-size: 0.95em;
+}
+
+.input, .select {
+    width: calc(100% - 20px); /* Resta el padding para que el 100% funcione bien */
+    padding: 12px 10px;
+    border: 1px solid var(--color-border, #ddd); /* Usa color-border */
+    border-radius: var(--border-radius-sm, 4px); /* Usa border-radius-sm, as defined in App.css */
+    font-size: 1em;
+    color: var(--color-text-dark, #333); /* Usa color-text-dark */
+    background-color: var(--color-surface, #fcfcfc); /* Usa color-surface */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.input:focus, .select:focus {
+    border-color: var(--color-primary, #007bff); /* Usa color-primary */
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25); /* Usa rgba del color-primary */
+    outline: none;
+}
+
+.select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23555" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 20px;
+}
+
+.buttonGroup {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.submitButton, .cancelButton {
+    padding: 12px 25px;
+    border: none;
+    border-radius: var(--border-radius-base, 8px); /* Ajustado a border-radius-base */
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.submitButton {
+    background-color: var(--btn-primary-bg, #007bff); /* Usa btn-primary-bg */
+    color: var(--btn-primary-color, #ffffff); /* Usa btn-primary-color */
+}
+
+.submitButton:hover {
+    background-color: var(--btn-primary-hover-bg, #0056b3); /* Usa btn-primary-hover-bg */
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm, 0 4px 10px rgba(0, 0, 0, 0.2)); /* Usa shadow-sm */
+}
+
+.submitButton:disabled {
+    background-color: var(--color-border, #ccc); /* Usa color-border para disabled */
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+.cancelButton {
+    background-color: var(--color-background-light, #e0e0e0); /* Usa color-background-light */
+    color: var(--color-text-dark, #333); /* Usa color-text-dark */
+}
+
+.cancelButton:hover {
+    background-color: var(--color-border, #ccc); /* Usa color-border para hover */
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm, 0 4px 10px rgba(0, 0, 0, 0.1)); /* Usa shadow-sm */
+}
+
+/* --- Estilos para los mensajes de alerta internos --- */
+.alertMessage {
+    padding: 10px 15px;
+    margin-bottom: 20px;
+    border-radius: var(--border-radius-sm, 4px); /* Usa border-radius-sm */
+    font-size: 0.95em;
+    font-weight: 500;
+    text-align: center;
+    border: 1px solid transparent; /* Base para el borde */
+}
+
+.alertMessage.error {
+    background-color: var(--color-danger-light, #ffe0e0); /* Usar danger-light si existe, si no, define uno */
+    color: var(--color-danger, #dc3545); /* Usa color-danger */
+    border-color: var(--color-danger, #dc3545); /* Usa color-danger */
+}
+
+.alertMessage.success {
+    background-color: var(--color-accent-light, #e8f5e9); /* Usa color-accent-light */
+    color: var(--color-accent, #388e3c); /* Usa color-accent */
+    border-color: var(--color-accent, #388e3c); /* Usa color-accent */
+}

@@ -45,6 +45,10 @@
   --btn-danger-color: #ffffff;
   --btn-danger-hover-bg: #c82333;
   --border-radius-sm: 5px;
+
+  /* Colores para animaciones de carga (Skeleton) */
+  --skeleton-color-light: #f0f0f0;
+  --skeleton-color-dark: #e0e0e0;
 }
 
 /* Fuentes y Estilos Básicos */
@@ -209,7 +213,7 @@ body {
 
 /* --- */
 
-/* Loading Spinner */
+/* Loading Spinner (GLOBAL) */
 .loading-spinner-container {
   display: flex;
   justify-content: center;
@@ -219,7 +223,56 @@ body {
   color: #666;
 }
 
-/* --- */
+/* Estilos para el spinner general (si lo usas fuera de un botón) */
+.spinner {
+    border: 4px solid rgba(0, 123, 255, 0.3); /* Usa --color-primary o un azul */
+    border-top: 4px solid var(--color-primary);
+    border-radius: 50%;
+    width: 30px; /* Tamaño por defecto */
+    height: 30px; /* Tamaño por defecto */
+    animation: spin 1s linear infinite;
+}
+
+/* Para usar dentro de un botón (generalmente más pequeño y blanco) */
+.spinner-button {
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid #fff;
+    border-radius: 50%;
+    width: 18px; /* Tamaño para botón */
+    height: 18px; /* Tamaño para botón */
+    animation: spin 1s linear infinite;
+    display: inline-block; /* Para alinear con texto si lo hubiera */
+    vertical-align: middle; /* Alineación vertical */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Animación de Esqueleto (GLOBAL) */
+.loading-skeleton {
+    background: linear-gradient(90deg, var(--skeleton-color-light) 25%, var(--skeleton-color-dark) 50%, var(--skeleton-color-light) 75%);
+    background-size: 200% 100%;
+    animation: loadingShimmer 1.5s infinite;
+    border-radius: var(--border-radius-sm); /* Un radio de borde para las líneas de esqueleto */
+    overflow: hidden; /* Asegura que el brillo no se salga */
+}
+
+.skeleton-line {
+    height: 1em; /* Altura de las "líneas" de texto */
+    background-color: var(--skeleton-color-dark);
+    border-radius: 4px;
+    opacity: 0.7; /* Ligeramente transparente */
+    margin-bottom: 0.5em; /* Espacio entre líneas */
+}
+
+/* Animación de shimmer */
+@keyframes loadingShimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
 
 /* Not Found Page */
 .not-found-container {
