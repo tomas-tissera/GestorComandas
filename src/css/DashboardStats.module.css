@@ -1,0 +1,212 @@
+/* src/css/DashboardStats.module.css */
+
+/* Variables CSS para colores y sombras (opcional, pero buena práctica si tienes una paleta de colores) */
+:root {
+    --primary-color: #3b82f6; /* Tailwind blue-500 */
+    --secondary-color: #10b981; /* Tailwind emerald-500 */
+    --accent-color-1: #facc15; /* Tailwind yellow-400 */
+    --accent-color-2: #ef4444; /* Tailwind red-500 */
+    --bg-light: #f3f4f6; /* Tailwind gray-100 */
+    --card-bg: #ffffff;
+    --text-dark: #1f2937; /* Tailwind gray-900 */
+    --text-medium: #4b5563; /* Tailwind gray-700 */
+    --text-light: #6b7280; /* Tailwind gray-500 */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.dashboardContainer {
+    padding: 1.5rem;
+    background-color: var(--bg-light);
+    border-radius: 0.75rem; /* rounded-lg */
+    box-shadow: var(--shadow-md);
+    font-family: 'Inter', sans-serif; /* Asume que Inter u otra fuente moderna está disponible */
+    color: var(--text-dark);
+}
+
+.mainTitle {
+    font-size: 2.25rem; /* text-3xl */
+    font-weight: 700; /* font-bold */
+    margin-bottom: 1.5rem; /* mb-6 */
+    color: var(--text-dark);
+    text-align: center;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 0.75rem;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr); /* col-1 */
+    gap: 1rem; /* gap-4 */
+    margin-bottom: 1.5rem; /* mb-6 */
+}
+
+@media (min-width: 768px) { /* md breakpoint */
+    .statsGrid {
+        grid-template-columns: repeat(3, 1fr); /* md:grid-cols-3 */
+    }
+}
+
+.statCard {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 0.5rem; /* rounded-lg */
+    box-shadow: var(--shadow-sm);
+    text-align: center;
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.statCard:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px -1px rgba(0, 0, 0, 0.15), 0 4px 8px -1px rgba(0, 0, 0, 0.08);
+}
+
+.cardTitle {
+    font-size: 1.25rem; /* text-xl */
+    font-weight: 600; /* font-semibold */
+    color: var(--text-medium);
+    margin-bottom: 0.5rem;
+}
+
+.cardValue {
+    font-size: 2.5rem; /* text-4xl, ajustado para impacto */
+    font-weight: 800; /* font-extrabold */
+    line-height: 1.2;
+}
+
+/* Colores específicos para las tarjetas de estadísticas */
+.statCardSales .cardValue {
+    color: #10b981; /* emerald-600 */
+}
+.statCardOrders .cardValue {
+    color: #3b82f6; /* blue-600 */
+}
+.statCardAverage .cardValue {
+    color: #a855f7; /* purple-600 */
+}
+
+.divider {
+    border: none;
+    border-top: 1px dashed var(--text-light);
+    margin: 2.5rem 0; /* Espaciado generoso */
+    opacity: 0.6;
+}
+
+.chartSection {
+    background-color: var(--card-bg);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem; /* mb-6 */
+}
+
+.sectionTitle {
+    font-size: 1.5rem; /* text-2xl */
+    font-weight: 700; /* font-bold */
+    color: var(--text-dark);
+    margin-bottom: 1rem;
+    text-align: center;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--bg-light);
+}
+
+.noChartData {
+    text-align: center;
+    color: var(--text-light);
+    font-style: italic;
+    padding: 1.5rem;
+    background-color: var(--bg-light);
+    border-radius: 0.5rem;
+}
+
+/* Estilos para ejes y etiquetas de Recharts */
+.gridStroke {
+  stroke: rgba(0, 0, 0, 0.08);
+}
+
+.axisText text {
+  font-size: 0.875rem; /* text-sm */
+  fill: var(--text-medium);
+}
+
+.labelText text {
+  font-size: 0.875rem; /* text-sm */
+  fill: var(--text-dark);
+  font-weight: 600;
+}
+
+/* Estilos de carga (esqueletos y spinner) */
+.loadingState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px; /* Asegura que el contenedor tenga altura para ver el spinner */
+    background-color: var(--bg-light);
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow-md);
+    padding: 2rem;
+}
+
+.spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-left-color: var(--primary-color);
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loadingText {
+    color: var(--text-medium);
+    font-size: 1.125rem; /* text-lg */
+    margin-bottom: 1.5rem;
+}
+
+.skeleton {
+    background-color: #e0e0e0; /* Color base del esqueleto */
+    background-image: linear-gradient(90deg, #e0e0e0 0%, #f0f0f0 20%, #e0e0e0 40%);
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite linear;
+    border-radius: 0.5rem;
+}
+
+.skeletonLine {
+    background-color: #c2c2c2; /* Color de las líneas del esqueleto */
+    border-radius: 0.25rem;
+    height: 1em; /* Altura predeterminada para líneas de texto */
+}
+
+/* Animación del esqueleto */
+@keyframes skeleton-loading {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* Ajustes para esqueletos de Recharts si se usan directamente */
+.chartContainer.skeleton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    font-size: 1rem;
+}
+
+/* Media Queries para Responsive Design en los gráficos si es necesario */
+@media (max-width: 640px) {
+    .mainTitle {
+        font-size: 1.75rem;
+    }
+    .cardValue {
+        font-size: 2rem;
+    }
+    .sectionTitle {
+        font-size: 1.25rem;
+    }
+}

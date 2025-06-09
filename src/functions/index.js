@@ -1,40 +1,37 @@
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 
-// Inicializa Firebase Admin SDK (esto generalmente ya está configurado si usas firebase init)
+// Inicializa el SDK de Admin, si no lo has hecho ya
+// Asegúrate de que esta línea esté presente y se ejecute una sola vez
 admin.initializeApp();
 
-// Exporta una función HTTPS Callable para crear un nuevo usuario
-exports.createAppUser = functions.https.onCall(async (data, context) => {
-    // --- Validación y Seguridad ---
-    // 1. Asegúrate de que solo usuarios autenticados pueden llamar a esta función
+exports.createRestaurantUser = functions.https.onCall(async (data, context) => {
+    // 1. Verificar autenticación y rol del llamador (gerente)
     if (!context.auth) {
         throw new functions.https.HttpsError(
             'unauthenticated',
-            'Debes estar autenticado para crear usuarios.'
+            'La solicitud debe estar autenticada para crear usuarios.'
         );
     }
 
-    // 2. Opcional pero CRUCIAL: Asegúrate de que solo un gerente pueda crear usuarios
-    //    Asume que tienes un 'custom claim' de 'role' en tus usuarios de Firebase Auth.
-    //    Para que esto funcione, cuando un gerente se loguea, deberías establecerle un custom claim:
-    //    admin.auth().setCustomUserClaims(gerenteUid, { role: 'gerente' });
-    //    Y asegúrate de que el token se refresque para que el cliente lo tenga.
-    if (context.auth.token.role !== 'gerente') {
+    const callerUid = context.auth.uid;
+    const callerClaims = (await admin.auth().getUser(callerUid)).customClaims;
+
+    // Asegúrate de que solo los gerentes puedan crear usuarios
+    if (!callerClaims || callerClaims.role !== 'gerente') {
         throw new functions.https.HttpsError(
             'permission-denied',
             'Solo los gerentes pueden crear nuevos usuarios.'
         );
     }
 
-    // --- Obtener datos del request ---
+    // 2. Validar los datos de entrada
     const { email, password, firstName, lastName, role } = data;
 
-    // --- Validación de datos de entrada ---
     if (!email || !password || !firstName || !lastName || !role) {
         throw new functions.https.HttpsError(
             'invalid-argument',
-            'Faltan campos requeridos: email, password, firstName, lastName, role.'
+            'Faltan campos obligatorios para crear el usuario.'
         );
     }
     if (password.length < 6) {
@@ -43,53 +40,60 @@ exports.createAppUser = functions.https.onCall(async (data, context) => {
             'La contraseña debe tener al menos 6 caracteres.'
         );
     }
-    const validRoles = ['mesero', 'cajero', 'cocinero', 'gerente'];
-    if (!validRoles.includes(role)) {
+    const allowedRoles = ['mesero', 'cajero', 'cocinero', 'gerente'];
+    if (!allowedRoles.includes(role)) {
         throw new functions.https.HttpsError(
             'invalid-argument',
-            'Rol no válido. Los roles permitidos son: mesero, cajero, cocinero, gerente.'
+            'Rol de usuario inválido.'
         );
     }
 
     try {
-        // 3. Crear el usuario en Firebase Authentication (Admin SDK)
-        //    Esta función NO loguea automáticamente al usuario recién creado.
+        // 3. Crear el usuario en Firebase Authentication
         const userRecord = await admin.auth().createUser({
             email: email,
             password: password,
-            displayName: `${firstName} ${lastName}`, // Opcional, pero útil
-            // emailVerified: true, // Considera si quieres verificar el email al crear
+            displayName: `${firstName} ${lastName}`,
         });
 
-        // 4. Establecer el custom claim del rol para el nuevo usuario
+        // 4. Establecer los Custom Claims (roles)
         await admin.auth().setCustomUserClaims(userRecord.uid, { role: role });
 
-        // 5. Guardar información adicional del usuario en Firestore
+        // 5. Opcional: Guardar información adicional en Firestore
         await admin.firestore().collection('users').doc(userRecord.uid).set({
             firstName: firstName,
             lastName: lastName,
             email: email,
             role: role,
-            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            createdAt: admin.firestore.FieldValue.serverTimestamp()
         });
 
-        // 6. Retornar éxito al cliente
-        return { success: true, message: `Usuario ${firstName} <span class="math-inline">\{lastName\} \(</span>{email}) creado exitosamente.` };
+        console.log(`Usuario creado: ${userRecord.uid} con rol: ${role}`);
+        return { success: true, message: 'Usuario creado exitosamente.' };
 
     } catch (error) {
-        // Manejo de errores específicos de Firebase Auth y Firestore
+        console.error("Error al crear usuario:", error);
+        // Manejo de errores específicos de Firebase Auth
         if (error.code === 'auth/email-already-in-use') {
-            throw new functions.https.HttpsError('already-exists', 'El correo electrónico ya está en uso.');
-        } else if (error.code === 'auth/invalid-email') {
-            throw new functions.https.HttpsError('invalid-argument', 'El formato del correo electrónico no es válido.');
-        } else if (error.code === 'auth/weak-password') {
-            throw new functions.https.HttpsError('invalid-argument', 'La contraseña es demasiado débil.');
-        } else {
-            console.error("Error al crear usuario en Cloud Function:", error);
             throw new functions.https.HttpsError(
-                'internal',
-                error.message || 'Ocurrió un error inesperado al crear el usuario.'
+                'already-exists', // Usar un código de error más descriptivo
+                'El correo electrónico ya está en uso.'
+            );
+        } else if (error.code === 'auth/invalid-email') {
+            throw new functions.https.HttpsError(
+                'invalid-argument',
+                'El formato del correo electrónico es inválido.'
+            );
+        } else if (error.code === 'auth/weak-password') {
+            throw new functions.https.HttpsError(
+                'invalid-argument',
+                'La contraseña es demasiado débil.'
             );
         }
+        // Error genérico
+        throw new functions.https.HttpsError(
+            'internal',
+            `Error interno al crear usuario: ${error.message}`
+        );
     }
 });

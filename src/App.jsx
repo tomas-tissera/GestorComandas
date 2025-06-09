@@ -18,7 +18,8 @@ import PedidosDashboard from './pages/PedidosDashboard'
 import Categorias from './components/categorias/categorias';
 import Productos from './components/Productos/Productos';
 import DashboardGerentePerformance from './components/DashboardGerentePerformance';
-import Comandas from "./components/comandas/comandas"
+import Comandas from "./components/comandas/comandas";
+import DashboardVentas from './components/ventas/DashboardVentas';
 // **Importa el CSS aquí**
 import './App.css';
 
@@ -92,6 +93,14 @@ function App() {
               element={
                 <PrivateRoute allowedRoles={['gerente']}>
                   <DashboardGerentePerformance />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/reportes"
+              element={
+                <PrivateRoute allowedRoles={['gerente']}>
+                  <DashboardVentas />
                 </PrivateRoute>
               }
             />
