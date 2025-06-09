@@ -13,7 +13,6 @@ const GerenteDashboard = () => {
         <p>Bienvenido, {currentUser?.email}!</p>
         <p>Tu rol es: {role}</p>
       </div>
-      <TaskBoard></TaskBoard>
     </div>
   );
 };

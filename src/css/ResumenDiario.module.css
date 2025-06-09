@@ -1,0 +1,98 @@
+.container {
+  max-width: 960px;
+  margin: 0 auto 20px;
+  padding: 2rem 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: var(--color-text-dark);
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-base);
+  box-shadow: var(--shadow-lg);
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
+}
+
+.statCard {
+  background-color: var(--color-background-light);
+  border-radius: var(--border-radius-base);
+  border: solid 1px var(--color-background-light);
+  padding: 1.75rem 1.25rem;
+  box-shadow: var(--shadow-md);
+  text-align: center;
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s;
+  cursor: default;
+}
+
+.statCard:hover {
+  transform: translateY(-8px);
+  box-shadow:
+    0 12px 20px var(--color-primary-light),
+    0 4px 10px var(--color-primary-light);
+}
+
+.cardTitle {
+  font-size: 1.2rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-medium);
+  letter-spacing: 0.03em;
+  text-transform: capitalize;
+}
+
+.cardValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: 0;
+  list-style: none;
+  padding-left: 0;
+}
+
+.cardValue li {
+  margin: 0.4rem 0;
+  font-weight: 500;
+  color: var(--color-text-dark);
+}
+
+.loadingContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 9rem;
+  color: var(--color-primary);
+  font-weight: 600;
+  font-size: 1.3rem;
+}
+
+.spinner {
+  margin-bottom: 0.85rem;
+  width: 42px;
+  height: 42px;
+  border: 5.5px solid var(--color-primary);
+  border-top: 5.5px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

@@ -50,9 +50,6 @@ const LoginPage = () => {
           Iniciar Sesión
         </button>
       </form>
-      <p style={{ textAlign: 'center', marginTop: '20px' }}>
-        ¿No tienes una cuenta? <Link to="/register">Regístrate aquí</Link>
-      </p>
     </div>
   );
 };

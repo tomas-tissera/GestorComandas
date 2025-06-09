@@ -18,6 +18,7 @@ import PedidosDashboard from './pages/PedidosDashboard'
 import Categorias from './components/categorias/categorias';
 import Productos from './components/Productos/Productos';
 import DashboardGerentePerformance from './components/DashboardGerentePerformance';
+import Comandas from "./components/comandas/comandas"
 // **Importa el CSS aquí**
 import './App.css';
 
@@ -29,7 +30,6 @@ function App() {
         <div className="container"> {/* Agrega un contenedor para centrar el contenido */}
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
 
             <Route
               path="/dashboard"
@@ -60,6 +60,14 @@ function App() {
               element={
                 <PrivateRoute allowedRoles={['mesero', 'gerente']}>
                   <PedidosDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/comandas"
+              element={
+                <PrivateRoute allowedRoles={['mesero', 'gerente']}>
+                  <Comandas />
                 </PrivateRoute>
               }
             />
