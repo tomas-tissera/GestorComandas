@@ -1,12 +1,12 @@
 .container {
-  max-width: 960px;
-  margin: 0 auto 20px;
-  padding: 2rem 1rem;
+  padding: 2rem 1.5rem;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: var(--color-text-dark);
   background-color: var(--color-surface);
+  color: var(--color-text-dark);
   border-radius: var(--border-radius-base);
   box-shadow: var(--shadow-lg);
+  border: 1px solid var(--color-divider);
+  margin-bottom: 25px;
 }
 
 .title {
@@ -15,7 +15,7 @@
   text-align: center;
   font-weight: 700;
   color: var(--color-primary);
-  letter-spacing: 1px;
+  letter-spacing: 0.5px;
   text-transform: uppercase;
 }
 
@@ -28,66 +28,66 @@
 .statCard {
   background-color: var(--color-background-light);
   border-radius: var(--border-radius-base);
-  border: solid 1px var(--color-background-light);
   padding: 1.75rem 1.25rem;
+  border: 1px solid var(--color-border);
   box-shadow: var(--shadow-md);
   text-align: center;
-  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s;
-  cursor: default;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .statCard:hover {
-  transform: translateY(-8px);
-  box-shadow:
-    0 12px 20px var(--color-primary-light),
-    0 4px 10px var(--color-primary-light);
+  transform: translateY(-6px);
+  box-shadow: 0 10px 20px rgba(0, 123, 255, 0.15);
 }
 
 .cardTitle {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   margin-bottom: 0.75rem;
   font-weight: 600;
   color: var(--color-text-medium);
-  letter-spacing: 0.03em;
   text-transform: capitalize;
+  letter-spacing: 0.03em;
 }
 
 .cardValue {
-  font-size: 1.75rem;
+  font-size: 1.6rem;
   font-weight: 700;
   color: var(--color-primary);
   margin: 0;
-  list-style: none;
   padding-left: 0;
+  list-style: none;
 }
 
 .cardValue li {
+  font-size: 1.05rem;
+  color: var(--color-text-dark);
   margin: 0.4rem 0;
   font-weight: 500;
-  color: var(--color-text-dark);
 }
 
+/* Loading styles */
 .loadingContainer {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 9rem;
+  font-size: 1.25rem;
   color: var(--color-primary);
   font-weight: 600;
-  font-size: 1.3rem;
 }
 
 .spinner {
-  margin-bottom: 0.85rem;
   width: 42px;
   height: 42px;
+  margin-bottom: 0.8rem;
   border: 5.5px solid var(--color-primary);
   border-top: 5.5px solid transparent;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
+/* Animación */
 @keyframes spin {
   0% {
     transform: rotate(0deg);
@@ -95,4 +95,23 @@
   100% {
     transform: rotate(360deg);
   }
+}
+.topSection {
+  margin-bottom: 3rem;
+}
+
+.bottomSection {
+  display: flex;
+  justify-content: center;
+}
+
+.bottomSection .statCard {
+  max-width: 600px;
+  width: 100%;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 2rem;
 }

@@ -15,7 +15,6 @@
 }
 /* Estilos para la barra superior (ahora contiene estadísticas y el botón) */
 .topBar {
-    width: 100%;
     display: flex;
     justify-content: space-between; /* Espacio entre las estadísticas y el botón */
     align-items: flex-start; /* Alinea los elementos al inicio (arriba) */

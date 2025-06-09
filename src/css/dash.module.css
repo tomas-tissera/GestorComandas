@@ -1,12 +1,40 @@
-.dashTitle{
-    flex: 1;
-    min-width: 280px;
-    background-color: #ffffff;
-    padding: 0 1.5rem;
-    margin: 1rem;
-    border-radius: var(--border-radius-base);
-    box-shadow: var(--shadow-medium);
-    border: 1px solid #e0e0e0;
+/* dash.module.css */
+
+.dashCuerpo {
+    padding: 2rem;
+    background-color: var(--color-background-light);
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-}
+    gap: 2rem;
+  }
+  
+  .dashTitle {
+    flex: 1;
+    min-width: 280px;
+    background-color: var(--color-surface);
+    padding: 1.5rem 2rem;
+    border-radius: var(--border-radius-base);
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--color-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    color: var(--color-text-dark);
+  }
+  
+  .dashTitle h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  
+  .dashTitle p {
+    margin: 0.25rem 0;
+    font-size: 1rem;
+    color: var(--color-text-medium);
+  }
+  

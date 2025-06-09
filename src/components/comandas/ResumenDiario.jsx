@@ -91,28 +91,32 @@ const ResumenDiario = () => {
   }
 
   return (
-    <section className={styles.container}>
+    <section className={styles.container}> 
       <h3 className={styles.title}>Resumen Diario</h3>
-
-      <div className={styles.statsGrid}>
-        <div className={styles.statCard}>
-          <h4 className={styles.cardTitle}>Comandas Pagadas Hoy</h4>
-          <p className={styles.cardValue}>{comandasPagadasHoy.length}</p>
-        </div>
-
-        <div className={styles.statCard}>
-          <h4 className={styles.cardTitle}>Total Ganado</h4>
-          <p className={styles.cardValue}>{formatCurrency(totalGanado)}</p>
-        </div>
-
-        {Object.entries(metodoPagoStats).map(([metodo, monto]) => (
-          <div key={metodo} className={styles.statCard}>
-            <h4 className={styles.cardTitle}>Pago con {metodo}</h4>
-            <p className={styles.cardValue}>{formatCurrency(monto)}</p>
+  
+      <div className={styles.topSection}>
+        <div className={styles.statsGrid}>
+          <div className={styles.statCard}>
+            <h4 className={styles.cardTitle}>Comandas Pagadas Hoy</h4>
+            <p className={styles.cardValue}>{comandasPagadasHoy.length}</p>
           </div>
-        ))}
-
-        <div className={styles.statCard} style={{ gridColumn: 'span 3' }}>
+  
+          <div className={styles.statCard}>
+            <h4 className={styles.cardTitle}>Total Ganado</h4>
+            <p className={styles.cardValue}>{formatCurrency(totalGanado)}</p>
+          </div>
+  
+          {Object.entries(metodoPagoStats).map(([metodo, monto]) => (
+            <div key={metodo} className={styles.statCard}>
+              <h4 className={styles.cardTitle}>Pago con {metodo}</h4>
+              <p className={styles.cardValue}>{formatCurrency(monto)}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+  
+      <div className={styles.bottomSection}>
+        <div className={styles.statCard}>
           <h4 className={styles.cardTitle}>Top 3 Productos Más Vendidos</h4>
           <ul className={styles.cardValue}>
             {topProductos.map(([nombre, cantidad]) => (
@@ -125,6 +129,7 @@ const ResumenDiario = () => {
       </div>
     </section>
   );
+  
 };
 
 export default ResumenDiario;
