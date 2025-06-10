@@ -111,6 +111,7 @@ const CocinaComandasView = () => {
                                     {order.productos && order.productos.map((item, index) => (
                                         <li key={index} className={styles.orderItem}>
                                             <span>{item.cantidad}x {item.nombre}</span>
+                                            <span>{item.aclaracion}</span>
                                             {item.notas && <span className={styles.itemNotes}>{/* <FaInfoCircle /> */} ({item.notas})</span>}
                                         </li>
                                     ))}
