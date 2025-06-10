@@ -1,6 +1,5 @@
 .formCategoria {
-    max-width: 400px;
-    margin: 0 auto;
+  
     background-color: var(--color-surface);
     padding: 20px;
     border-radius: 8px;
