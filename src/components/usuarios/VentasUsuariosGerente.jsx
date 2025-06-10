@@ -1,13 +1,14 @@
-// src/components/usuarios/VentasUsuariosGerente.js
-
 import React, { useEffect, useState, useMemo } from "react";
 import { useComandas } from "../../hooks/useComandas";
 import { useProductos } from "../../hooks/useProductos";
 import { useUsers } from "../../hooks/useUsers";
-import '../../App.css'; // Importa App.css para las clases globales de spinner y skeleton
+import { db } from '../../firebase';
+import { doc, updateDoc } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import '../../App.css';
 
-// Importa las funciones de Firebase para llamar a Cloud Functions
-import { getFunctions, httpsCallable } from 'firebase/functions';
+// Importa el nuevo componente de edición
+import EditarUsuarioModal from './EditarUsuarioModal'; // Asegúrate de que la ruta sea correcta
 
 const formatCurrency = (amount) => {
   const numericAmount = typeof amount === 'number' ? amount : parseFloat(amount) || 0;
@@ -21,8 +22,6 @@ const formatCurrency = (amount) => {
 
 export default function VentasUsuariosGerente() {
   // --- TODAS LAS LLAMADAS A HOOKS DEBEN IR AQUÍ, AL PRINCIPIO ---
-
-  // Hooks de datos personalizados
   const fetchedComandas = useComandas();
   const fetchedProductos = useProductos();
   const fetchedUsers = useUsers();
@@ -32,13 +31,11 @@ export default function VentasUsuariosGerente() {
   const [userToDelete, setUserToDelete] = useState(null);
   const [deleteStatus, setDeleteStatus] = useState({ loading: false, error: null, success: null });
 
-  // Inicialización de Firebase Functions (esto es un hook o depende de un hook, se declara aquí)
-  // IMPORTANTE: Si tus Cloud Functions no están en 'us-central1', especifica la región aquí:
-  // const functions = getFunctions(undefined, 'your-region'); // e.g., 'southamerica-east1'
-  const functions = getFunctions(); 
-  const deleteAndArchiveUser = httpsCallable(functions, 'deleteAndArchiveUser'); // Nombre de la nueva Cloud Function
+  // NUEVOS ESTADOS PARA LA EDICIÓN
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [userToEdit, setUserToEdit] = useState(null);
+  // --- FIN NUEVOS ESTADOS ---
 
-  // Derivación de estados o datos para optimización (useMemo)
   const allComandas = fetchedComandas || [];
   const allProductos = fetchedProductos || [];
   const allUsers = fetchedUsers || [];
@@ -46,17 +43,18 @@ export default function VentasUsuariosGerente() {
   const loadingComandas = fetchedComandas === null;
   const loadingProductos = fetchedProductos === null;
   const loadingUsers = fetchedUsers === null;
-
   const isLoading = loadingComandas || loadingProductos || loadingUsers;
 
-  const meseros = useMemo(() => {
-    return allUsers.filter(user => user.rol === 'mesero' || !user.rol);
+  const activeUsers = useMemo(() => {
+    return allUsers.filter(user => user.eliminado !== true);
   }, [allUsers]);
 
-  // Funciones que usan datos o dependencias declaradas como hooks
+  const meseros = useMemo(() => {
+    return activeUsers.filter(user => user.role === 'mesero');
+  }, [activeUsers]);
+
   const calcularTotalComanda = (comanda) => {
     if (!comanda || !Array.isArray(comanda.productos) || allProductos.length === 0) return 0;
-
     return comanda.productos.reduce((total, prod) => {
       const productoInfo = allProductos.find((p) => p.id === prod.productoId);
       if (!productoInfo) {
@@ -73,17 +71,13 @@ export default function VentasUsuariosGerente() {
     if (isLoading || allComandas.length === 0 || allProductos.length === 0 || meseros.length === 0) {
       return {};
     }
-
     const performanceByMesero = {};
-
     meseros.forEach(mesero => {
       const nombreCompleto = `${mesero.nombre || ''} ${mesero.apellido || ''}`.trim();
       const displayMeseroName = nombreCompleto || mesero.email || `UID: ${mesero.id}`;
-
       if (!nombreCompleto) {
           console.warn(`Mesero con ID ${mesero.id} no tiene nombre o apellido definido. Mostrando: ${displayMeseroName}.`);
       }
-
       performanceByMesero[mesero.id] = {
         id: mesero.id,
         nombre: displayMeseroName,
@@ -92,19 +86,15 @@ export default function VentasUsuariosGerente() {
         productosVendidosCount: {},
       };
     });
-
     allComandas.forEach(comanda => {
       const meseroId = comanda.meseroId;
       const mesero = meseros.find(m => m.id === meseroId);
-
       if (!mesero) {
         return;
       }
-
       performanceByMesero[meseroId].totalComandas++;
       const comandaTotal = calcularTotalComanda(comanda);
       performanceByMesero[meseroId].totalVentas += comandaTotal;
-
       if (comanda.productos && allProductos.length > 0) {
         comanda.productos.forEach(prod => {
           const productoInfo = allProductos.find(p => p.id === prod.productoId);
@@ -116,7 +106,6 @@ export default function VentasUsuariosGerente() {
         });
       }
     });
-
     Object.keys(performanceByMesero).forEach(meseroId => {
       const currentMesero = performanceByMesero[meseroId];
       currentMesero.topProductos = Object.entries(currentMesero.productosVendidosCount)
@@ -125,55 +114,56 @@ export default function VentasUsuariosGerente() {
         .slice(0, 3);
       delete currentMesero.productosVendidosCount;
     });
-
     return performanceByMesero;
   }, [isLoading, allComandas, allProductos, meseros, calcularTotalComanda]);
 
-  const isLoadingScreen = isLoading; // Puedes mantener esta variable si quieres
+  const isLoadingScreen = isLoading;
 
-  // Funciones de manejo de eventos
+  // --- FUNCIONES DE MANEJO DE EVENTOS ---
+
+  // Funciones para Deshabilitar Usuario (existentes)
   const handleDeleteClick = (user) => {
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      if (!currentUser) {
+          setDeleteStatus({ loading: false, error: "No hay usuario autenticado. Por favor, inicia sesión.", success: null });
+          setTimeout(() => setDeleteStatus({ loading: false, error: null, success: null }), 5000);
+          return;
+      }
+      if (currentUser.uid === user.id) {
+          setDeleteStatus({ loading: false, error: "Un gerente no puede deshabilitar su propia cuenta desde esta interfaz.", success: null });
+          setTimeout(() => setDeleteStatus({ loading: false, error: null, success: null }), 5000);
+          return;
+      }
+      if (user.role === 'gerente') {
+          setDeleteStatus({ loading: false, error: "Un gerente no puede deshabilitar la cuenta de otro gerente.", success: null });
+          setTimeout(() => setDeleteStatus({ loading: false, error: null, success: null }), 5000);
+          return;
+      }
     setUserToDelete(user);
     setShowConfirmModal(true);
   };
 
   const confirmDeleteUser = async () => {
     if (!userToDelete) return;
-
     setDeleteStatus({ loading: true, error: null, success: null });
-    setShowConfirmModal(false); // Cierra el modal de confirmación
-
+    setShowConfirmModal(false);
     try {
-      const result = await deleteAndArchiveUser({ userId: userToDelete.id });
-      setDeleteStatus({ loading: false, success: result.data.message, error: null });
-      setTimeout(() => setDeleteStatus({ loading: false, error: null, success: null }), 5000); // Limpiar mensaje
+        const userRef = doc(db, 'users', userToDelete.id);
+        await updateDoc(userRef, {
+            eliminado: true,
+            fechaEliminacion: new Date(),
+        });
+      setDeleteStatus({ loading: false, success: `Usuario ${userToDelete.nombre || userToDelete.email} ha sido deshabilitado.`, error: null });
+      setTimeout(() => setDeleteStatus({ loading: false, error: null, success: null }), 5000);
     } catch (err) {
-      console.error("Error al eliminar usuario:", err);
-      let errorMessage = "Ocurrió un error al intentar eliminar el usuario.";
-      if (err.code) {
-        switch (err.code) {
-          case 'unauthenticated':
-            errorMessage = 'No estás autenticado para realizar esta acción.';
-            break;
-          case 'permission-denied':
-            errorMessage = 'No tienes permisos para eliminar usuarios.';
-            break;
-          case 'not-found':
-            errorMessage = 'El usuario a eliminar no fue encontrado.';
-            break;
-          case 'internal':
-            errorMessage = `Error interno del servidor: ${err.message}`;
-            break;
-          default:
-            errorMessage = `Error inesperado: ${err.message || 'Ocurrió un error desconocido.'}`;
-        }
-      } else {
-        errorMessage = err.message || errorMessage;
-      }
+      console.error("Error al deshabilitar usuario en Firestore:", err);
+      let errorMessage = "Ocurrió un error al intentar deshabilitar el usuario.";
+      errorMessage = err.message || errorMessage;
       setDeleteStatus({ loading: false, error: errorMessage, success: null });
-      setTimeout(() => setDeleteStatus({ loading: false, error: null, success: null }), 5000); // Limpiar mensaje
+      setTimeout(() => setDeleteStatus({ loading: false, error: null, success: null }), 5000);
     } finally {
-      setUserToDelete(null); // Limpiar el usuario a eliminar
+      setUserToDelete(null);
     }
   };
 
@@ -181,15 +171,35 @@ export default function VentasUsuariosGerente() {
     setShowConfirmModal(false);
     setUserToDelete(null);
   };
-  
-  // --- A PARTIR DE AQUÍ, YA PUEDES TENER TUS RETURNS CONDICIONALES O EL JSX NORMAL ---
 
-  // Esto se declara aquí porque `allUsers` se necesita para el `useMemo` de `meseros` y
-  // para `allUsersCategorized` antes del renderizado condicional principal.
-  const allUsersCategorized = useMemo(() => {
-    return allUsers; 
-  }, [allUsers]);
+  // NUEVAS FUNCIONES PARA EDITAR USUARIO
+  const handleEditClick = (user) => {
+    setUserToEdit(user);
+    setShowEditModal(true);
+  };
 
+  const handleEditClose = () => {
+    setShowEditModal(false);
+    setUserToEdit(null);
+  };
+
+  // Función para manejar los datos guardados desde el modal de edición
+  const handleUserSave = (updatedData) => {
+    // Aquí puedes actualizar el estado local de `allUsers` o `activeUsers`
+    // para que la UI se refleje inmediatamente sin necesidad de recargar la página.
+    // Por ejemplo, mapeando y reemplazando el usuario actualizado:
+    const updatedAllUsers = allUsers.map(user =>
+      user.id === userToEdit.id ? { ...user, ...updatedData } : user
+    );
+    // Asumiendo que `useUsers` tiene una forma de actualizarse,
+    // o que puedes forzar un re-renderizdo con un estado dummy si el hook no lo hace solo.
+    // Si tu useUsers hook es reactivo, un simple re-fetch podría funcionar.
+    // Por ahora, solo cerramos el modal, y el hook useUsers debería eventualmente reflejar el cambio.
+    console.log("Usuario actualizado en el padre:", updatedData);
+  };
+  // --- FIN NUEVAS FUNCIONES ---
+
+  // --- RENDERIZADO DEL COMPONENTE ---
   if (isLoadingScreen) {
     return (
       <div style={{
@@ -260,13 +270,13 @@ export default function VentasUsuariosGerente() {
       </h3>
 
       {/* Mensajes de estado de la eliminación */}
-      {deleteStatus.loading && <p style={{ textAlign: 'center', color: '#007bff', fontSize: '16px', marginBottom: '15px' }}>Eliminando usuario...</p>}
+      {deleteStatus.loading && <p style={{ textAlign: 'center', color: '#007bff', fontSize: '16px', marginBottom: '15px' }}>Deshabilitando usuario...</p>}
       {deleteStatus.error && <p style={{ textAlign: 'center', color: '#dc3545', fontSize: '16px', marginBottom: '15px' }}>Error: {deleteStatus.error}</p>}
       {deleteStatus.success && <p style={{ textAlign: 'center', color: '#28a745', fontSize: '16px', marginBottom: '15px' }}>{deleteStatus.success}</p>}
 
-      {allUsersCategorized.length === 0 && !isLoadingScreen ? (
+      {activeUsers.length === 0 && !isLoadingScreen ? (
         <p style={{ textAlign: 'center', padding: '40px', color: '#777', fontSize: '18px' }}>
-          No se encontraron usuarios en el sistema.
+          No se encontraron usuarios activos en el sistema.
         </p>
       ) : (
         <div style={{
@@ -275,9 +285,8 @@ export default function VentasUsuariosGerente() {
           gap: '25px',
           padding: '20px'
         }}>
-          {allUsersCategorized.map(user => { // Itera sobre todos los usuarios para la gestión
-            const performance = meserosPerformanceData[user.id]; // Si es mesero, tendrá datos de rendimiento
-            
+          {activeUsers.map(user => {
+            const performance = meserosPerformanceData[user.id];
             const userNombreCompleto = `${user.nombre || ''} ${user.apellido || ''}`.trim();
             const displayUserName = userNombreCompleto || user.email || `UID: ${user.id}`;
 
@@ -287,18 +296,18 @@ export default function VentasUsuariosGerente() {
                 padding: '25px',
                 borderRadius: '12px',
                 boxShadow: '0 6px 20px rgba(0,0,0,0.1)',
-                borderTop: `6px solid ${user.rol === 'gerente' ? '#ffc107' : user.rol === 'mesero' ? '#007bff' : '#6c757d'}`, // Colores por rol
+                borderTop: `6px solid ${user.role === 'gerente' ? '#ffc107' : user.role === 'mesero' ? '#007bff' : '#6c757d'}`,
                 textAlign: 'center',
                 display: 'flex',
                 flexDirection: 'column',
                 justifyContent: 'space-between',
-                position: 'relative' // Para posicionar el botón de eliminar
+                position: 'relative'
               }}>
                 <h4 style={{ margin: '0 0 5px 0', color: '#333', fontSize: '22px' }}>{displayUserName}</h4>
-                <p style={{ margin: '0 0 5px 0', fontSize: '16px', color: '#555' }}>Rol: <strong style={{ textTransform: 'capitalize' }}>{user.role || 'N/A'}</strong></p>
+                <p style={{ margin: '0 0 5px 0', fontSize: '16px', color: '#555' }}>role: <strong style={{ textTransform: 'capitalize' }}>{user.role || 'N/A'}</strong></p>
                 <p style={{ margin: '0 0 15px 0', fontSize: '14px', color: '#888' }}>UID: {user.id}</p>
-                {/* Mostrar performance solo si es mesero y hay datos */}
-                {user.rol === 'mesero' && performance ? (
+                
+                {user.role === 'mesero' && performance ? (
                   <>
                     <p style={{ margin: '5px 0', fontSize: '18px', color: '#555' }}>Total Comandas: <strong style={{ color: '#007bff' }}>{performance.totalComandas}</strong></p>
                     <p style={{ margin: '5px 0', fontSize: '18px', color: '#555' }}>Ventas Totales: <strong style={{ color: '#007bff' }}>{formatCurrency(performance.totalVentas)}</strong></p>
@@ -317,40 +326,62 @@ export default function VentasUsuariosGerente() {
                       )}
                     </div>
                   </>
-                ) : user.rol === 'mesero' && !performance ? (
+                ) : user.role === 'mesero' && !performance ? (
                     <p style={{ margin: '5px 0', fontSize: '18px', color: '#555' }}>Sin datos de rendimiento aún.</p>
                 ) : (
-                    <p style={{ margin: '5px 0', fontSize: '16px', color: '#666' }}>No aplica rendimiento para este rol.</p>
+                    <p style={{ margin: '5px 0', fontSize: '16px', color: '#666' }}>No aplica rendimiento para este role.</p>
                 )}
 
-                {/* Botón de Eliminar Usuario */}
-                {/* Puedes añadir una lógica para que un gerente no se pueda eliminar a sí mismo, o no pueda eliminar a otro gerente. */}
-                <button
-                  onClick={() => handleDeleteClick(user)}
-                  style={{
-                    backgroundColor: '#dc3545',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '10px 15px',
-                    fontSize: '1em',
-                    cursor: 'pointer',
-                    marginTop: '20px',
-                    transition: 'background-color 0.3s ease',
-                  }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#c82333'}
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#dc3545'}
-                  disabled={deleteStatus.loading} // Deshabilita si ya está eliminando
-                >
-                  {deleteStatus.loading && userToDelete?.id === user.id ? 'Eliminando...' : 'Eliminar Usuario'}
-                </button>
+                <div style={{ display: 'flex', gap: '10px', marginTop: '20px', justifyContent: 'center' }}>
+                  {/* Botón de Editar Usuario */}
+                  <button
+                    onClick={() => handleEditClick(user)}
+                    style={{
+                      backgroundColor: '#007bff',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '10px 15px',
+                      fontSize: '1em',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.3s ease',
+                      flex: 1,
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#0056b3'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#007bff'}
+                    disabled={deleteStatus.loading} // Deshabilita si está en proceso de eliminación
+                  >
+                    Editar
+                  </button>
+
+                  {/* Botón de Deshabilitar Usuario */}
+                  <button
+                    onClick={() => handleDeleteClick(user)}
+                    style={{
+                      backgroundColor: '#dc3545',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '10px 15px',
+                      fontSize: '1em',
+                      cursor: 'pointer',
+                      transition: 'background-color 0.3s ease',
+                      flex: 1,
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#c82333'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#dc3545'}
+                    disabled={deleteStatus.loading}
+                  >
+                    {deleteStatus.loading && userToDelete?.id === user.id ? 'Deshabilitando...' : 'Deshabilitar'}
+                  </button>
+                </div>
               </div>
             );
           })}
         </div>
       )}
 
-      {/* Modal de Confirmación para Eliminar Usuario */}
+      {/* Modal de Confirmación para Deshabilitar Usuario (existente) */}
       {showConfirmModal && userToDelete && (
         <div style={{
           position: 'fixed',
@@ -362,7 +393,7 @@ export default function VentasUsuariosGerente() {
           display: 'flex',
           justifyContent: 'center',
           alignItems: 'center',
-          zIndex: 1000 // Asegura que esté por encima de todo
+          zIndex: 1000
         }}>
           <div style={{
             backgroundColor: 'white',
@@ -373,10 +404,10 @@ export default function VentasUsuariosGerente() {
             maxWidth: '400px',
             width: '90%'
           }}>
-            <h4 style={{ color: '#333', marginBottom: '20px' }}>Confirmar Eliminación</h4>
+            <h4 style={{ color: '#333', marginBottom: '20px' }}>Confirmar Deshabilitación</h4>
             <p style={{ marginBottom: '25px', color: '#555' }}>
-              ¿Estás seguro de que quieres eliminar a <strong style={{ color: '#dc3545' }}>{userToDelete.nombre} {userToDelete.apellido}</strong> (Rol: {userToDelete.rol})?
-              Esta acción es irreversible y el usuario será movido al historial.
+              ¿Estás seguro de que quieres deshabilitar a <strong style={{ color: '#dc3545' }}>{userToDelete.nombre || userToDelete.email}</strong> (role: {userToDelete.role})?
+              Este usuario ya no aparecerá como activo en la aplicación.
             </p>
             <div style={{ display: 'flex', justifyContent: 'space-around', gap: '15px' }}>
               <button
@@ -394,7 +425,7 @@ export default function VentasUsuariosGerente() {
                 onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#c82333'}
                 onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#dc3545'}
               >
-                Sí, Eliminar
+                Sí, Deshabilitar
               </button>
               <button
                 onClick={cancelDelete}
@@ -416,6 +447,15 @@ export default function VentasUsuariosGerente() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Renderizar el Modal de Edición */}
+      {showEditModal && userToEdit && (
+        <EditarUsuarioModal
+          user={userToEdit}
+          onClose={handleEditClose}
+          onSave={handleUserSave}
+        />
       )}
     </section>
   );
