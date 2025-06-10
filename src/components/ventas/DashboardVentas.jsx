@@ -1,4 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
 
 // Importa tus custom hooks para obtener datos
 import { useComandas } from '../../hooks/useComandas';
@@ -6,7 +8,7 @@ import { useProductos } from '../../hooks/useProductos';
 import { useUsers } from '../../hooks/useUsers';
 import { useCategorias } from '../../hooks/useCategorias';
 
-// Importaciones de Recharts para gráficos directos
+// Importaciones de Recharts para gráficos directos (mantener si se usan)
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, CartesianGrid, LabelList } from 'recharts';
 
 // Importar los componentes de gráficos dedicados
@@ -16,14 +18,35 @@ import PeakHoursChart from './charts/PeakHoursChart';
 import MonthlySalesOverviewChart from './charts/MonthlySalesOverviewChart';
 import AverageOrderValueByMeseroChart from './charts/AverageOrderValueByMeseroChart';
 
+// Librerías para exportación
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
+import 'jspdf-autotable'; // ¡Asegúrate de que esta línea esté presente para autoTable!
+
 // Importar módulo CSS para estilos específicos
 import styles from '../../css/DashboardStats.module.css';
-import EstadisticasGeneralesGerente from '../gerente/EstadisticasGeneralesGerente';
+import EstadisticasGeneralesGerente from '../gerente/EstadisticasGeneralesGerente'; // Asegúrate de que este componente no se duplique si lo usas para el lapso de tiempo.
 
 // Colores para gráficos (ej. PieChart)
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF', '#FF19A0', '#19FFD8', '#FFD819', '#82ca9d', '#ffc658', '#4CAF50', '#FF5733', '#7D3C98'];
 
+// Función para formatear moneda, REUTILIZABLE
+const formatCurrency = (amount) => {
+  const numericAmount = typeof amount === 'number' ? amount : parseFloat(amount) || 0;
+  return new Intl.NumberFormat('es-AR', {
+    style: 'currency',
+    currency: 'ARS',
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  }).format(numericAmount);
+};
+
+
 const DashboardStats = () => {
+    // Estados para el rango de fechas de exportación
+    const [startDate, setStartDate] = useState(null);
+    const [endDate, setEndDate] = useState(null);
+
     // Hooks para obtener los datos de tu aplicación
     const fetchedComandas = useComandas();
     const fetchedProductos = useProductos();
@@ -32,7 +55,7 @@ const DashboardStats = () => {
 
     // Asegurarse de que los arrays no sean nulos si los hooks están cargando o no tienen datos
     const comandas = fetchedComandas || [];
-    const productos = fetchedProductos || []; 
+    const productos = fetchedProductos || [];
     const users = fetchedUsers || [];
     const categorias = fetchedCategorias || [];
 
@@ -52,6 +75,9 @@ const DashboardStats = () => {
         peakHoursData,
         monthlySalesData,
         averageTicketByMeseroData,
+        // Añadimos la data filtrada por el lapso para exportación
+        filteredComandasForExport,
+        topProductsForExport,
     } = useMemo(() => {
         // Estado de carga inicial: devolver valores vacíos
         if (isLoading) {
@@ -67,6 +93,8 @@ const DashboardStats = () => {
                 peakHoursData: [],
                 monthlySalesData: [],
                 averageTicketByMeseroData: [],
+                filteredComandasForExport: [],
+                topProductsForExport: [],
             };
         }
 
@@ -81,17 +109,15 @@ const DashboardStats = () => {
         }, {});
 
         // --- Función auxiliar para calcular el total de una comanda ---
-        // Calcula el total de la comanda sumando (cantidad * precio) de cada producto.
         const calculateComandaTotal = (comanda) => {
             let total = 0;
             if (comanda.productos && Array.isArray(comanda.productos)) {
                 comanda.productos.forEach(comandaProduct => {
-                    const productDetails = productsById[comandaProduct.productoId];
-                    if (productDetails && typeof productDetails.precio === 'number') { // Asegura que el precio es un número
-                        const cantidad = parseFloat(comandaProduct.cantidad) || 0;
-                        const precio = parseFloat(productDetails.precio) || 0;
-                        total += cantidad * precio;
-                    }
+                    // Si el producto en la comanda tiene su propio precio (como en el ejemplo de DB), úsalo.
+                    // De lo contrario, busca el precio en productsById.
+                    const precio = parseFloat(comandaProduct.precio) || (productsById[comandaProduct.productoId] ? parseFloat(productsById[comandaProduct.productoId].precio) : 0);
+                    const cantidad = parseFloat(comandaProduct.cantidad) || 0;
+                    total += cantidad * precio;
                 });
             }
             return total;
@@ -102,9 +128,37 @@ const DashboardStats = () => {
             .filter(c => c.estado === 'pagado' && c.fechaPago)
             .map(comanda => ({
                 ...comanda,
-                calculatedTotal: calculateComandaTotal(comanda) 
+                calculatedTotal: calculateComandaTotal(comanda)
             }));
 
+        // --- Filtro de comandas para el rango de fechas de EXPORTACIÓN ---
+        const filteredComandasForExport = paidComandasWithCalculatedTotal.filter(comanda => {
+            if (!startDate || !endDate) return false; // Solo filtra si ambas fechas están seleccionadas
+            const paymentDate = new Date(comanda.fechaPago);
+            // Establece la hora de endDate al final del día para incluir ese día completo
+            const adjustedEndDate = new Date(endDate);
+            adjustedEndDate.setHours(23, 59, 59, 999);
+
+            return paymentDate >= startDate && paymentDate <= adjustedEndDate;
+        });
+
+        // --- Cálculos para el "Top 3 Productos Más Vendidos" para el rango de exportación ---
+        const productoVentasForExport = {};
+        filteredComandasForExport.forEach((c) => {
+            const productosComanda = Array.isArray(c.productos) ? c.productos : [];
+            productosComanda.forEach((p) => {
+                const nombre = p.nombre || 'Producto sin nombre';
+                const cantidad = parseInt(p.cantidad) || 0;
+
+                if (!productoVentasForExport[nombre]) {
+                    productoVentasForExport[nombre] = 0;
+                }
+                productoVentasForExport[nombre] += cantidad;
+            });
+        });
+        const topProductsForExport = Object.entries(productoVentasForExport)
+            .sort(([, aCantidad], [, bCantidad]) => bCantidad - aCantidad)
+            .slice(0, 3); // Top 3 para exportación
 
         // 2. Filtra las comandas pagadas DEL MES ACTUAL para la mayoría de las métricas operativas
         const paidComandasThisMonth = paidComandasWithCalculatedTotal.filter(c => {
@@ -112,6 +166,7 @@ const DashboardStats = () => {
             return paymentDate.getMonth() === currentMonth && paymentDate.getFullYear() === currentYear;
         });
 
+        // Resto de los cálculos de useMemo (sin cambios, ya que se basan en paidComandasThisMonth)
         // --- CALCULO DE MÉTRICAS GENERALES DEL MES ACTUAL ---
         const calculatedTotalSales = paidComandasThisMonth.reduce((sum, comanda) => sum + comanda.calculatedTotal, 0);
         const calculatedTotalPaidComandas = paidComandasThisMonth.length;
@@ -119,9 +174,8 @@ const DashboardStats = () => {
 
         // --- VENTAS DIARIAS POR MÉTODO DE PAGO DEL MES ACTUAL ---
         const salesByDateAndMethod = {};
-        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate(); // Obtiene el último día del mes
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
 
-        // Inicializa cada día del mes con 0 para cada método de pago
         for (let i = 1; i <= daysInMonth; i++) {
             const date = new Date(currentYear, currentMonth, i);
             const formattedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -131,11 +185,11 @@ const DashboardStats = () => {
         paidComandasThisMonth.forEach(comanda => {
             const paymentDate = new Date(comanda.fechaPago);
             const formattedDate = `${paymentDate.getFullYear()}-${String(paymentDate.getMonth() + 1).padStart(2, '0')}-${String(paymentDate.getDate()).padStart(2, '0')}`;
-            
-            const totalComanda = comanda.calculatedTotal;
-            const rawMetodoPago = (comanda.metodoPago || '').toLowerCase(); 
 
-            let classifiedMetodoPago = 'otros'; // Por defecto, si no coincide
+            const totalComanda = comanda.calculatedTotal;
+            const rawMetodoPago = (comanda.metodoPago || '').toLowerCase();
+
+            let classifiedMetodoPago = 'otros';
 
             if (rawMetodoPago.includes('efectivo')) {
                 classifiedMetodoPago = 'efectivo';
@@ -150,7 +204,7 @@ const DashboardStats = () => {
         });
 
         const calculatedDailySalesByPaymentMethodData = Object.keys(salesByDateAndMethod).sort().map(date => ({
-            date: `${date.substring(8, 10)}/${date.substring(5, 7)}`, // Formato DD/MM
+            date: `${date.substring(8, 10)}/${date.substring(5, 7)}`,
             efectivo: parseFloat(salesByDateAndMethod[date].efectivo.toFixed(2)),
             tarjeta: parseFloat(salesByDateAndMethod[date].tarjeta.toFixed(2)),
             otros: parseFloat(salesByDateAndMethod[date].otros.toFixed(2)),
@@ -158,9 +212,8 @@ const DashboardStats = () => {
         }));
 
         // --- UNIDADES VENDIDAS POR CATEGORÍA (MES ACTUAL) ---
-        // (Esta métrica sigue basándose en la 'cantidad' de productos, no en su valor monetario)
         const categoryCounts = {};
-        paidComandasThisMonth.forEach(comanda => { 
+        paidComandasThisMonth.forEach(comanda => {
             comanda.productos && comanda.productos.forEach(comandaProduct => {
                 const correspondingProduct = productsById[comandaProduct.productoId];
                 if (correspondingProduct) {
@@ -176,30 +229,25 @@ const DashboardStats = () => {
             .map(([name, count]) => ({ name, orders: count }));
 
         // --- TOP 10 PRODUCTOS MÁS VENDIDOS (UNIDADES - MES ACTUAL) ---
-        // Se mantiene el cálculo para el MES ACTUAL, coherente con el título del gráfico.
-        // --- TOP 10 PRODUCTOS MÁS VENDIDOS (UNIDADES - MES ACTUAL) ---
-      // Se mantiene el cálculo para el MES ACTUAL, coherente con el título del gráfico.
-      const productSalesCounts = {};
-      paidComandasThisMonth.forEach(comanda => { // <--- This is the key part!
-          if (comanda.productos && Array.isArray(comanda.productos)) {
-              comanda.productos.forEach(comandaProduct => {
-                  const correspondingProduct = productsById[comandaProduct.productoId];
-                  if (correspondingProduct) {
-                      const productName = correspondingProduct.nombre;
-                      const quantitySold = parseFloat(comandaProduct.cantidad) || 0;
-                      productSalesCounts[productName] = (productSalesCounts[productName] || 0) + quantitySold;
-                  }
-              });
-          }
-      });
-      const calculatedTopProductsData = Object.entries(productSalesCounts)
-          .sort(([, countA], [, countB]) => countB - countA)
-          .slice(0, 10)
-          .map(([name, count]) => ({ name, count }));
+        const productSalesCounts = {};
+        paidComandasThisMonth.forEach(comanda => {
+            if (comanda.productos && Array.isArray(comanda.productos)) {
+                comanda.productos.forEach(comandaProduct => {
+                    const correspondingProduct = productsById[comandaProduct.productoId];
+                    if (correspondingProduct) {
+                        const productName = correspondingProduct.nombre;
+                        const quantitySold = parseFloat(comandaProduct.cantidad) || 0;
+                        productSalesCounts[productName] = (productSalesCounts[productName] || 0) + quantitySold;
+                    }
+                });
+            }
+        });
+        const calculatedTopProductsData = Object.entries(productSalesCounts)
+            .sort(([, countA], [, countB]) => countB - countA)
+            .slice(0, 10)
+            .map(([name, count]) => ({ name, count }));
 
         // --- DISTRIBUCIÓN DE MÉTODOS DE PAGO (Comandas del Mes Actual) ---
-        // Esta métrica cuenta el NÚMERO de comandas por método de pago.
-        // Si quisieras la distribución POR MONTO, deberías usar 'calculatedTotal' aquí.
         const paymentMethods = {};
         paidComandasThisMonth.forEach(comanda => {
             const method = comanda.metodoPago || 'Desconocido';
@@ -222,7 +270,6 @@ const DashboardStats = () => {
         });
 
         // --- HORAS PICO DE VENTA (Cantidad de Comandas - MES ACTUAL) ---
-        // (Esta métrica sigue basándose en el NÚMERO de comandas)
         const salesByHour = {};
         for (let h = 0; h < 24; h++) {
             const hourKey = String(h).padStart(2, '0');
@@ -246,7 +293,6 @@ const DashboardStats = () => {
         const monthlySales = {};
         const monthNames = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
-        // Inicializa para los últimos 12 meses para asegurar continuidad en el gráfico
         for (let i = 0; i < 12; i++) {
             let d = new Date();
             d.setMonth(now.getMonth() - i);
@@ -254,21 +300,21 @@ const DashboardStats = () => {
             monthlySales[yearMonth] = 0;
         }
 
-        paidComandasWithCalculatedTotal.forEach(comanda => { // Usa TODAS las comandas pagadas con total calculado
+        paidComandasWithCalculatedTotal.forEach(comanda => {
             const paymentDate = new Date(comanda.fechaPago);
             const yearMonth = `${paymentDate.getFullYear()}-${String(paymentDate.getMonth() + 1).padStart(2, '0')}`;
-            
+
             if (monthlySales.hasOwnProperty(yearMonth)) {
                 monthlySales[yearMonth] = (monthlySales[yearMonth] || 0) + comanda.calculatedTotal;
             }
         });
 
         const calculatedMonthlySalesData = Object.keys(monthlySales)
-            .sort() // Ordenar cronológicamente
+            .sort()
             .map(ym => {
                 const [year, monthNum] = ym.split('-');
                 return {
-                    month: `${monthNames[parseInt(monthNum, 10) - 1]} ${year.slice(-2)}`, // Ej: "Jun 25"
+                    month: `${monthNames[parseInt(monthNum, 10) - 1]} ${year.slice(-2)}`,
                     sales: parseFloat(monthlySales[ym].toFixed(2))
                 };
             });
@@ -292,10 +338,10 @@ const DashboardStats = () => {
             const meseroName = mesero ? (mesero.nombre || mesero.displayName || `Mesero ${meseroId}`) : `Mesero ${meseroId}`;
             const average = meseroComandaCounts[meseroId] > 0 ? (meseroTotalSales[meseroId] / meseroComandaCounts[meseroId]) : 0;
             return { name: meseroName, average: parseFloat(average.toFixed(2)) };
-        }).sort((a, b) => b.average - a.average); // Ordenar por ticket promedio descendente
+        }).sort((a, b) => b.average - a.average);
 
 
-        // Devolver todos los datos calculados
+        // Devolver todos los datos calculados, incluyendo los nuevos para exportación
         return {
             totalSales: calculatedTotalSales,
             totalPaidComandas: calculatedTotalPaidComandas,
@@ -308,8 +354,64 @@ const DashboardStats = () => {
             peakHoursData: calculatedPeakHoursData,
             monthlySalesData: calculatedMonthlySalesData,
             averageTicketByMeseroData: calculatedAverageTicketByMeseroData,
+            filteredComandasForExport: filteredComandasForExport, // Añadido
+            topProductsForExport: topProductsForExport,          // Añadido
         };
-    }, [isLoading, comandas, productos, users, categorias]); // Dependencias del useMemo
+    }, [isLoading, comandas, productos, users, categorias, startDate, endDate]); // Dependencias del useMemo
+
+    // --- Funciones de Exportación ---
+
+    const exportToCsv = () => {
+        if (!startDate || !endDate) {
+            alert('Por favor, selecciona un rango de fechas para exportar.');
+            return;
+        }
+
+        const formattedStartDate = startDate.toLocaleDateString('es-AR');
+        const formattedEndDate = endDate.toLocaleDateString('es-AR');
+        const filename = `reporte_comandas_${formattedStartDate}_a_${formattedEndDate}.csv`;
+
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Tipo,Fecha,Total,Metodo Pago,Mesero,Producto,Cantidad,Precio Unitario\n";
+
+        // Añadir las comandas pagadas en el rango
+        filteredComandasForExport.forEach(comanda => {
+            const comandaDate = new Date(comanda.fechaPago).toLocaleDateString('es-AR', {
+                year: 'numeric', month: '2-digit', day: '2-digit'
+            });
+            const metodo = comanda.metodoPago || 'N/A';
+            const mesero = users.find(u => u.id === comanda.meseroId)?.nombre || `ID: ${comanda.meseroId}`;
+            
+            if (comanda.productos && Array.isArray(comanda.productos)) {
+                comanda.productos.forEach(prod => {
+                    const productoNombre = prod.nombre || 'Producto sin nombre';
+                    const productoCantidad = prod.cantidad || 0;
+                    const productoPrecio = prod.precio || 0; // Usar el precio del producto en la comanda
+                    csvContent += `Comanda,${comandaDate},${comanda.calculatedTotal},${metodo},"${mesero}",${productoNombre},${productoCantidad},${productoPrecio}\n`;
+                });
+            } else {
+                    csvContent += `Comanda,${comandaDate},${comanda.calculatedTotal},${metodo},"${mesero}",N/A,N/A,N/A\n`;
+            }
+        });
+
+        // Añadir el top 3 productos vendidos en el rango
+        csvContent += "\nTop 3 Productos Más Vendidos (Rango Seleccionado)\n";
+        csvContent += "Producto,Cantidad Vendida\n";
+        topProductsForExport.forEach(([nombre, cantidad]) => {
+            csvContent += `${nombre},${cantidad}\n`;
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", filename);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    
+
 
     // --- ESTADO DE CARGA ---
     if (isLoading) {
@@ -344,11 +446,50 @@ const DashboardStats = () => {
     return (
         <div className={styles.dashboardContainer}>
             <h2 className={styles.mainTitle}>Dashboard de Estadísticas del Restaurante</h2>
-            
-            {/* Sección de Resumen General */}
-            {/* Este componente ya incluye la lógica de selección de mes y muestra estadísticas dinámicas */}
+
+            {/* Selector de Rango de Fechas para Exportación */}
+            <div className={styles.datePickerContainer}>
+                <label className={styles.datePickerLabel}>
+                    Fecha Inicio:
+                    <DatePicker
+                        selected={startDate}
+                        onChange={(date) => setStartDate(date)}
+                        selectsStart
+                        startDate={startDate}
+                        endDate={endDate}
+                        dateFormat="dd/MM/yyyy"
+                        className={styles.datePickerInput}
+                        isClearable
+                    />
+                </label>
+                <label className={styles.datePickerLabel}>
+                    Fecha Fin:
+                    <DatePicker
+                        selected={endDate}
+                        onChange={(date) => setEndDate(date)}
+                        selectsEnd
+                        startDate={startDate}
+                        endDate={endDate}
+                        minDate={startDate}
+                        dateFormat="dd/MM/yyyy"
+                        className={styles.datePickerInput}
+                        isClearable
+                    />
+                </label>
+                {/* Botón para exportar CSV con la nueva clase CSS */}
+                <button
+                    onClick={exportToCsv}
+                    className={styles.exportButton}
+                    disabled={!startDate || !endDate} // Deshabilita si no hay rango de fechas
+                >
+                    Exportar CSV
+                </button>
+                
+            </div>
+
+            {/* Sección de Resumen General (mantener si es relevante para el mes actual o adaptar) */}
             <EstadisticasGeneralesGerente />
-            
+
             <hr className={styles.divider} />
 
             {/* Gráfico: Ventas Diarias por Método de Pago (Mes Actual) */}
@@ -386,21 +527,21 @@ const DashboardStats = () => {
             <div className={styles.chartSection}>
               <h3 className={styles.sectionTitle}>Top 10 Productos Más Vendidos (Unidades - Mes Actual)</h3>
               {topProductsData.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={400}>
-                      <BarChart data={topProductsData} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" className={styles.gridStroke} />
-                          <XAxis type="number" className={styles.axisText} />
-                          <YAxis type="category" dataKey="name" width={120} className={styles.axisText} />
-                          <Tooltip />
-                          <Legend />
-                          <Bar dataKey="count" fill="#FFBB28" name="Cantidad Vendida">
-                              <LabelList dataKey="count" position="right" className={styles.labelText} />
-                          </Bar>
-                      </BarChart>
-                  </ResponsiveContainer>
-              ) : (
-                  <p className={styles.noChartData}>No hay datos de Top 10 productos para mostrar este gráfico en el mes actual.</p>
-              )}
+                    <ResponsiveContainer width="100%" height={400}>
+                        <BarChart data={topProductsData} layout="vertical" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                            <CartesianGrid strokeDasharray="3 3" className={styles.gridStroke} />
+                            <XAxis type="number" className={styles.axisText} />
+                            <YAxis type="category" dataKey="name" width={120} className={styles.axisText} />
+                            <Tooltip />
+                            <Legend />
+                            <Bar dataKey="count" fill="#FFBB28" name="Cantidad Vendida">
+                                <LabelList dataKey="count" position="right" className={styles.labelText} />
+                            </Bar>
+                        </BarChart>
+                    </ResponsiveContainer>
+                ) : (
+                    <p className={styles.noChartData}>No hay datos de Top 10 productos para mostrar este gráfico en el mes actual.</p>
+                )}
             </div>
 
             <hr className={styles.divider} />
@@ -469,7 +610,7 @@ const DashboardStats = () => {
 
             {/* Gráfico: Horas Pico de Venta (Mes Actual) */}
             <PeakHoursChart peakHoursData={peakHoursData} />
-            
+
         </div>
     );
 };

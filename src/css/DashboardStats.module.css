@@ -1,161 +1,193 @@
-/* src/css/DashboardStats.module.css */
-
-/* Variables CSS para colores y sombras (opcional, pero buena práctica si tienes una paleta de colores) */
+/* ===================================== */
+/* VARIABLES GLOBALES          */
+/* ===================================== */
 :root {
-    --primary-color: #3b82f6; /* Tailwind blue-500 */
-    --secondary-color: #10b981; /* Tailwind emerald-500 */
-    --accent-color-1: #facc15; /* Tailwind yellow-400 */
-    --accent-color-2: #ef4444; /* Tailwind red-500 */
-    --bg-light: #f3f4f6; /* Tailwind gray-100 */
-    --card-bg: #ffffff;
-    --text-dark: #1f2937; /* Tailwind gray-900 */
-    --text-medium: #4b5563; /* Tailwind gray-700 */
-    --text-light: #6b7280; /* Tailwind gray-500 */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    /* Colores */
+    --primary-blue: #007bff;
+    --dark-blue: #0056b3;
+    --accent-green: #28a745; /* Exportar CSV */
+    --accent-red: #dc3545;   /* Exportar PDF */
+    --light-grey: #f4f7f6;
+    --medium-grey: #e0e0e0;
+    --dark-grey: #343a40;
+    --text-color-light: #fff;
+    --text-color-dark: #333;
+    --border-color: #ddd;
+
+    /* Espaciado */
+    --spacing-xs: 8px;
+    --spacing-sm: 15px;
+    --spacing-md: 20px;
+    --spacing-lg: 30px;
+
+    /* Bordes y Sombras */
+    --border-radius-base: 8px;
+    --box-shadow-light: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --box-shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
+/* ===================================== */
+/* CONTENEDOR PRINCIPAL         */
+/* ===================================== */
 .dashboardContainer {
-    padding: 1.5rem;
-    background-color: var(--bg-light);
-    border-radius: 0.75rem; /* rounded-lg */
-    box-shadow: var(--shadow-md);
-    font-family: 'Inter', sans-serif; /* Asume que Inter u otra fuente moderna está disponible */
-    color: var(--text-dark);
+    padding: var(--spacing-lg);
+    background-color: var(--light-grey);
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif; /* Puedes cambiar la fuente si tienes una */
+    color: var(--text-color-dark);
 }
 
+/* ===================================== */
+/* TÍTULOS Y TEXTO            */
+/* ===================================== */
 .mainTitle {
-    font-size: 2.25rem; /* text-3xl */
-    font-weight: 700; /* font-bold */
-    margin-bottom: 1.5rem; /* mb-6 */
-    color: var(--text-dark);
+    font-size: 2.5rem;
+    color: var(--dark-grey);
     text-align: center;
-    border-bottom: 2px solid var(--primary-color);
-    padding-bottom: 0.75rem;
-}
-
-.statsGrid {
-    display: grid;
-    grid-template-columns: repeat(1, 1fr); /* col-1 */
-    gap: 1rem; /* gap-4 */
-    margin-bottom: 1.5rem; /* mb-6 */
-}
-
-@media (min-width: 768px) { /* md breakpoint */
-    .statsGrid {
-        grid-template-columns: repeat(3, 1fr); /* md:grid-cols-3 */
-    }
-}
-
-.statCard {
-    background-color: var(--card-bg);
-    padding: 1.5rem;
-    border-radius: 0.5rem; /* rounded-lg */
-    box-shadow: var(--shadow-sm);
-    text-align: center;
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.statCard:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px -1px rgba(0, 0, 0, 0.15), 0 4px 8px -1px rgba(0, 0, 0, 0.08);
-}
-
-.cardTitle {
-    font-size: 1.25rem; /* text-xl */
-    font-weight: 600; /* font-semibold */
-    color: var(--text-medium);
-    margin-bottom: 0.5rem;
-}
-
-.cardValue {
-    font-size: 2.5rem; /* text-4xl, ajustado para impacto */
-    font-weight: 800; /* font-extrabold */
-    line-height: 1.2;
-}
-
-/* Colores específicos para las tarjetas de estadísticas */
-.statCardSales .cardValue {
-    color: #10b981; /* emerald-600 */
-}
-.statCardOrders .cardValue {
-    color: #3b82f6; /* blue-600 */
-}
-.statCardAverage .cardValue {
-    color: #a855f7; /* purple-600 */
-}
-
-.divider {
-    border: none;
-    border-top: 1px dashed var(--text-light);
-    margin: 2.5rem 0; /* Espaciado generoso */
-    opacity: 0.6;
-}
-
-.chartSection {
-    background-color: var(--card-bg);
-    padding: 1.5rem;
-    border-radius: 0.5rem;
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 1.5rem; /* mb-6 */
+    margin-bottom: var(--spacing-lg);
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .sectionTitle {
-    font-size: 1.5rem; /* text-2xl */
-    font-weight: 700; /* font-bold */
-    color: var(--text-dark);
-    margin-bottom: 1rem;
+    font-size: 1.6rem;
+    color: var(--dark-grey);
+    margin-bottom: var(--spacing-md);
+    border-left: 5px solid var(--primary-blue);
+    padding-left: var(--spacing-xs);
+    line-height: 1.2;
+    font-weight: 600;
+}
+
+.noDataMessage, .noChartData, .loadingText {
     text-align: center;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--bg-light);
+    padding: var(--spacing-md);
+    font-size: 1.1rem;
+    color: #666;
+    background-color: #f0f0f0;
+    border-radius: var(--border-radius-base);
+    margin-top: var(--spacing-md);
 }
 
-.noChartData {
-    text-align: center;
-    color: var(--text-light);
-    font-style: italic;
-    padding: 1.5rem;
-    background-color: var(--bg-light);
-    border-radius: 0.5rem;
+/* ===================================== */
+/* BOTONES                 */
+/* ===================================== */
+/* Estilo base para todos los botones */
+.baseButton {
+    padding: 10px 20px;
+    border: none;
+    border-radius: var(--border-radius-base);
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.1s ease, box-shadow 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px; /* Espacio entre texto e ícono si los hubiera */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Estilos para ejes y etiquetas de Recharts */
-.gridStroke {
-  stroke: rgba(0, 0, 0, 0.08);
+.baseButton:hover {
+    transform: translateY(-2px); /* Pequeño efecto de elevación */
+    box-shadow: var(--box-shadow-hover);
 }
 
-.axisText text {
-  font-size: 0.875rem; /* text-sm */
-  fill: var(--text-medium);
+.baseButton:disabled {
+    background-color: var(--medium-grey);
+    color: #888;
+    cursor: not-allowed;
+    transform: none;
+    opacity: 0.7;
+    box-shadow: none;
 }
 
-.labelText text {
-  font-size: 0.875rem; /* text-sm */
-  fill: var(--text-dark);
-  font-weight: 600;
+/* Botón de Exportar CSV */
+.exportButton {
+    composes: baseButton; /* Hereda estilos de baseButton */
+    background-color: var(--accent-green);
+    color: var(--text-color-light);
+    margin-left: var(--spacing-sm);
 }
 
-/* Estilos de carga (esqueletos y spinner) */
+.exportButton:hover {
+    background-color: #218838; /* Tono más oscuro de verde */
+}
+
+/* Botón de Exportar PDF */
+.exportPdfButton {
+    composes: baseButton; /* Hereda estilos de baseButton */
+    background-color: var(--accent-red);
+    color: var(--text-color-light);
+    margin-left: var(--spacing-sm);
+}
+
+.exportPdfButton:hover {
+    background-color: #c82333; /* Tono más oscuro de rojo */
+}
+
+/* ===================================== */
+/* SECCIÓN DE FECHAS           */
+/* ===================================== */
+.datePickerContainer {
+    display: flex;
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+    align-items: center;
+    gap: var(--spacing-sm); /* Espacio entre los elementos */
+    margin-bottom: var(--spacing-lg);
+    padding: var(--spacing-md);
+    background-color: #fff;
+    border-radius: var(--border-radius-base);
+    box-shadow: var(--box-shadow-light);
+    justify-content: center;
+}
+
+.datePickerLabel {
+    font-weight: 600;
+    color: var(--dark-grey);
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.datePickerInput {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 1rem;
+    width: 120px; /* Ancho fijo para el input del DatePicker */
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.datePickerInput:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+/* ===================================== */
+/* ESTADOS DE CARGA            */
+/* ===================================== */
 .loadingState {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: 400px; /* Asegura que el contenedor tenga altura para ver el spinner */
-    background-color: var(--bg-light);
-    border-radius: 0.75rem;
-    box-shadow: var(--shadow-md);
-    padding: 2rem;
+    min-height: 500px; /* Asegura un mínimo de altura para el spinner */
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius-base);
+    box-shadow: var(--box-shadow-light);
+    margin-top: var(--spacing-lg);
 }
 
 .spinner {
-    border: 4px solid rgba(0, 0, 0, 0.1);
-    border-left-color: var(--primary-color);
+    border: 5px solid var(--medium-grey);
+    border-top: 5px solid var(--primary-blue);
     border-radius: 50%;
     width: 50px;
     height: 50px;
     animation: spin 1s linear infinite;
-    margin-bottom: 1rem;
+    margin-bottom: var(--spacing-md);
 }
 
 @keyframes spin {
@@ -163,242 +195,143 @@
     100% { transform: rotate(360deg); }
 }
 
-.loadingText {
-    color: var(--text-medium);
-    font-size: 1.125rem; /* text-lg */
-    margin-bottom: 1.5rem;
+.skeleton {
+    background-color: var(--medium-grey);
+    border-radius: var(--border-radius-base);
+    overflow: hidden;
+    position: relative;
 }
 
-.skeleton {
-    background-color: #e0e0e0; /* Color base del esqueleto */
-    background-image: linear-gradient(90deg, #e0e0e0 0%, #f0f0f0 20%, #e0e0e0 40%);
-    background-size: 200% 100%;
-    animation: skeleton-loading 1.5s infinite linear;
-    border-radius: 0.5rem;
+.skeleton::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 20%, rgba(255, 255, 255, 0.5) 60%, rgba(255, 255, 255, 0) 100%);
+    animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+    100% {
+        transform: translateX(100%);
+    }
 }
 
 .skeletonLine {
-    background-color: #c2c2c2; /* Color de las líneas del esqueleto */
-    border-radius: 0.25rem;
-    height: 1em; /* Altura predeterminada para líneas de texto */
+    height: 1rem;
+    background-color: #ccc;
+    border-radius: 4px;
+    margin-bottom: 0.5rem;
 }
 
-/* Animación del esqueleto */
-@keyframes skeleton-loading {
-    0% { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-}
-
-/* Ajustes para esqueletos de Recharts si se usan directamente */
-.chartContainer.skeleton {
+/* Estilos específicos para la animación de esqueleto en el DashboardStats.jsx */
+.statsGrid .skeleton {
+    padding: var(--spacing-md);
+    height: 120px; /* Altura para las tarjetas de esqueleto */
     display: flex;
-    align-items: center;
+    flex-direction: column;
     justify-content: center;
-    color: var(--text-light);
-    font-size: 1rem;
+}
+.statsGrid .skeleton .skeletonLine.w-3-4 { width: 75%; height: 20px; } /* Ajusta estas clases si Tailwind no las aplica directamente */
+.statsGrid .skeleton .skeletonLine.w-1-2 { width: 50%; height: 32px; }
+
+.chartContainer.skeleton {
+    height: 300px; /* Altura para el esqueleto del gráfico */
+    margin-top: var(--spacing-md);
 }
 
-/* Media Queries para Responsive Design en los gráficos si es necesario */
-@media (max-width: 640px) {
-    .mainTitle {
-        font-size: 1.75rem;
-    }
-    .cardValue {
-        font-size: 2rem;
-    }
-    .sectionTitle {
-        font-size: 1.25rem;
-    }
-}
-/* src/css/DashboardStats.module.css */
 
-.dashboardContainer {
-    padding: 2rem;
-    background-color: #f4f7f6; /* Un gris claro suave */
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-    max-width: 1400px;
-    margin: 2rem auto;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: #333;
-}
-
-.mainTitle {
-    font-size: 2.5rem;
-    color: #1a2a3a;
-    text-align: center;
-    margin-bottom: 2.5rem;
-    font-weight: 700;
-    letter-spacing: -0.03em;
-}
-
+/* ===================================== */
+/* SECCIONES DE GRÁFICOS Y DATOS   */
+/* ===================================== */
 .divider {
     border: none;
-    border-top: 1px solid #e0e0e0;
-    margin: 3rem 0;
+    border-top: 1px solid var(--medium-grey);
+    margin: var(--spacing-lg) 0;
 }
 
 .chartSection {
-    background-color: #ffffff;
-    border-radius: 10px;
-    padding: 2rem;
-    margin-bottom: 2.5rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    background-color: #fff;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-base);
+    box-shadow: var(--box-shadow-light);
+    margin-bottom: var(--spacing-lg);
+    position: relative; /* Necesario para ResponsiveContainer */
 }
 
-.chartSection:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-}
-
-.sectionTitle {
-    font-size: 1.8rem;
-    color: #2c3e50;
-    margin-bottom: 1.8rem;
-    text-align: center;
-    font-weight: 600;
-    border-bottom: 2px solid #f0f0f0;
-    padding-bottom: 1rem;
-}
-
-/* Estilos para los textos dentro de los gráficos */
-.axisText text {
-    font-size: 0.85rem;
-    fill: #666;
-}
-
+/* Recharts overrides/custom styles */
 .gridStroke {
-    stroke: #e8e8e8;
+    stroke: var(--border-color); /* Color para las líneas de la cuadrícula de Recharts */
+    stroke-dasharray: "3 3";
+}
+
+.axisText {
+    font-size: 0.85rem;
+    fill: #666; /* Color para el texto de los ejes */
 }
 
 .labelText {
     font-size: 0.8rem;
-    fill: #333;
-    font-weight: 500;
+    fill: #333; /* Color para las etiquetas de las barras/pie charts */
 }
 
-.noChartData, .noDataMessage {
-    text-align: center;
-    color: #777;
-    font-size: 1.1rem;
-    padding: 2rem;
-    background-color: #fdfde6;
-    border-radius: 8px;
-    border: 1px dashed #dcdcaa;
-    margin-top: 1.5rem;
-}
-
-/* Loading State & Skeleton */
-.loadingState {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 500px;
-    background-color: #fbfbfb;
-}
-
-.spinner {
-    border: 8px solid #f3f3f3;
-    border-top: 8px solid #3498db;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    animation: spin 2s linear infinite;
-    margin-bottom: 1.5rem;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
-.loadingText {
-    font-size: 1.3rem;
-    color: #555;
-    margin-bottom: 2rem;
-}
-
-.skeleton {
-    background-color: #e0e0e0;
-    animation: pulse 1.5s infinite ease-in-out;
-    border-radius: 8px;
-}
-
-.skeletonLine {
-    height: 1.2em;
-    background-color: #c0c0c0;
-    border-radius: 4px;
-    margin-bottom: 0.5em;
-}
-
-@keyframes pulse {
-    0% { opacity: 0.7; }
-    50% { opacity: 1; }
-    100% { opacity: 0.7; }
-}
-
-/* Responsive Adjustments */
+/* ===================================== */
+/* RESPONSIVE               */
+/* ===================================== */
 @media (max-width: 1024px) {
-    .dashboardContainer {
-        padding: 1.5rem;
-        margin: 1.5rem auto;
-    }
-
     .mainTitle {
         font-size: 2rem;
-        margin-bottom: 2rem;
     }
-
     .sectionTitle {
-        font-size: 1.5rem;
-        margin-bottom: 1.5rem;
+        font-size: 1.4rem;
+    }
+    .datePickerContainer {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .exportButton, .exportPdfButton {
+        margin-left: 0;
+        width: 100%;
+        margin-top: var(--spacing-xs);
+    }
+    .datePickerLabel {
+        width: 100%;
+    }
+    .datePickerInput {
+        width: 100%; /* El input ocupa todo el ancho disponible */
     }
 }
 
 @media (max-width: 768px) {
     .dashboardContainer {
-        padding: 1rem;
-        margin: 1rem auto;
+        padding: var(--spacing-md);
     }
-
     .mainTitle {
         font-size: 1.8rem;
-        margin-bottom: 1.5rem;
     }
-
     .sectionTitle {
-        font-size: 1.3rem;
-        margin-bottom: 1rem;
+        font-size: 1.2rem;
     }
-
     .chartSection {
-        padding: 1.5rem;
-        margin-bottom: 2rem;
+        padding: var(--spacing-sm);
     }
-
-    .axisText text, .labelText {
-        font-size: 0.75rem;
+    .statsGrid {
+        grid-template-columns: 1fr; /* Una columna en pantallas muy pequeñas */
+        gap: var(--spacing-sm);
     }
 }
 
 @media (max-width: 480px) {
     .dashboardContainer {
-        padding: 0.8rem;
-        margin: 0.8rem auto;
+        padding: var(--spacing-xs);
     }
-
     .mainTitle {
-        font-size: 1.6rem;
-        margin-bottom: 1rem;
+        font-size: 1.5rem;
     }
-
     .sectionTitle {
-        font-size: 1.2rem;
-    }
-
-    .chartSection {
-        padding: 1rem;
+        font-size: 1.1rem;
     }
 }
