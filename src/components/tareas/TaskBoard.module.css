@@ -1,5 +1,31 @@
 /* TaskBoard.module.css */
 
+/* Define your CSS variables if not defined globally */
+:root {
+  --color-primary: #4a90e2; /* A nice blue */
+  --color-primary-dark: #357bd8;
+  --color-secondary: #5cb85c; /* A green for success/pay */
+  --color-danger: #d9534f; /* A red for danger/delete */
+  --color-background-light: #f8f9fa; /* Light background */
+  --color-text-dark: #343a40; /* Dark text */
+  --border-radius-base: 8px;
+
+  --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.08);
+  --shadow-medium: 0 4px 10px rgba(0, 0, 0, 0.12);
+
+  /* New colors for "Listo para Servir" items */
+  --ready-to-serve-bg: #fffde7; /* Very light yellow */
+  --ready-to-serve-border: #ffeb3b; /* Vibrant yellow for border/accent */
+  --ready-to-serve-text: #333; /* Dark text for contrast */
+
+  /* New colors for SweetAlert2 "Comanda Lista" alert */
+  --alert-ready-bg: #d4edda; /* Light green background */
+  --alert-ready-border: #28a745; /* Darker green border */
+  --alert-ready-text: #155724; /* Dark green text */
+  --alert-ready-title: #28a745; /* Green title */
+}
+
+
 .boardContainerDad {
   padding: 1.5rem; /* Increased padding for more breathing room */
   display: flex;
@@ -27,6 +53,7 @@
   text-align: center;
   transition: all 0.3s ease; /* Smooth transitions for hover effects */
   background-color: var(--color-primary);
+  color: white; /* Ensure text color is white for primary buttons */
   min-width: 200px; /* Ensure buttons have a minimum width */
   box-shadow: var(--shadow-light);
 }
@@ -80,25 +107,48 @@
   border-bottom: 2px solid var(--color-primary); /* Underline for column titles */
 }
 
-.boardItem {
+/* New wrapper for board items to control layout of item content and actions */
+.boardItemWrapper {
+  display: flex;
+  flex-direction: column;
   background-color: #fdfdfd;
-  padding: 1rem; /* Slightly more padding */
-  margin-bottom: 0.75rem;
-  border-radius: 6px;
-  box-shadow: var(--shadow-light);
   border: 1px solid #eee; /* Light border for items */
+  border-radius: var(--border-radius-base);
+  margin-bottom: 0.75rem;
+  box-shadow: var(--shadow-light);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  color: var(--color-text-dark);
 }
 
-.boardItem:hover {
+.boardItemWrapper:hover {
   transform: translateY(-3px); /* Lift effect on hover */
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
 }
 
+/* Style for the draggable content part of the item */
+.boardItem {
+  padding: 1rem; /* Slightly more padding */
+  color: var(--color-text-dark);
+  cursor: grab; /* Indicates it's draggable */
+  flex-grow: 1; /* Allows content to take available space */
+}
+
+/* --- New style for "Listo para Servir" items --- */
+.readyToServeItem {
+  background-color: var(--ready-to-serve-bg); /* Very light yellow */
+  border-color: var(--ready-to-serve-border); /* Vibrant yellow border */
+  /* text-shadow: 0 0 1px rgba(0, 0, 0, 0.1); */ /* Optional: subtle text shadow for contrast */
+  animation: pulseReady 1.5s infinite alternate; /* Gentle pulsating animation */
+}
+
+@keyframes pulseReady {
+  0% { box-shadow: var(--shadow-light); }
+  100% { box-shadow: 0 0 15px var(--ready-to-serve-border); } /* Glow effect */
+}
+
+
 .boardItem strong {
   font-size: 1.1rem;
-  color: var(--color-primary);
+  color: var(--color-primary); /* Uses primary color for strong text */
   display: block; /* Ensures it takes full width */
   margin-bottom: 0.5rem;
 }
@@ -127,19 +177,22 @@
   margin-top: 0.2rem;
 }
 
-.boardIcon {
-  margin-top: 1rem; /* More space above icons */
+/* Actions container (renamed from boardIcon for clarity in the JS) */
+.boardItemActions {
+  margin-top: 0.5rem; /* Space above actions */
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-around; /* Distribute icons evenly */
   padding: 0.75rem;
   background-color: var(--color-background-light);
-  border-radius: var(--border-radius-base);
+  border-bottom-left-radius: var(--border-radius-base);
+  border-bottom-right-radius: var(--border-radius-base);
   box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Inner shadow for a subtle inset look */
+  border-top: 1px solid #eee; /* Separator from content */
 }
 
-.boardIcon button {
+.actionBtn {
   background-color: transparent; /* Fully transparent background */
   color: var(--color-primary-dark); /* Icons color */
   border: none;
@@ -153,76 +206,126 @@
   align-items: center;
 }
 
-.boardIcon button:hover {
+.actionBtn:hover {
   background-color: rgba(74, 144, 226, 0.1); /* Light blue background on hover */
   color: var(--color-primary);
   transform: scale(1.15); /* Slightly less aggressive scale */
 }
 
-.boardIcon button:focus {
+.actionBtn:focus {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px; /* Offset outline from the button */
 }
 
-.boardIcon button:active {
+.actionBtn:active {
   transform: scale(0.98);
 }
 
 /* Specific icon colors for better UX */
-.boardIcon button[title="Editar Comanda"] {
+.actionBtn[title="Editar Comanda"] {
   color: #f39c12; /* Orange for edit */
 }
-.boardIcon button[title="Eliminar Comanda"] {
+.actionBtn[title="Eliminar Comanda"] {
   color: var(--color-danger); /* Red for delete */
 }
-.boardIcon button[title="Imprimir Ticket"] {
+.actionBtn[title="Imprimir Ticket"] {
   color: #6c757d; /* Gray for print */
 }
-.boardIcon button[title="Marcar como Pagado"] {
+.actionBtn[title="Marcar como Pagado"] {
   color: var(--color-secondary); /* Green for pay */
 }
+
+
+/* --- SweetAlert2 Custom Styles for "Comanda Lista" Alert --- */
+/* These classes will be applied via `customClass` in Swal.fire */
+.readyToServeAlert {
+  background-color: var(--alert-ready-bg) !important;
+  border: 2px solid var(--alert-ready-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2) !important;
+  padding: 2rem !important;
+  font-family: 'Arial', sans-serif !important; /* Use a common sans-serif font */
+}
+
+.readyToServeAlert .swal2-icon.swal2-success {
+  border-color: var(--alert-ready-border) !important; /* Match border color */
+}
+
+.readyToServeAlert .swal2-success-line-tip,
+.readyToServeAlert .swal2-success-line-long {
+  background-color: var(--alert-ready-border) !important; /* Match border color for checkmark */
+}
+
+.readyToServeAlertTitle {
+  color: var(--alert-ready-title) !important;
+  font-size: 2.2rem !important; /* Larger title */
+  font-weight: 700 !important;
+  margin-bottom: 1rem !important;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Subtle shadow for title */
+}
+
+.readyToServeAlertText {
+  color: var(--alert-ready-text) !important;
+  font-size: 1.3rem !important; /* Larger text */
+  line-height: 1.5 !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.readyToServeAlert .swal2-timer-progress-bar {
+  background-color: var(--alert-ready-border) !important; /* Progress bar color */
+  height: 6px !important; /* Thicker progress bar */
+}
+
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .boardContainer {
-    flex-direction: column; /* Stack columns vertically on smaller screens */
-    align-items: center; /* Center stacked columns */
+      flex-direction: column; /* Stack columns vertically on smaller screens */
+      align-items: center; /* Center stacked columns */
   }
 
   .column {
-    width: 90%; /* Take more width on small screens */
-    max-width: 400px; /* Limit max width even when stacked */
+      width: 90%; /* Take more width on small screens */
+      max-width: 400px; /* Limit max width even when stacked */
   }
 
   .divButton {
-    flex-direction: column;
-    align-items: center;
+      flex-direction: column;
+      align-items: center;
   }
 
   .boardButton {
-    width: 80%; /* Make buttons take more width */
+      width: 80%; /* Make buttons take more width */
   }
 }
 
 @media (max-width: 480px) {
   .boardContainerDad {
-    padding: 1rem;
+      padding: 1rem;
   }
 
   .column {
-    min-width: unset; /* Remove min-width to allow more flexibility */
-    width: 95%; /* Even wider on very small screens */
-    padding: 1rem;
+      min-width: unset; /* Remove min-width to allow more flexibility */
+      width: 95%; /* Even wider on very small screens */
+      padding: 1rem;
   }
 
   .boardButton {
-    width: 90%;
-    font-size: 0.9rem;
-    padding: 10px 15px;
+      width: 90%;
+      font-size: 0.9rem;
+      padding: 10px 15px;
+  }
+
+  .readyToServeAlertTitle {
+      font-size: 1.8rem !important;
+  }
+
+  .readyToServeAlertText {
+      font-size: 1.1rem !important;
   }
 }
-/* ... (existing CSS from previous improvement) ... */
 
+/* Loading Indicator */
 .loadingIndicator {
   display: flex;
   flex-direction: column;

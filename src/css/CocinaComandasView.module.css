@@ -1,0 +1,346 @@
+/* ===================================== */
+/* VARIABLES GLOBALES (Puedes ajustar o importar de un archivo global) */
+/* ===================================== */
+:root {
+    --primary-blue: #007bff;
+    --dark-blue: #0056b3;
+    --accent-green: #28a745; /* Color para "Listo para Servir" */
+    --accent-red: #dc3545;   /* Color para "Cancelar" */
+    --light-grey: #f4f7f6;
+    --medium-grey: #e0e0e0;
+    --dark-grey: #343a40;
+    --text-color-light: #fff;
+    --text-color-dark: #333;
+    --border-color: #ddd;
+
+    /* Espaciado */
+    --spacing-xs: 8px;
+    --spacing-sm: 15px;
+    --spacing-md: 20px;
+    --spacing-lg: 30px;
+
+    /* Bordes y Sombras */
+    --border-radius-base: 8px;
+    --box-shadow-light: 0 4px 12px rgba(0, 0, 0, 0.05);
+    --box-shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* ===================================== */
+/* CONTENEDOR PRINCIPAL               */
+/* ===================================== */
+.kitchenOrdersContainer {
+    padding: var(--spacing-lg);
+    background-color: var(--light-grey);
+    min-height: 100vh;
+    font-family: 'Arial', sans-serif; /* Consistencia con tu otro componente */
+    color: var(--text-color-dark);
+}
+
+.mainTitle {
+    font-size: 2.5rem;
+    color: var(--dark-grey);
+    text-align: center;
+    margin-bottom: var(--spacing-xs); /* Menos margen porque viene subtítulo */
+    font-weight: 700;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.subtitle {
+    font-size: 1.1rem;
+    color: #666;
+    text-align: center;
+    margin-bottom: var(--spacing-lg);
+}
+
+/* ===================================== */
+/* ESTADOS (Carga, Error, Sin Comandas) */
+/* ===================================== */
+.loadingState, .errorState, .noOrdersMessage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px; /* Suficiente altura para centrar el mensaje */
+    background-color: #fff;
+    border-radius: var(--border-radius-base);
+    box-shadow: var(--box-shadow-light);
+    margin: var(--spacing-lg) auto; /* Centrar horizontalmente */
+    padding: var(--spacing-lg);
+    max-width: 600px; /* Ancho máximo para estos mensajes */
+    text-align: center;
+}
+
+.spinner {
+    border: 6px solid var(--medium-grey);
+    border-top: 6px solid var(--primary-blue);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin-bottom: var(--spacing-md);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loadingText, .errorState p, .noOrdersMessage p {
+    font-size: 1.2rem;
+    color: #555;
+    margin-bottom: var(--spacing-md);
+}
+
+.retryButton, .refreshButton {
+    padding: 10px 25px;
+    border: none;
+    border-radius: var(--border-radius-base);
+    background-color: var(--primary-blue);
+    color: var(--text-color-light);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs); /* Espacio para el ícono si lo usas */
+}
+
+.retryButton:hover, .refreshButton:hover {
+    background-color: var(--dark-blue);
+    transform: translateY(-1px);
+}
+
+/* ===================================== */
+/* GRID DE COMANDAS                  */
+/* ===================================== */
+.ordersGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); /* Tarjetas de 320px en adelante */
+    gap: var(--spacing-lg);
+    padding: var(--spacing-md);
+}
+
+/* ===================================== */
+/* TARJETA DE COMANDA                */
+/* ===================================== */
+.orderCard {
+    background-color: #fff;
+    border-radius: var(--border-radius-base);
+    box-shadow: var(--box-shadow-light);
+    padding: var(--spacing-md);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Empuja el footer hacia abajo */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    min-height: 280px; /* Altura mínima para que las tarjetas se vean consistentes */
+}
+
+.orderCard:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--box-shadow-hover);
+}
+
+.orderHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-xs);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.orderId {
+    font-size: 1.4rem;
+    color: var(--primary-blue);
+    margin: 0;
+    font-weight: 700;
+}
+
+.tableNumber {
+    background-color: var(--primary-blue);
+    color: var(--text-color-light);
+    padding: 5px 10px;
+    border-radius: var(--border-radius-base);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.orderItems {
+    margin-bottom: var(--spacing-sm);
+    flex-grow: 1; /* Permite que la lista de ítems ocupe el espacio restante */
+}
+
+.orderItems h4 {
+    font-size: 1.1rem;
+    color: var(--dark-grey);
+    margin-top: 0;
+    margin-bottom: var(--spacing-xs);
+}
+
+.orderItems ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.orderItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px dashed var(--medium-grey);
+}
+
+.orderItem:last-child { /* Elimina el borde inferior del último ítem */
+    border-bottom: none;
+}
+
+.orderItem span {
+    font-size: 1rem;
+}
+
+.itemNotes {
+    font-size: 0.9rem;
+    color: #888;
+    margin-left: var(--spacing-xs);
+    font-style: italic;
+}
+
+.orderNotes {
+    background-color: #fff3cd; /* Color suave para destacar notas */
+    border-left: 4px solid #ffc107; /* Borde a la izquierda para énfasis */
+    padding: var(--spacing-xs);
+    border-radius: var(--border-radius-base);
+    margin-top: var(--spacing-xs);
+    margin-bottom: var(--spacing-sm);
+}
+
+.orderNotes p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #6a4f00;
+}
+
+.orderFooter {
+    display: flex;
+    flex-direction: column; /* Apila elementos en pantallas pequeñas */
+    gap: var(--spacing-xs);
+    align-items: flex-start; /* Alinear a la izquierda en móvil */
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid var(--border-color);
+}
+
+.timeReceived {
+    font-size: 0.85rem;
+    color: #777;
+    text-align: right; /* Alineación a la derecha en escritorio */
+    width: 100%;
+}
+
+.actionButtons {
+    display: flex;
+    gap: var(--spacing-xs);
+    width: 100%; /* Ocupa todo el ancho disponible */
+    justify-content: flex-end; /* Alinea los botones a la derecha en escritorio */
+    flex-wrap: wrap; /* Permite que los botones se envuelvan si no hay espacio */
+}
+
+.actionButton {
+    padding: 8px 15px;
+    border: none;
+    border-radius: var(--border-radius-base);
+    color: var(--text-color-light);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px; /* Espacio para el ícono si lo usas */
+    font-weight: 500;
+    flex-grow: 1; /* Permite que los botones crezcan para llenar el espacio */
+    justify-content: center; /* Centrar el texto y el ícono */
+}
+
+.actionButton:hover {
+    transform: translateY(-1px);
+}
+
+.readyButton {
+    background-color: var(--accent-green);
+}
+
+.readyButton:hover {
+    background-color: #218838; /* Tono más oscuro de verde */
+}
+
+.cancelButton {
+    background-color: var(--accent-red);
+}
+
+.cancelButton:hover {
+    background-color: #c82333; /* Tono más oscuro de rojo */
+}
+
+/* ===================================== */
+/* RESPONSIVE               */
+/* ===================================== */
+@media (max-width: 1200px) {
+    .ordersGrid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); /* Ajuste para pantallas medianas */
+        gap: var(--spacing-md);
+    }
+}
+
+@media (max-width: 768px) {
+    .kitchenOrdersContainer {
+        padding: var(--spacing-md);
+    }
+    .mainTitle {
+        font-size: 2rem;
+    }
+    .subtitle {
+        font-size: 1rem;
+    }
+    .ordersGrid {
+        grid-template-columns: 1fr; /* Una sola columna en móvil */
+        gap: var(--spacing-md);
+    }
+    .orderCard {
+        min-height: auto; /* Altura automática en móvil */
+    }
+    .orderHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-xs);
+    }
+    .tableNumber {
+        align-self: flex-end; /* Mantiene el número de mesa a la derecha si está apilado */
+    }
+    .orderFooter {
+        flex-direction: column;
+        align-items: center;
+    }
+    .actionButtons {
+        flex-direction: column; /* Apila los botones de acción verticalmente */
+        width: 100%;
+    }
+    .actionButton {
+        width: 100%; /* Botones ocupan todo el ancho disponible */
+    }
+}
+
+@media (max-width: 480px) {
+    .kitchenOrdersContainer {
+        padding: var(--spacing-sm);
+    }
+    .mainTitle {
+        font-size: 1.8rem;
+    }
+    .orderId {
+        font-size: 1.2rem;
+    }
+    .actionButton {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+}

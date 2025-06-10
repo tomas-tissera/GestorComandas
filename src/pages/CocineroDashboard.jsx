@@ -1,7 +1,7 @@
 // src/pages/CocineroDashboard.js
 import React from 'react';
 import { useAuth } from '../components/AuthProvider';
-
+import CocinaComandasView from '../components/cocinero/CocinaComandasView';
 const CocineroDashboard = () => {
   const { currentUser, role } = useAuth();
   return (
@@ -10,11 +10,9 @@ const CocineroDashboard = () => {
       <p>Bienvenido, {currentUser?.email}!</p>
       <p>Tu rol es: {role}</p>
       {/* Aquí el contenido específico para el cocinero */}
-      <h3>Pedidos para Cocinar</h3>
-      <ul>
-        <li>Plato: Hamburguesa Clásica (Mesa 2)</li>
-        <li>Plato: Ensalada César (Mesa 7)</li>
-      </ul>
+      <div>
+        <CocinaComandasView/>
+      </div>
     </div>
   );
 };
