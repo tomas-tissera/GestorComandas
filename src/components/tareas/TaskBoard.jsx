@@ -1,10 +1,11 @@
 import React, { useState, useCallback, useEffect } from "react";
 import { DndContext, useDraggable, useDroppable, closestCenter } from "@dnd-kit/core";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { MdDeliveryDining } from "react-icons/md"; // Import the new icon
 import ModalAddTask from "./ModalAddTask";
 import styles from "./TaskBoard.module.css";
 import Swal from "sweetalert2";
-import { ref, push } from "firebase/database"; // Removed 'remove' and 'update' as they are imported from useComandas
+import { ref, push } from "firebase/database";
 import { database } from "../../firebase";
 import { useAuth } from "../../components/AuthProvider";
 
@@ -17,13 +18,8 @@ import { IoMdPrint } from "react-icons/io";
 import { IoCardOutline } from "react-icons/io5";
 
 // --- MODIFICACIÓN 1: Nombres de las columnas ---
-// Cambiamos "Entregado" por "Listo para Servir" para el flujo de cocina
-// y añadimos "Entregado" como un estado posterior si es necesario.
-// OJO: Si 'Entregado' era el estado final antes de 'pagado', considera si necesitas 4 columnas.
-// Por ahora, asumiré 3 estados clave: "Sala", "Cocina", "Listo_para_servir".
-// Si necesitas "Entregado" como un paso intermedio entre "Listo_para_servir" y "pagado",
-// puedes añadirlo nuevamente.
-const COLUMNS = ["Sala", "Cocina", "Listo_para_servir"]; // Renombramos 'Entregado' a 'Listo_para_servir'
+// Añadimos "Entregado" como un nuevo estado posterior.
+const COLUMNS = ["Sala", "Cocina", "Listo_para_servir", "Entregado"]; // Added 'Entregado'
 
 // Helper function to get product name by ID
 function getProductNameById(id, productosDisponibles) {
@@ -65,10 +61,15 @@ const DraggableItem = React.memo(({ task, productosDisponibles, isListoParaServi
 // Droppable Column Component (memoized for performance)
 const DroppableColumn = React.memo(({ id, children, isLoading }) => {
   const { setNodeRef } = useDroppable({ id });
-    const columnTitle = id === "listo_para_servir" ? "Listo para Servir" : id; // Display name
+    let columnTitle = id;
+    if (id === "Listo_para_servir") {
+        columnTitle = "Listo para Servir";
+    } else if (id === "Entregado") { // New display name for 'Entregado'
+        columnTitle = "Entregado";
+    }
     return (
         <div ref={setNodeRef} className={styles.column}>
-            <h3>{columnTitle}</h3> {/* Muestra el nombre legible */}
+            <h3>{columnTitle}</h3>
             {isLoading ? (
                 <div className={styles.loadingIndicator}>
                     Cargando comandas...
@@ -99,24 +100,22 @@ export default function TaskBoard() {
     const [activeComandas, setActiveComandas] = useState({
         Sala: [],
         Cocina: [],
-        Listo_para_servir: [], // Ahora esta columna
+        Listo_para_servir: [],
+        Entregado: [], // Initialize the new column
     });
 
     useEffect(() => {
         if (comandas !== null) {
             setIsLoadingComandas(false);
-            const newActiveComandas = {
-                Sala: [],
-                Cocina: [],
-                Listo_para_servir: [],
-            };
+            const newActiveComandas = {};
+
+            // Initialize all columns from the COLUMNS array to empty arrays
+            COLUMNS.forEach(column => {
+                newActiveComandas[column] = [];
+            });
 
             comandas.forEach((comanda) => {
                 if (comanda.estado !== "pagado") {
-                    // --- MODIFICACIÓN 2: Lógica de filtrado de "Listo para Servir" para el cocinero ---
-                    // En este TaskBoard (asumimos que es para Meseros/Admin),
-                    // SIEMPRE mostraremos la columna 'Listo para Servir'.
-                    // El filtrado para que NO le aparezca al cocinero ya se hace en `CocinaComandasView`.
                     const estadoValido = COLUMNS.includes(comanda.estado) ? comanda.estado : "Sala";
                     newActiveComandas[estadoValido].push(comanda);
                 }
@@ -310,21 +309,30 @@ export default function TaskBoard() {
             try {
                 await actualizarComanda(movedTask.id, { estado: targetCol });
 
-                // --- MODIFICACIÓN 4: Alerta a meseros cuando el estado cambia a "Listo para Servir" ---
                 if (targetCol === "Listo_para_servir") {
                     Swal.fire({
                         icon: "success",
                         title: "¡Comanda Lista!",
                         html: `La comanda para la mesa <strong>${movedTask.nombre}</strong> está lista para ser servida.<br/> ¡Mesero, favor de buscar!`,
-                        timer: 5000, // Visible por 5 segundos
+                        timer: 5000,
                         timerProgressBar: true,
-                        position: 'center', // Centrado para mayor visibilidad
+                        position: 'center',
                         showConfirmButton: false,
                         customClass: {
-                            popup: styles.readyToServeAlert, // Clase CSS para la alerta
+                            popup: styles.readyToServeAlert,
                             title: styles.readyToServeAlertTitle,
                             htmlContainer: styles.readyToServeAlertText
                         }
+                    });
+                } else if (targetCol === "Entregado") { // New alert for 'Entregado'
+                    Swal.fire({
+                        icon: "info",
+                        title: `Comanda Entregada`,
+                        text: `La comanda para la mesa "${movedTask.nombre}" ha sido marcada como entregada.`,
+                        showConfirmButton: false,
+                        timer: 1500,
+                        position: 'top-end',
+                        toast: true,
                     });
                 } else {
                     Swal.fire({
@@ -347,7 +355,7 @@ export default function TaskBoard() {
                 });
             }
         }
-    }, [activeComandas]); // Asegúrate de incluir todas las dependencias necesarias. `actualizarComanda` es estable.
+    }, [activeComandas]);
 
     const handlePrint = (task) => {
         const now = new Date();
@@ -402,7 +410,7 @@ export default function TaskBoard() {
                   <span>$${total.toFixed(2)}</span>
                 </div>
                 <div class="line"></div>
-                <p>Estado: ${task.estado === "Listo_para_servir" ? "Lista para Servir" : task.estado}</p>
+                <p>Estado: ${task.estado === "Listo_para_servir" ? "Lista para Servir" : task.estado === "Entregado" ? "Entregada" : task.estado}</p>
                 <p>¡Gracias por su visita!</p>
               </div>
             </body>
@@ -413,6 +421,45 @@ export default function TaskBoard() {
         win.print();
         win.close();
     };
+
+    // --- NEW: Handle marking comanda as 'Entregado' ---
+    const handleMarkAsEntregado = useCallback(async (task) => {
+        const result = await Swal.fire({
+            title: "¿Marcar como entregado?",
+            text: `¿Confirmas que la comanda de la mesa "${task.nombre}" ha sido entregada?`,
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Sí, entregar",
+            cancelButtonText: "Cancelar",
+        });
+
+        if (result.isConfirmed) {
+            try {
+                await actualizarComanda(task.id, { estado: "Entregado" });
+                Swal.fire({
+                    icon: "success",
+                    title: "¡Entregada!",
+                    text: `La comanda de la mesa "${task.nombre}" ha sido marcada como entregada.`,
+                    showConfirmButton: false,
+                    timer: 1500,
+                    position: 'top-end',
+                    toast: true,
+                });
+            } catch (error) {
+                console.error("Error al marcar como entregado:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "¡Error!",
+                    text: "No se pudo marcar la comanda como entregada. Inténtalo de nuevo.",
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: "#e63946",
+                });
+            }
+        }
+    }, []);
+
 
     const handleAbrirPago = (task) => {
         setTaskToPagar(task);
@@ -508,22 +555,30 @@ export default function TaskBoard() {
                     <div className={styles.boardContainer}>
                         {COLUMNS.map((col) => (
                             <DroppableColumn key={col} id={col} isLoading={isLoadingComandas}>
-                                {!isLoadingComandas && activeComandas[col].map((task) => (
-                                    <div key={task.id} className={styles.boardItemWrapper}> {/* Nuevo div wrapper para el botón de acciones */}
+                                {!isLoadingComandas && activeComandas[col] && activeComandas[col].map((task) => (
+                                    <div key={task.id} className={styles.boardItemWrapper}>
                                         <DraggableItem
                                             task={task}
                                             productosDisponibles={productosDisponibles}
-                                            isListoParaServir={task.estado === "Listo_para_servir"} // Pasa el prop
+                                            isListoParaServir={task.estado === "Listo_para_servir"}
                                         />
-                                        <div className={styles.boardItemActions}> {/* Renombrado de boardIcon para mayor claridad */}
+                                        <div className={styles.boardItemActions}>
                                             <button onClick={() => handleEditComanda(task)} title="Editar Comanda" className={styles.actionBtn}>
                                                 <FaEdit />
                                             </button>
                                             <button onClick={() => handleDeleteComanda(task.id)} title="Eliminar Comanda" className={styles.actionBtn}>
                                                 <FaTrash />
                                             </button>
-                                            {/* Los botones de Imprimir y Pagar solo aparecen en "Listo para Servir" */}
+                                            {/* Los botones de Imprimir, Pagar y Entregado solo aparecen en "Listo para Servir" */}
                                             {col === "Listo_para_servir" && (
+                                                <>
+                                                    {/* NEW: Button to mark as delivered */}
+                                                    <button onClick={() => handleMarkAsEntregado(task)} title="Marcar como Entregado" className={styles.actionBtn}>
+                                                        <MdDeliveryDining /> {/* New icon for delivery */}
+                                                    </button>
+                                                </>
+                                            )}
+                                            {col === "Entregado" && (
                                                 <>
                                                     <button onClick={() => handlePrint(task)} title="Imprimir Ticket" className={styles.actionBtn}>
                                                         <IoMdPrint />
