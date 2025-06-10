@@ -210,3 +210,195 @@
         font-size: 1.25rem;
     }
 }
+/* src/css/DashboardStats.module.css */
+
+.dashboardContainer {
+    padding: 2rem;
+    background-color: #f4f7f6; /* Un gris claro suave */
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    max-width: 1400px;
+    margin: 2rem auto;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+.mainTitle {
+    font-size: 2.5rem;
+    color: #1a2a3a;
+    text-align: center;
+    margin-bottom: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    margin: 3rem 0;
+}
+
+.chartSection {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 2rem;
+    margin-bottom: 2.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.chartSection:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.sectionTitle {
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 1.8rem;
+    text-align: center;
+    font-weight: 600;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 1rem;
+}
+
+/* Estilos para los textos dentro de los gráficos */
+.axisText text {
+    font-size: 0.85rem;
+    fill: #666;
+}
+
+.gridStroke {
+    stroke: #e8e8e8;
+}
+
+.labelText {
+    font-size: 0.8rem;
+    fill: #333;
+    font-weight: 500;
+}
+
+.noChartData, .noDataMessage {
+    text-align: center;
+    color: #777;
+    font-size: 1.1rem;
+    padding: 2rem;
+    background-color: #fdfde6;
+    border-radius: 8px;
+    border: 1px dashed #dcdcaa;
+    margin-top: 1.5rem;
+}
+
+/* Loading State & Skeleton */
+.loadingState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 500px;
+    background-color: #fbfbfb;
+}
+
+.spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 2s linear infinite;
+    margin-bottom: 1.5rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.loadingText {
+    font-size: 1.3rem;
+    color: #555;
+    margin-bottom: 2rem;
+}
+
+.skeleton {
+    background-color: #e0e0e0;
+    animation: pulse 1.5s infinite ease-in-out;
+    border-radius: 8px;
+}
+
+.skeletonLine {
+    height: 1.2em;
+    background-color: #c0c0c0;
+    border-radius: 4px;
+    margin-bottom: 0.5em;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.7; }
+    50% { opacity: 1; }
+    100% { opacity: 0.7; }
+}
+
+/* Responsive Adjustments */
+@media (max-width: 1024px) {
+    .dashboardContainer {
+        padding: 1.5rem;
+        margin: 1.5rem auto;
+    }
+
+    .mainTitle {
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .sectionTitle {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboardContainer {
+        padding: 1rem;
+        margin: 1rem auto;
+    }
+
+    .mainTitle {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .sectionTitle {
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+    }
+
+    .chartSection {
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .axisText text, .labelText {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .dashboardContainer {
+        padding: 0.8rem;
+        margin: 0.8rem auto;
+    }
+
+    .mainTitle {
+        font-size: 1.6rem;
+        margin-bottom: 1rem;
+    }
+
+    .sectionTitle {
+        font-size: 1.2rem;
+    }
+
+    .chartSection {
+        padding: 1rem;
+    }
+}

@@ -3,9 +3,8 @@
 .container {
     background-color: var(--color-surface, #ffffff); /* Fondo de tarjeta principal */
     padding: 30px;
-    border-radius: var(--border-radius-base);
-    box-shadow: var(--shadow-lg);
-    border: 1px solid var(--color-divider);
+    border-radius: var(--border-radius-base, 8px);
+    box-shadow: var(--shadow-md, 0 4px 10px rgba(0, 0, 0, 0.1));
     margin-bottom: 30px; /* Espacio debajo de la sección */
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
 }
