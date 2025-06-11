@@ -9,7 +9,7 @@
     min-height: 100vh; /* Para que el contenido ocupe toda la altura */
 }
 .userStatsSection{
-    width: 80%;
+  
     display: flex;
     gap: 20px; 
 }
@@ -210,9 +210,18 @@
       padding: 16px;
     }
   }
-  
+  .statCardConteiner{
+    display: flex;
+    
+    gap: 15px        ;
+}
   /* Teléfonos y tablets pequeños (481px - 767px) */
   @media (min-width: 481px) and (max-width: 767px) {
+    .statCardConteiner{
+      display: flex;
+      flex-direction: column  ;
+      gap: 15px        ;
+  }
     .dashboardContainer {
       padding: 10px;
       gap: 15px;
@@ -252,6 +261,7 @@
   
   /* Tablets medianos (768px - 1024px) */
   @media (min-width: 768px) and (max-width: 1024px) {
+    
     .dashboardContainer {
       padding: 15px;
       gap: 18px;

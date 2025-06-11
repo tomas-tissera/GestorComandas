@@ -42,7 +42,6 @@ export default function CrearUsuarioGerente({ onClose, onUserCreated }) {
 
   const rolesDisponibles = [
     { value: 'mesero', label: 'Mesero' },
-    { value: 'cajero', label: 'Cajero' },
     { value: 'cocinero', label: 'Cocinero' },
     { value: 'gerente', label: 'Gerente' },
   ];
