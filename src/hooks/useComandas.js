@@ -22,6 +22,7 @@ export function useComandas() {
           cambio: value.cambio,
           cobrado: value.cobrado,
           meseroId: value.meseroId,
+          hsCocina: value.hsCocina,
           
           // Asegúrate de que `productos` sea un array, y si tiene `notas`, que también exista.
           productos: value.productos || [], 

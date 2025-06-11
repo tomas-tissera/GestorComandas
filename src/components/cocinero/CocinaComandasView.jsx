@@ -112,7 +112,8 @@ const CocinaComandasView = () => {
 
                             <div className={styles.orderFooter}>
                                 <span className={styles.timeReceived}>
-                                    Recibida: {new Date(order.fechaCreacion || Date.now()).toLocaleTimeString()}
+                                    {/* Changed from fechaCreacion to hsCocina */}
+                                    Recibida en Cocina: {new Date(order.hsCocina || order.fechaCreacion || Date.now()).toLocaleTimeString()}
                                 </span>
                                 <div className={styles.actionButtons}>
                                     <button className={`${styles.actionButton} ${styles.readyButton}`} onClick={() => updateOrderStatus(order.id, 'Listo_para_servir')}>

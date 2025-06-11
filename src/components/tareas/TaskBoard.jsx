@@ -60,7 +60,7 @@ const DraggableItem = React.memo(({ task, productosDisponibles, isListoParaServi
 
 // Droppable Column Component (memoized for performance)
 const DroppableColumn = React.memo(({ id, children, isLoading }) => {
-  const { setNodeRef } = useDroppable({ id });
+    const { setNodeRef } = useDroppable({ id });
     let columnTitle = id;
     if (id === "Listo_para_servir") {
         columnTitle = "Listo para Servir";
@@ -306,8 +306,16 @@ export default function TaskBoard() {
             const movedTask = activeComandas[sourceCol].find((task) => task.id === active.id);
             if (!movedTask) return;
 
+            // Prepare the update object
+            const updates = { estado: targetCol };
+
+            // --- NEW: Add hsCocina if moving to "Cocina" for the first time ---
+            if (targetCol === "Cocina" && !movedTask.hsCocina) {
+                updates.hsCocina = new Date().toISOString(); // Current timestamp in ISO format
+            }
+
             try {
-                await actualizarComanda(movedTask.id, { estado: targetCol });
+                await actualizarComanda(movedTask.id, updates);
 
                 if (targetCol === "Listo_para_servir") {
                     Swal.fire({
@@ -329,6 +337,16 @@ export default function TaskBoard() {
                         icon: "info",
                         title: `Comanda Entregada`,
                         text: `La comanda para la mesa "${movedTask.nombre}" ha sido marcada como entregada.`,
+                        showConfirmButton: false,
+                        timer: 1500,
+                        position: 'top-end',
+                        toast: true,
+                    });
+                } else if (targetCol === "Cocina") { // Specific alert for 'Cocina'
+                    Swal.fire({
+                        icon: "info",
+                        title: `Comanda en Cocina`,
+                        text: `La comanda para la mesa "${movedTask.nombre}" ha sido enviada a cocina.`,
                         showConfirmButton: false,
                         timer: 1500,
                         position: 'top-end',
@@ -378,7 +396,7 @@ export default function TaskBoard() {
 
         const win = window.open("", "PRINT", "height=600,width=800");
         win.document.write(`
-          <html>
+            <html>
             <head>
               <title>Ticket - ${task.nombre}</title>
               <style>
@@ -414,7 +432,7 @@ export default function TaskBoard() {
                 <p>¡Gracias por su visita!</p>
               </div>
             </body>
-          </html>
+            </html>
         `);
         win.document.close();
         win.focus();
