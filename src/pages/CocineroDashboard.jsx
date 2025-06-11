@@ -6,9 +6,9 @@ const CocineroDashboard = () => {
   const { currentUser, role } = useAuth();
   return (
     <div style={{ padding: '20px' }}>
-      <h2>Dashboard de Cocinero</h2>
+      {/* <h2>Dashboard de Cocinero</h2>
       <p>Bienvenido, {currentUser?.email}!</p>
-      <p>Tu rol es: {role}</p>
+      <p>Tu rol es: {role}</p> */}
       {/* Aquí el contenido específico para el cocinero */}
       <div>
         <CocinaComandasView/>

@@ -43,9 +43,6 @@ const Navbar = () => {
           </>
         )}
 
-        {role === 'cocinero' && (
-          <Link to="/cocina" className={isLinkActive('/cocina') ? styles.active : ''}>Cocina</Link>
-        )}
 
         {role === 'mesero' && (
           <>

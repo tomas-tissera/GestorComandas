@@ -1,29 +1,7 @@
 /* ===================================== */
 /* VARIABLES GLOBALES (Puedes ajustar o importar de un archivo global) */
 /* ===================================== */
-:root {
-    --primary-blue: #007bff;
-    --dark-blue: #0056b3;
-    --accent-green: #28a745; /* Color para "Listo para Servir" */
-    --accent-red: #dc3545;   /* Color para "Cancelar" */
-    --light-grey: #f4f7f6;
-    --medium-grey: #e0e0e0;
-    --dark-grey: #343a40;
-    --text-color-light: #fff;
-    --text-color-dark: #333;
-    --border-color: #ddd;
 
-    /* Espaciado */
-    --spacing-xs: 8px;
-    --spacing-sm: 15px;
-    --spacing-md: 20px;
-    --spacing-lg: 30px;
-
-    /* Bordes y Sombras */
-    --border-radius-base: 8px;
-    --box-shadow-light: 0 4px 12px rgba(0, 0, 0, 0.05);
-    --box-shadow-hover: 0 6px 16px rgba(0, 0, 0, 0.1);
-}
 /* General Layout & Background */
 .kitchenOrdersContainer {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -187,12 +165,19 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    color: white;
+    font-weight: 700;
 }
 
 /* Order Items List */
 .orderItems {
     padding: 20px;
     flex-grow: 1; /* Allows content to push footer down */
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: start;
+    text-align: initial;
 }
 
 .orderItems h4 {
@@ -210,14 +195,6 @@
     margin: 0;
 }
 
-.orderItem {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px dashed #e0e0e0; /* Dashed line for items */
-    font-size: 1em;
-}
 
 .orderItem:last-child {
     border-bottom: none; /* No border for the last item */
@@ -347,4 +324,62 @@
         width: 100%; /* Full width for stacked buttons */
         justify-content: center; /* Center text/icon in stacked buttons */
     }
+}
+.meseroNombre {
+    font-weight: 500;
+    font-size: 1rem;
+    color: #333;
+    margin-top: 0.25rem;
+    display: block;
+  }
+  
+  .meseroNombre::before {
+    content: "Mesero: ";
+    font-weight: 600;
+    color: #555;
+  }
+  .orderHeader {
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .orderTitle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1rem;
+    color: #333;
+  }
+  
+  .orderTime {
+    font-size: 0.9rem;
+    color: #888;
+  }
+  
+  .orderMeta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 0.25rem;
+  }
+  
+  .orderMesa,
+  .orderUser {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+.meseroNombreHread{
+    padding: 20px;
+    font-size: 1.2em;
+    border-bottom: 2px solid #d1d1d1;
+    padding-bottom: 10px;
+}
+.mainTitleCont{
+    background-color: #ffffff;
+    padding: 10px;
+    border-radius: var(--border-radius-base);
+    box-shadow: var(--shadow-sm);
 }
