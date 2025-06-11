@@ -29,4 +29,16 @@
   .crear-mesa-button:hover {
     background-color: var(--color-accent-dark);
   }
+  @media (max-width: 600px) {
+    .crear-mesa-form {
+      flex-direction: column;
+      gap: 12px;
+    }
+  
+    .crear-mesa-input,
+    .crear-mesa-button {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
   

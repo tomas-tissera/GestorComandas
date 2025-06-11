@@ -5,3 +5,17 @@
     margin-bottom: 15px;
     box-shadow: var(--shadow-md);
 }
+@media (max-width: 480px) {
+    .dashGeneral {
+      padding: 8px;
+      margin-bottom: 12px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .dashGeneral {
+      padding: 9px;
+      margin-bottom: 13px;
+    }
+  }
+  

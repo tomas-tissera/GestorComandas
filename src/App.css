@@ -295,3 +295,117 @@ body {
   color: #555;
   font-size: 1.1em;
 }
+/* Tablet (≤1024px) */
+@media (max-width: 1024px) {
+  .container {
+    margin: 2% auto;
+    padding: 0 15px;
+    max-width: 95%;
+  }
+
+  .form-container {
+    padding: 25px;
+    margin: 40px auto;
+  }
+
+  .form-group input[type="email"],
+  .form-group input[type="password"],
+  .form-group select {
+    font-size: 0.95em;
+    padding: 10px 8px;
+  }
+
+  .btn {
+    font-size: 0.95em;
+    padding: 9px 18px;
+  }
+
+  .dashboard-container {
+    padding: 25px;
+  }
+
+  .not-found-container {
+    padding: 40px;
+  }
+
+  .not-found-container h1 {
+    font-size: 2.4em;
+  }
+}
+
+
+/* Celular (≤768px) */
+@media (max-width: 768px) {
+  :root {
+    font-size: 90%;
+  }
+
+  .container {
+    padding: 0 10px;
+    margin: 4% auto;
+  }
+
+  .form-container {
+    padding: 20px;
+    margin: 30px auto;
+    width: 100%;
+    max-width: 90%;
+  }
+
+  .form-container h2 {
+    font-size: 1.5em;
+  }
+
+  .form-group label {
+    font-size: 0.95em;
+  }
+
+  .form-group input[type="email"],
+  .form-group input[type="password"],
+  .form-group select {
+    font-size: 0.9em;
+    padding: 10px 8px;
+  }
+
+  .btn {
+    font-size: 0.9em;
+    padding: 8px 16px;
+  }
+
+  .dashboard-container {
+    padding: 20px;
+  }
+
+  .dashboard-container h2 {
+    font-size: 1.4em;
+  }
+
+  .dashboard-container ul li {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .not-found-container {
+    padding: 30px 15px;
+    margin: 30px auto;
+  }
+
+  .not-found-container h1 {
+    font-size: 2em;
+  }
+
+  .not-found-container p {
+    font-size: 1em;
+  }
+
+  .spinner {
+    width: 24px;
+    height: 24px;
+  }
+
+  .spinner-button {
+    width: 16px;
+    height: 16px;
+  }
+}

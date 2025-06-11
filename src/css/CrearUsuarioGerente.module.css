@@ -123,3 +123,52 @@
     color: var(--color-accent, #388e3c); /* Usa color-accent */
     border-color: var(--color-accent, #388e3c); /* Usa color-accent */
 }
+/* Tablets (<= 1024px) */
+@media (max-width: 1024px) {
+    .container {
+      padding: 20px;
+    }
+    .title {
+      font-size: 1.5em;
+      margin-bottom: 20px;
+    }
+    .input, .select {
+      width: 100%;
+      padding: 10px 8px;
+    }
+    .buttonGroup {
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .submitButton, .cancelButton {
+      flex: 1 1 45%;
+      padding: 12px;
+      font-size: 0.95em;
+    }
+  }
+  
+  /* Móviles (<= 480px) */
+  @media (max-width: 480px) {
+    .container {
+      padding: 15px;
+    }
+    .title {
+      font-size: 1.3em;
+      margin-bottom: 15px;
+    }
+    .input, .select {
+      width: 100%;
+      padding: 10px 6px;
+    }
+    .buttonGroup {
+      flex-direction: column;
+      gap: 12px;
+    }
+    .submitButton, .cancelButton {
+      width: 100%;
+      padding: 12px;
+      font-size: 0.9em;
+    }
+  }
+  

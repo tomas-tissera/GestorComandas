@@ -50,3 +50,38 @@
 .btn-guardar:hover {
   background-color: #218838;
 }
+@media (max-width: 768px) {
+  .form-producto {
+    padding: 20px;
+    width: 90%;
+    margin: 0 auto;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .btn-guardar {
+    font-size: 0.95rem;
+    padding: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .form-producto {
+    padding: 15px;
+    width: 95%;
+  }
+
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+
+  .btn-guardar {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+}

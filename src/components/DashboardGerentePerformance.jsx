@@ -104,6 +104,8 @@ export default function DashboardGerentePerformance() {
             <p className={styles.errorText}>{userStatsError}</p>
           ) : (
             <>
+            <div className={styles.statCardConteiner}>
+
               <div className={styles.statCard}>
                 <h3 className={styles.statTitle}>Usuarios Registrados</h3>
                 <p className={styles.statNumber}>{totalUsers}</p>
@@ -119,6 +121,7 @@ export default function DashboardGerentePerformance() {
                   ))}
                 </ul>
               </div>
+            </div>
             </>
           )}
         </div>

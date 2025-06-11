@@ -163,37 +163,152 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
+/* ====== Media Queries Mejorados ====== */
 
-/* Media Queries para responsividad */
-@media (max-width: 768px) {
+/* Teléfonos pequeños (hasta 480px) */
+@media (max-width: 480px) {
     .dashboardContainer {
-        padding: 10px;
-        gap: 15px;
+      padding: 8px;
+      gap: 12px;
     }
+  
     .topBar {
-        flex-direction: column; /* Apila las estadísticas y el botón en columnas */
-        align-items: center; /* Centra los elementos cuando están apilados */
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
     }
+  
     .userStatsContainer {
-        flex-direction: column; /* Apila las tarjetas de estadísticas */
-        width: 100%; /* Las tarjetas ocupan todo el ancho */
+      flex-direction: column;
+      width: 100%;
     }
+  
     .statCard {
-        width: 100%; /* Asegura que las tarjetas ocupen todo el ancho */
-        max-width: unset; /* Elimina el ancho máximo para dispositivos pequeños */
+      width: 100%;
+      padding: 12px;
+      font-size: 0.95rem;
+      
     }
-    .alert {
-        top: 10px;
-        padding: 10px 15px;
-        min-width: unset;
-        width: 90%;
+    .statCardConteiner{
+        display: flex;
+        flex-direction: column  ;
+        gap: 15px        ;
     }
     .createButton {
-        padding: 8px 15px;
-        font-size: 14px;
-        width: 100%; /* Botón ocupa todo el ancho en móviles */
+      width: 100%;
+      font-size: 14px;
+      padding: 8px 12px;
     }
+  
+    .alert {
+      top: 8px;
+      width: 95%;
+      padding: 10px;
+    }
+  
     .modalContent {
-        padding: 20px;
+      padding: 16px;
     }
-}
+  }
+  
+  /* Teléfonos y tablets pequeños (481px - 767px) */
+  @media (min-width: 481px) and (max-width: 767px) {
+    .dashboardContainer {
+      padding: 10px;
+      gap: 15px;
+    }
+  
+    .topBar {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    .userStatsContainer {
+      flex-direction: column;
+      width: 100%;
+    }
+  
+    .statCard {
+      width: 100%;
+      max-width: unset;
+    }
+  
+    .createButton {
+      width: 100%;
+      padding: 10px 16px;
+      font-size: 15px;
+    }
+  
+    .alert {
+      top: 10px;
+      width: 90%;
+      padding: 12px 15px;
+    }
+  
+    .modalContent {
+      padding: 20px;
+    }
+  }
+  
+  /* Tablets medianos (768px - 1024px) */
+  @media (min-width: 768px) and (max-width: 1024px) {
+    .dashboardContainer {
+      padding: 15px;
+      gap: 18px;
+    }
+  
+    .topBar {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+  
+    .userStatsSection {
+      width: 100%;
+      justify-content: center;
+    }
+  
+    .userStatsContainer {
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+  
+    .statCard {
+      min-width: 180px;
+      flex-grow: 1;
+      max-width: 280px;
+    }
+  
+    .createButton {
+      width: auto;
+      padding: 10px 18px;
+      font-size: 15px;
+    }
+  
+    .alert {
+      width: 80%;
+    }
+  }
+  
+  /* Laptops pequeños (1025px - 1280px) */
+  @media (min-width: 1025px) and (max-width: 1280px) {
+    .userStatsSection {
+        width: 100%;
+        justify-content: center;
+      }
+    .topBar {
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+  
+    .statCard {
+      max-width: 300px;
+    }
+  
+    .createButton {
+      font-size: 16px;
+      padding: 10px 20px;
+    }
+  }
+  

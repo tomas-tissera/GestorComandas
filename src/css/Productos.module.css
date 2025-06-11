@@ -25,8 +25,13 @@
 .inputPrecio {
   width: 100%;
   box-sizing: border-box;
+  background-color: var(--color-background-light);
 }
-
+.inputPrecio,.buscador{
+  border: solid 2px #4e4d51;  
+  border-radius: 10px;
+  color: black;
+}
 .selectCategoria {
   background-color: var(--color-background-light);
   color: black;
@@ -255,4 +260,101 @@ textarea{
 .select-cat{
   border: 1px solid var(--color-border);
   border-radius: 4px;
+}
+/* TABLET (≤1024px) */
+@media (max-width: 1024px) {
+  .contenedor {
+    padding: 0.75rem;
+  }
+
+  .filtros {
+    gap: 0.75rem;
+  }
+
+  .filtros input,
+  .filtros select,
+  .filtros button {
+    flex: 1 1 calc(33.33% - 0.75rem);
+    font-size: 0.95rem;
+  }
+
+  .productosList {
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .productoImagen {
+    max-height: 140px;
+  }
+
+  .productoInfo h4 {
+    font-size: 1rem;
+  }
+
+  .modalContent {
+    padding: 1.5rem;
+    max-width: 90%;
+  }
+}
+
+/* MÓVIL (≤768px) */
+@media (max-width: 768px) {
+  .contenedor {
+    padding: 1rem 0.5rem;
+  }
+
+  .filtros {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.75rem;
+  }
+
+  .filtros input,
+  .filtros select,
+  .filtros button {
+    flex: 1 1 100%;
+    font-size: 0.95rem;
+  }
+
+  .productosList {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .productoItem {
+    padding: 0.75rem;
+    align-items: stretch;
+  }
+
+  .productoImagen {
+    max-height: 120px;
+  }
+
+  .productoInfo h4 {
+    font-size: 0.95rem;
+  }
+
+  .modalContent {
+    padding: 1rem;
+    width: 95%;
+    max-height: 85vh;
+  }
+
+  .modalActions {
+    flex-direction: column;
+    gap: 0.75rem;
+    align-items: stretch;
+  }
+
+  .botonGuardar,
+  .botonCancelar {
+    width: 100%;
+    padding: 0.6rem;
+  }
+
+  .editButton,
+  .deleteButton {
+    font-size: 1rem;
+    padding: 0 3px;
+  }
 }

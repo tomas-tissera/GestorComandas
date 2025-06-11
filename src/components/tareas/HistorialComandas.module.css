@@ -147,3 +147,77 @@
   .deleteButton:hover {
     background-color: #c82333;
   }
+  /* Responsive para tablets y móviles */
+
+@media (max-width: 768px) {
+  .historyContainer {
+    width: 95%;
+    padding: 20px;
+    max-width: 600px;
+  }
+
+  .comandaList {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 15px;
+  }
+
+  .comandaItem {
+    padding: 15px;
+  }
+
+  .comandaHeader h4 {
+    font-size: 18px;
+  }
+
+  .comandaHeader p,
+  .productList,
+  .comandaFooter {
+    font-size: 14px;
+  }
+
+  .deleteButton {
+    font-size: 13px;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .historyContainer {
+    width: 98%;
+    padding: 15px;
+    max-width: 100%;
+    max-height: 85vh;
+  }
+
+  .header h2 {
+    font-size: 20px;
+  }
+
+  .closeButton {
+    font-size: 20px;
+  }
+
+  .comandaList {
+    grid-template-columns: 1fr; /* Una columna para móviles pequeños */
+    gap: 12px;
+  }
+
+  .comandaItem {
+    padding: 12px;
+  }
+
+  .comandaHeader h4 {
+    font-size: 16px;
+  }
+
+  .comandaHeader p,
+  .productList,
+  .comandaFooter {
+    font-size: 13px;
+  }
+
+  .deleteButton {
+    font-size: 12px;
+    padding: 5px 8px;
+  }
+}

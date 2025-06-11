@@ -1,353 +1,377 @@
-/* TaskBoard.module.css */
+  /* TaskBoard.module.css */
 
-/* Define your CSS variables if not defined globally */
-:root {
-  --color-primary: #4a90e2; /* A nice blue */
-  --color-primary-dark: #357bd8;
-  --color-secondary: #5cb85c; /* A green for success/pay */
-  --color-danger: #d9534f; /* A red for danger/delete */
-  --color-background-light: #f8f9fa; /* Light background */
-  --color-text-dark: #343a40; /* Dark text */
-  --border-radius-base: 8px;
+  
+  :root {
+    --color-primary: #4a90e2; /* A nice blue */
+    --color-primary-dark: #357bd8;
+    --color-secondary: #5cb85c; /* A green for success/pay */
+    --color-danger: #d9534f; /* A red for danger/delete */
+    --color-background-light: #f8f9fa; /* Light background */
+    --color-text-dark: #343a40; /* Dark text */
+    --border-radius-base: 8px;
 
-  --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.08);
-  --shadow-medium: 0 4px 10px rgba(0, 0, 0, 0.12);
+    --shadow-light: 0 2px 5px rgba(0, 0, 0, 0.08);
+    --shadow-medium: 0 4px 10px rgba(0, 0, 0, 0.12);
 
-  /* New colors for "Listo para Servir" items */
-  --ready-to-serve-bg: #fffde7; /* Very light yellow */
-  --ready-to-serve-border: #ffeb3b; /* Vibrant yellow for border/accent */
-  --ready-to-serve-text: #333; /* Dark text for contrast */
+    /* New colors for "Listo para Servir" items */
+    --ready-to-serve-bg: #fffde7; /* Very light yellow */
+    --ready-to-serve-border: #ffeb3b; /* Vibrant yellow for border/accent */
+    --ready-to-serve-text: #333; /* Dark text for contrast */
 
-  /* New colors for SweetAlert2 "Comanda Lista" alert */
-  --alert-ready-bg: #d4edda; /* Light green background */
-  --alert-ready-border: #28a745; /* Darker green border */
-  --alert-ready-text: #155724; /* Dark green text */
-  --alert-ready-title: #28a745; /* Green title */
-}
-
-
-.boardContainerDad {
-  padding: 1.5rem; /* Increased padding for more breathing room */
-  display: flex;
-  flex-direction: column;
-  gap: 2rem; /* Increased gap between sections */
-  background-color: var(--color-background-light); /* Light background for the whole board area */
-  min-height: calc(100vh - 60px); /* Adjust based on your header/footer height */
-}
-
-.divButton {
-  display: flex;
-  justify-content: center; /* Center the buttons */
-  gap: 1rem; /* Space between buttons */
-  margin-bottom: 1.5rem; /* Space below the buttons */
-  flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
-}
-
-.boardButton {
-  padding: 12px 24px; /* Larger padding for better touch targets */
-  font-size: 1rem; /* Readable font size */
-  font-weight: 600;
-  border: 1px solid var(--color-primary); /* Border matching primary color */
-  border-radius: var(--border-radius-base);
-  cursor: pointer;
-  text-align: center;
-  transition: all 0.3s ease; /* Smooth transitions for hover effects */
-  background-color: var(--color-primary);
-  color: white; /* Ensure text color is white for primary buttons */
-  min-width: 200px; /* Ensure buttons have a minimum width */
-  box-shadow: var(--shadow-light);
-}
-
-.boardButton:hover {
-  background-color: var(--color-primary-dark);
-  box-shadow: var(--shadow-medium);
-  transform: translateY(-2px); /* Slight lift effect */
-}
-
-.boardButton:active {
-  transform: translateY(0);
-  box-shadow: var(--shadow-light);
-}
-
-.boardButton:disabled {
-  background-color: #cccccc;
-  border-color: #999999;
-  cursor: not-allowed;
-  opacity: 0.7;
-}
-
-.boardContainer {
-  display: flex;
-  gap: 1.5rem; /* Consistent spacing between columns */
-  justify-content: center; /* Center columns when there's extra space */
-  flex-wrap: wrap; /* Allow columns to wrap on smaller screens */
-}
-
-.column {
-  flex: 1;
-  min-width: 280px; /* Slightly increased min-width for content */
-  max-width: 350px; /* Optional: set a max-width for very wide screens */
-  background-color: #ffffff; /* White background for columns */
-  padding: 1.5rem; /* More internal padding */
-  border-radius: var(--border-radius-base);
-  box-shadow: var(--shadow-medium); /* Stronger shadow for depth */
-  border: 1px solid #e0e0e0; /* Subtle border */
-  display: flex;
-  flex-direction: column;
-  gap: 1rem; /* Space between column title and items */
-}
-
-.column h3 {
-  text-align: center;
-  color: var(--color-primary-dark);
-  margin-top: 0;
-  margin-bottom: 1rem; /* Space below the heading */
-  font-size: 1.4rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid var(--color-primary); /* Underline for column titles */
-}
-
-/* New wrapper for board items to control layout of item content and actions */
-.boardItemWrapper {
-  display: flex;
-  flex-direction: column;
-  background-color: #fdfdfd;
-  border: 1px solid #eee; /* Light border for items */
-  border-radius: var(--border-radius-base);
-  margin-bottom: 0.75rem;
-  box-shadow: var(--shadow-light);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.boardItemWrapper:hover {
-  transform: translateY(-3px); /* Lift effect on hover */
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
-}
-
-/* Style for the draggable content part of the item */
-.boardItem {
-  padding: 1rem; /* Slightly more padding */
-  color: var(--color-text-dark);
-  cursor: grab; /* Indicates it's draggable */
-  flex-grow: 1; /* Allows content to take available space */
-}
-
-/* --- New style for "Listo para Servir" items --- */
-.readyToServeItem {
-  background-color: var(--ready-to-serve-bg); /* Very light yellow */
-  border-color: var(--ready-to-serve-border); /* Vibrant yellow border */
-  /* text-shadow: 0 0 1px rgba(0, 0, 0, 0.1); */ /* Optional: subtle text shadow for contrast */
-  animation: pulseReady 1.5s infinite alternate; /* Gentle pulsating animation */
-}
-
-@keyframes pulseReady {
-  0% { box-shadow: var(--shadow-light); }
-  100% { box-shadow: 0 0 15px var(--ready-to-serve-border); } /* Glow effect */
-}
-
-
-.boardItem strong {
-  font-size: 1.1rem;
-  color: var(--color-primary); /* Uses primary color for strong text */
-  display: block; /* Ensures it takes full width */
-  margin-bottom: 0.5rem;
-}
-
-.boardItem ul {
-  list-style: none; /* Remove default list bullets */
-  padding: 0;
-  margin: 0.5rem 0 0;
-}
-
-.boardItem li {
-  padding: 0.2rem 0;
-  border-bottom: 1px dashed #e0e0e0; /* Dashed line for items */
-  font-size: 0.95rem;
-}
-
-.boardItem li:last-child {
-  border-bottom: none; /* No border for the last item */
-}
-
-.aclaracion {
-  font-style: italic;
-  font-size: 0.85em; /* Slightly smaller for clarity */
-  margin-left: 15px; /* Indent the clarification */
-  color: #666;
-  margin-top: 0.2rem;
-}
-
-/* Actions container (renamed from boardIcon for clarity in the JS) */
-.boardItemActions {
-  margin-top: 0.5rem; /* Space above actions */
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: space-around; /* Distribute icons evenly */
-  padding: 0.75rem;
-  background-color: var(--color-background-light);
-  border-bottom-left-radius: var(--border-radius-base);
-  border-bottom-right-radius: var(--border-radius-base);
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Inner shadow for a subtle inset look */
-  border-top: 1px solid #eee; /* Separator from content */
-}
-
-.actionBtn {
-  background-color: transparent; /* Fully transparent background */
-  color: var(--color-primary-dark); /* Icons color */
-  border: none;
-  cursor: pointer;
-  font-size: 28px; /* Larger icons */
-  padding: 10px; /* More padding for easier clicks */
-  border-radius: 50%;
-  transition: all 0.2s ease;
-  display: flex; /* To center icon if padding varies */
-  justify-content: center;
-  align-items: center;
-}
-
-.actionBtn:hover {
-  background-color: rgba(74, 144, 226, 0.1); /* Light blue background on hover */
-  color: var(--color-primary);
-  transform: scale(1.15); /* Slightly less aggressive scale */
-}
-
-.actionBtn:focus {
-  outline: 2px solid var(--color-primary);
-  outline-offset: 2px; /* Offset outline from the button */
-}
-
-.actionBtn:active {
-  transform: scale(0.98);
-}
-
-/* Specific icon colors for better UX */
-.actionBtn[title="Editar Comanda"] {
-  color: #f39c12; /* Orange for edit */
-}
-.actionBtn[title="Eliminar Comanda"] {
-  color: var(--color-danger); /* Red for delete */
-}
-.actionBtn[title="Imprimir Ticket"] {
-  color: #6c757d; /* Gray for print */
-}
-.actionBtn[title="Marcar como Pagado"] {
-  color: var(--color-secondary); /* Green for pay */
-}
-
-
-/* --- SweetAlert2 Custom Styles for "Comanda Lista" Alert --- */
-/* These classes will be applied via `customClass` in Swal.fire */
-.readyToServeAlert {
-  background-color: var(--alert-ready-bg) !important;
-  border: 2px solid var(--alert-ready-border) !important;
-  border-radius: 12px !important;
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2) !important;
-  padding: 2rem !important;
-  font-family: 'Arial', sans-serif !important; /* Use a common sans-serif font */
-}
-
-.readyToServeAlert .swal2-icon.swal2-success {
-  border-color: var(--alert-ready-border) !important; /* Match border color */
-}
-
-.readyToServeAlert .swal2-success-line-tip,
-.readyToServeAlert .swal2-success-line-long {
-  background-color: var(--alert-ready-border) !important; /* Match border color for checkmark */
-}
-
-.readyToServeAlertTitle {
-  color: var(--alert-ready-title) !important;
-  font-size: 2.2rem !important; /* Larger title */
-  font-weight: 700 !important;
-  margin-bottom: 1rem !important;
-  text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Subtle shadow for title */
-}
-
-.readyToServeAlertText {
-  color: var(--alert-ready-text) !important;
-  font-size: 1.3rem !important; /* Larger text */
-  line-height: 1.5 !important;
-  margin-bottom: 0.5rem !important;
-}
-
-.readyToServeAlert .swal2-timer-progress-bar {
-  background-color: var(--alert-ready-border) !important; /* Progress bar color */
-  height: 6px !important; /* Thicker progress bar */
-}
-
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .boardContainer {
-      flex-direction: column; /* Stack columns vertically on smaller screens */
-      align-items: center; /* Center stacked columns */
+    /* New colors for SweetAlert2 "Comanda Lista" alert */
+    --alert-ready-bg: #d4edda; /* Light green background */
+    --alert-ready-border: #28a745; /* Darker green border */
+    --alert-ready-text: #155724; /* Dark green text */
+    --alert-ready-title: #28a745; /* Green title */
   }
 
-  .column {
-      width: 90%; /* Take more width on small screens */
-      max-width: 400px; /* Limit max width even when stacked */
+
+  .boardContainerDad {
+    padding: 1.5rem; /* Increased padding for more breathing room */
+    display: flex;
+    flex-direction: column;
+    gap: 2rem; /* Increased gap between sections */
+    background-color: var(--color-background-light); /* Light background for the whole board area */
+    min-height: calc(100vh - 60px); /* Adjust based on your header/footer height */
   }
 
   .divButton {
-      flex-direction: column;
-      align-items: center;
+    display: flex;
+    justify-content: center; /* Center the buttons */
+    gap: 1rem; /* Space between buttons */
+    margin-bottom: 1.5rem; /* Space below the buttons */
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
   }
 
   .boardButton {
-      width: 80%; /* Make buttons take more width */
+    padding: 12px 24px; /* Larger padding for better touch targets */
+    font-size: 1rem; /* Readable font size */
+    font-weight: 600;
+    border: 1px solid var(--color-primary); /* Border matching primary color */
+    border-radius: var(--border-radius-base);
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s ease; /* Smooth transitions for hover effects */
+    background-color: var(--color-primary);
+    color: white; /* Ensure text color is white for primary buttons */
+    min-width: 200px; /* Ensure buttons have a minimum width */
+    box-shadow: var(--shadow-light);
   }
-}
 
-@media (max-width: 480px) {
-  .boardContainerDad {
-      padding: 1rem;
+  .boardButton:hover {
+    background-color: var(--color-primary-dark);
+    box-shadow: var(--shadow-medium);
+    transform: translateY(-2px); /* Slight lift effect */
+  }
+
+  .boardButton:active {
+    transform: translateY(0);
+    box-shadow: var(--shadow-light);
+  }
+
+  .boardButton:disabled {
+    background-color: #cccccc;
+    border-color: #999999;
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .boardContainer {
+    display: flex;
+    gap: 1.5rem; /* Consistent spacing between columns */
+    justify-content: center; /* Center columns when there's extra space */
+    flex-wrap: wrap; /* Allow columns to wrap on smaller screens */
   }
 
   .column {
-      min-width: unset; /* Remove min-width to allow more flexibility */
-      width: 95%; /* Even wider on very small screens */
-      padding: 1rem;
+    flex: 1;
+    min-width: 280px; /* Slightly increased min-width for content */
+    max-width: 350px; /* Optional: set a max-width for very wide screens */
+    background-color: #ffffff; /* White background for columns */
+    padding: 1.5rem; /* More internal padding */
+    border-radius: var(--border-radius-base);
+    box-shadow: var(--shadow-medium); /* Stronger shadow for depth */
+    border: 1px solid #e0e0e0; /* Subtle border */
+    display: flex;
+    flex-direction: column;
+    gap: 1rem; /* Space between column title and items */
   }
 
-  .boardButton {
-      width: 90%;
-      font-size: 0.9rem;
-      padding: 10px 15px;
+  .column h3 {
+    text-align: center;
+    color: var(--color-primary-dark);
+    margin-top: 0;
+    margin-bottom: 1rem; /* Space below the heading */
+    font-size: 1.4rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--color-primary); /* Underline for column titles */
+  }
+
+  /* New wrapper for board items to control layout of item content and actions */
+  .boardItemWrapper {
+    display: flex;
+    flex-direction: column;
+    background-color: #fdfdfd;
+    border: 1px solid #eee; /* Light border for items */
+    border-radius: var(--border-radius-base);
+    margin-bottom: 0.75rem;
+    box-shadow: var(--shadow-light);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .boardItemWrapper:hover {
+    transform: translateY(-3px); /* Lift effect on hover */
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Style for the draggable content part of the item */
+  .boardItem {
+    padding: 1rem; /* Slightly more padding */
+    color: var(--color-text-dark);
+    cursor: grab; /* Indicates it's draggable */
+    flex-grow: 1; /* Allows content to take available space */
+  }
+
+  /* --- New style for "Listo para Servir" items --- */
+  .readyToServeItem {
+    background-color: var(--ready-to-serve-bg); /* Very light yellow */
+    border-color: var(--ready-to-serve-border); /* Vibrant yellow border */
+    /* text-shadow: 0 0 1px rgba(0, 0, 0, 0.1); */ /* Optional: subtle text shadow for contrast */
+    animation: pulseReady 1.5s infinite alternate; /* Gentle pulsating animation */
+  }
+
+  @keyframes pulseReady {
+    0% { box-shadow: var(--shadow-light); }
+    100% { box-shadow: 0 0 15px var(--ready-to-serve-border); } /* Glow effect */
+  }
+
+
+  .boardItem strong {
+    font-size: 1.1rem;
+    color: var(--color-primary); /* Uses primary color for strong text */
+    display: block; /* Ensures it takes full width */
+    margin-bottom: 0.5rem;
+  }
+
+  .boardItem ul {
+    list-style: none; /* Remove default list bullets */
+    padding: 0;
+    margin: 0.5rem 0 0;
+  }
+
+  .boardItem li {
+    padding: 0.2rem 0;
+    border-bottom: 1px dashed #e0e0e0; /* Dashed line for items */
+    font-size: 0.95rem;
+  }
+
+  .boardItem li:last-child {
+    border-bottom: none; /* No border for the last item */
+  }
+
+  .aclaracion {
+    font-style: italic;
+    font-size: 0.85em; /* Slightly smaller for clarity */
+    margin-left: 15px; /* Indent the clarification */
+    color: #666;
+    margin-top: 0.2rem;
+  }
+
+  /* Actions container (renamed from boardIcon for clarity in the JS) */
+  .boardItemActions {
+    margin-top: 0.5rem; /* Space above actions */
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around; /* Distribute icons evenly */
+    padding: 0.75rem;
+    background-color: var(--color-background-light);
+    border-bottom-left-radius: var(--border-radius-base);
+    border-bottom-right-radius: var(--border-radius-base);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.05); /* Inner shadow for a subtle inset look */
+    border-top: 1px solid #eee; /* Separator from content */
+  }
+
+  .actionBtn {
+    background-color: transparent; /* Fully transparent background */
+    color: var(--color-primary-dark); /* Icons color */
+    border: none;
+    cursor: pointer;
+    font-size: 28px; /* Larger icons */
+    padding: 10px; /* More padding for easier clicks */
+    border-radius: 50%;
+    transition: all 0.2s ease;
+    display: flex; /* To center icon if padding varies */
+    justify-content: center;
+    align-items: center;
+  }
+
+  .actionBtn:hover {
+    background-color: rgba(74, 144, 226, 0.1); /* Light blue background on hover */
+    color: var(--color-primary);
+    transform: scale(1.15); /* Slightly less aggressive scale */
+  }
+
+  .actionBtn:focus {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px; /* Offset outline from the button */
+  }
+
+  .actionBtn:active {
+    transform: scale(0.98);
+  }
+
+  /* Specific icon colors for better UX */
+  .actionBtn[title="Editar Comanda"] {
+    color: #f39c12; /* Orange for edit */
+  }
+  .actionBtn[title="Eliminar Comanda"] {
+    color: var(--color-danger); /* Red for delete */
+  }
+  .actionBtn[title="Imprimir Ticket"] {
+    color: #6c757d; /* Gray for print */
+  }
+  .actionBtn[title="Marcar como Pagado"] {
+    color: var(--color-secondary); /* Green for pay */
+  }
+
+
+  /* --- SweetAlert2 Custom Styles for "Comanda Lista" Alert --- */
+  /* These classes will be applied via `customClass` in Swal.fire */
+  .readyToServeAlert {
+    background-color: var(--alert-ready-bg) !important;
+    border: 2px solid var(--alert-ready-border) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2) !important;
+    padding: 2rem !important;
+    font-family: 'Arial', sans-serif !important; /* Use a common sans-serif font */
+  }
+
+  .readyToServeAlert .swal2-icon.swal2-success {
+    border-color: var(--alert-ready-border) !important; /* Match border color */
+  }
+
+  .readyToServeAlert .swal2-success-line-tip,
+  .readyToServeAlert .swal2-success-line-long {
+    background-color: var(--alert-ready-border) !important; /* Match border color for checkmark */
   }
 
   .readyToServeAlertTitle {
-      font-size: 1.8rem !important;
+    color: var(--alert-ready-title) !important;
+    font-size: 2.2rem !important; /* Larger title */
+    font-weight: 700 !important;
+    margin-bottom: 1rem !important;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1); /* Subtle shadow for title */
   }
 
   .readyToServeAlertText {
-      font-size: 1.1rem !important;
+    color: var(--alert-ready-text) !important;
+    font-size: 1.3rem !important; /* Larger text */
+    line-height: 1.5 !important;
+    margin-bottom: 0.5rem !important;
   }
-}
 
-/* Loading Indicator */
-.loadingIndicator {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem 0;
-  color: var(--color-primary-dark);
-  font-size: 1.1rem;
-  font-weight: 500;
-}
+  .readyToServeAlert .swal2-timer-progress-bar {
+    background-color: var(--alert-ready-border) !important; /* Progress bar color */
+    height: 6px !important; /* Thicker progress bar */
+  }
 
-.spinner {
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-top: 4px solid var(--color-primary);
-  border-radius: 50%;
-  width: 30px;
-  height: 30px;
-  animation: spin 1s linear infinite;
-  margin-top: 1rem;
-}
 
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .boardContainer {
+        flex-direction: column; /* Stack columns vertically on smaller screens */
+        align-items: center; /* Center stacked columns */
+    }
+
+    .column {
+        width: 90%; /* Take more width on small screens */
+        max-width: 400px; /* Limit max width even when stacked */
+    }
+
+    .divButton {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .boardButton {
+        width: 80%; /* Make buttons take more width */
+    }
+  }
+
+  @media (max-width: 480px) {
+    .boardContainerDad {
+        padding: 1rem;
+    }
+
+    .column {
+        min-width: unset; /* Remove min-width to allow more flexibility */
+        width: 95%; /* Even wider on very small screens */
+        padding: 1rem;
+    }
+
+    .boardButton {
+        width: 90%;
+        font-size: 0.9rem;
+        padding: 10px 15px;
+    }
+
+    .readyToServeAlertTitle {
+        font-size: 1.8rem !important;
+    }
+
+    .readyToServeAlertText {
+        font-size: 1.1rem !important;
+    }
+  }
+
+  /* Loading Indicator */
+  .loadingIndicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+    color: var(--color-primary-dark);
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+
+  .spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-top: 4px solid var(--color-primary);
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    animation: spin 1s linear infinite;
+    margin-top: 1rem;
+  }
+
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  @media (max-width: 320px) {
+    .boardContainerDad {
+      padding: 0.8rem;
+    }
+    
+    .boardButton {
+      width: 100%;
+      min-width: unset;
+      font-size: 0.85rem;
+      padding: 8px 12px;
+    }
+  
+    .column {
+      width: 100%;
+      max-width: none;
+      padding: 0.75rem;
+    }
+  
+    .boardItem {
+      padding: 0.75rem;
+      font-size: 0.9rem;
+    }
+  }
+  

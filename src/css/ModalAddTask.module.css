@@ -127,3 +127,56 @@
     align-items: center;
     justify-content: center;
 }
+/* Para pantallas pequeñas (móviles) */
+@media (max-width: 480px) {
+  .modal {
+    width: 95%;
+    padding: 15px;
+    border-radius: 8px;
+  }
+
+  .productCard {
+    width: 80px;
+    height: 80px;
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+
+  .submitButton,
+  .cancelButton,
+  .deleteButton {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+
+  .opcionMesaDiv {
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1rem;
+    font-size: 1rem;
+  }
+
+  .opcionMesa {
+    width: 100%;
+  }
+}
+
+/* Para tablets y pantallas medianas */
+@media (max-width: 768px) {
+  .modal {
+    width: 90%;
+  }
+
+  .productCard {
+    width: 90px;
+    height: 90px;
+    font-size: 1rem;
+  }
+
+  .submitButton,
+  .cancelButton,
+  .deleteButton {
+    font-size: 1rem;
+    padding: 10px;
+  }
+}

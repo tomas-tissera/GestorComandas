@@ -38,3 +38,38 @@
     color: var(--color-text-medium);
   }
   
+  /* Tablets (menor o igual a 1024px) */
+@media (max-width: 1024px) {
+  .dashCuerpo {
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+  .dashTitle {
+    min-width: 220px;
+    padding: 1.2rem 1.5rem;
+  }
+  .dashTitle h2 {
+    font-size: 1.6rem;
+  }
+  .dashTitle p {
+    font-size: 0.9rem;
+  }
+}
+
+/* Móviles (menor o igual a 480px) */
+@media (max-width: 480px) {
+  .dashCuerpo {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  .dashTitle {
+    min-width: 100%;
+    padding: 1rem 1rem;
+  }
+  .dashTitle h2 {
+    font-size: 1.3rem;
+  }
+  .dashTitle p {
+    font-size: 0.8rem;
+  }
+}

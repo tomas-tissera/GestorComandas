@@ -68,3 +68,37 @@
       transform: translateY(0);
     }
   }
+  /* Media Queries */
+
+/* Tablets y pantallas medianas */
+@media (max-width: 768px) {
+  .formCategoria {
+    padding: 15px;
+    max-width: 100%;
+  }
+
+  .btnGuardar {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+}
+
+/* Móviles */
+@media (max-width: 480px) {
+  .formCategoria {
+    padding: 12px;
+    border-radius: 6px;
+  }
+
+  .formDesc,
+  input {
+    font-size: 13px;
+    padding: 8px;
+  }
+
+  .btnGuardar {
+    padding: 12px;
+    font-size: 1rem;
+    border-radius: 6px;
+  }
+}

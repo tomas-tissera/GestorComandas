@@ -64,3 +64,34 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+/* Tablet (pantallas hasta 1024px) */
+@media (max-width: 1024px) {
+  h1 {
+    font-size: 2.4em; /* reducir tamaño para tablets */
+  }
+
+  button {
+    padding: 0.5em 1em; /* ajuste de padding */
+    font-size: 0.95em;
+  }
+}
+
+/* Celular (pantallas hasta 768px) */
+@media (max-width: 768px) {
+  :root {
+    font-size: 90%; /* Escala global de texto */
+  }
+
+  h1 {
+    font-size: 1.8em;
+  }
+
+  button {
+    padding: 0.4em 0.8em;
+    font-size: 0.9em;
+  }
+
+  body {
+    padding: 0 1rem; /* añadir padding lateral en móviles */
+  }
+}

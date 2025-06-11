@@ -62,3 +62,74 @@
   display: flex;
   justify-content: space-between;
 }
+/* Tablets (entre 768px y 1024px) */
+@media (max-width: 1024px) and (min-width: 768px) {
+  .container {
+    max-width: 700px;
+    margin: 15px auto;
+    padding: 0 12px;
+  }
+
+  .title {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+  }
+
+  .metricsSection {
+    padding: 15px;
+    margin-bottom: 30px;
+  }
+
+  .metricsList {
+    font-size: 1em;
+  }
+
+  .comandaCard {
+    padding: 12px 15px;
+  }
+
+  .productosList {
+    padding-left: 15px;
+  }
+}
+
+/* Celulares (menores a 767px) */
+@media (max-width: 767px) {
+  .container {
+    max-width: 100%;
+    margin: 10px 10px;
+    padding: 0 10px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+  .metricsSection {
+    padding: 10px;
+    margin-bottom: 25px;
+  }
+
+  .metricsList {
+    font-size: 0.95em;
+  }
+
+  .metricsList li {
+    margin-bottom: 6px;
+  }
+
+  .comandaCard {
+    padding: 10px 12px;
+  }
+
+  .productosList {
+    padding-left: 12px;
+    margin-bottom: 8px;
+  }
+
+  .comandaCardTitle {
+    flex-direction: column;
+    gap: 6px;
+  }
+}
