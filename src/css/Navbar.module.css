@@ -173,7 +173,8 @@
     position: static;
     transform: none !important;
     height: auto;
-    width: auto;
+    width: 100%;
+    display: contents;
     box-shadow: none;
     flex-direction: row;
     align-items: center;
