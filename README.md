@@ -74,6 +74,7 @@ Aplicación web para la gestión de pedidos en restaurantes. Permite a meseros, 
     import { initializeApp } from "firebase/app";
     import { getAuth } from "firebase/auth";
     import { getFirestore } from "firebase/firestore";
+    import { getDatabase } from "firebase/database";
 
     const firebaseConfig = {
     apiKey: "TU_API_KEY",
@@ -85,9 +86,9 @@ Aplicación web para la gestión de pedidos en restaurantes. Permite a meseros, 
     };
 
     const app = initializeApp(firebaseConfig);
-
-    export const auth = getAuth(app);
-    export const db = getFirestore(app);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+    const database = getDatabase(app); 
     ```
 4. Inicia la app en modo desarrollo:
     ```
