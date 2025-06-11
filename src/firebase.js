@@ -6,19 +6,19 @@ import { getDatabase } from "firebase/database";
 
 // **Importante:** Usa variables de entorno para producción
 const firebaseConfig = {
-    apiKey: "AIzaSyAzyeb5i4QUDXjPKUxW4wHlbfxsYVwqYTI",
-    authDomain: "gestion-comandas-36c3f.firebaseapp.com",
-    databaseURL: "https://gestion-comandas-36c3f-default-rtdb.firebaseio.com",
-    projectId: "gestion-comandas-36c3f",
-    storageBucket: "gestion-comandas-36c3f.appspot.com",
-    messagingSenderId: "884678876861",
-    appId: "1:884678876861:web:4a2ff182e4100d2d0ea1d4",
-    measurementId: "G-D3YME5HB01",
-  };
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  databaseURL: import.meta.env.VITE_FIREBASE_DB_URL,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MSG_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
+};
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-const database = getDatabase(app); // 👈 Asegurate de tener esta línea
+const database = getDatabase(app); 
 
 export { auth, db ,database};

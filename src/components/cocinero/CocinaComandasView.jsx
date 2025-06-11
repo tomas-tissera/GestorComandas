@@ -2,6 +2,8 @@ import React from 'react';
 import styles from '../../css/CocinaComandasView.module.css';
 import { useComandas, actualizarComanda } from '../../hooks/useComandas';
 import { useUsers } from '../../hooks/useUsers';
+import { ToastContainer, toast } from 'react-toastify'; // Import toastify components
+import 'react-toastify/dist/ReactToastify.css'; // Import toastify CSS
 
 const CocinaComandasView = () => {
     const allComandas = useComandas();
@@ -32,10 +34,29 @@ const CocinaComandasView = () => {
     const updateOrderStatus = async (id, estado) => {
         try {
             await actualizarComanda(id, { estado });
-            alert(`Comanda #${id} actualizada a: ${estado.replace('_', ' ')}`);
+            // Reemplazado alert() con toast.success()
+            toast.success(`¡Comanda #${id} actualizada a: ${estado.replace('_', ' ')}!`, {
+                position: "top-right",
+                autoClose: 3000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
         } catch (err) {
             console.error(`Error al actualizar comanda ${id}:`, err);
-            alert(`Error al actualizar el estado de la comanda #${id}`);
+            // Reemplazado alert() con toast.error()
+            toast.error(`Error al actualizar el estado de la comanda #${id}.`, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+            });
+            setError(`Error al actualizar el estado de la comanda #${id}`); // Keep error state for main display if needed
         }
     };
 
@@ -60,8 +81,10 @@ const CocinaComandasView = () => {
 
     return (
         <div className={styles.kitchenOrdersContainer}>
-            <div className={styles.mainTitleCont}>
+            {/* Agrega ToastContainer en la raíz de tu componente */}
+            <ToastContainer /> 
 
+            <div className={styles.mainTitleCont}>
                 <h1 className={styles.mainTitle}>Comandas en Cocina</h1>
                 <p className={styles.subtitle}>Aquí puedes ver y gestionar las comandas pendientes de preparación.</p>
             </div>
@@ -81,7 +104,6 @@ const CocinaComandasView = () => {
                     {kitchenOrders.map(order => (
                         <div key={order.id} className={styles.orderCard}>
                             <div className={styles.orderHeader}>
-                                {/* <h3 className={styles.orderId}>C{order.id.substring(0, 6)}...</h3> */}
                                 <h3 className={styles.tableNumber}>{order.nombre || 'N/A'}</h3>
                             </div>
                             <div className={styles.meseroNombreHread}>
@@ -94,10 +116,9 @@ const CocinaComandasView = () => {
                                     {order.productos?.map((item, i) => (
                                         <li key={i} className={styles.orderItem}>
                                             <div>
-
                                                 <span>{item.cantidad}x {item.nombre}</span>
                                             </div>
-                                                {item.aclaracion && <span>Aclaración: {item.aclaracion}</span>}
+                                            {item.aclaracion && <span>Aclaración: {item.aclaracion}</span>}
                                         </li>
                                     ))}
                                 </ul>
@@ -112,7 +133,6 @@ const CocinaComandasView = () => {
 
                             <div className={styles.orderFooter}>
                                 <span className={styles.timeReceived}>
-                                    {/* Changed from fechaCreacion to hsCocina */}
                                     Recibida en Cocina: {new Date(order.hsCocina || order.fechaCreacion || Date.now()).toLocaleTimeString()}
                                 </span>
                                 <div className={styles.actionButtons}>

@@ -44,7 +44,7 @@ Aplicación web para la gestión de pedidos en restaurantes. Permite a meseros, 
 - **Firebase** – Autenticación, Base de datos, Hosting.
 - **Zustand** – Estado global simple.
 - **React Router DOM** – Rutas protegidas.
-- **SweetAlert2** – Alertas modernas.
+- **SweetAlert2/React-toastify** – Alertas modernas.
 - **Chart.js + Recharts** – Gráficas interactivas.
 - **jsPDF + html2canvas** – Exportación de reportes PDF.
 - **DND Kit** – Drag & Drop para gestión visual.
@@ -98,6 +98,7 @@ Aplicación web para la gestión de pedidos en restaurantes. Permite a meseros, 
     ```
     npm run build
     ```
+    
 📄 Licencia
 
 MIT © 2025 - Tomas Tissera

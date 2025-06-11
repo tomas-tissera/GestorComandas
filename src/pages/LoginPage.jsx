@@ -23,35 +23,57 @@ const LoginPage = () => {
   };
 
   return (
-    <div className={styles.formContainer}> {/* Aplica la clase del módulo */}
-      <h2>Iniciar Sesión</h2>
-      <form onSubmit={handleSubmit}>
-        <div className={styles.formGroup}> {/* Aplica la clase del módulo */}
-          <label htmlFor="email">Email:</label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
-        <div className={styles.formGroup}> {/* Aplica la clase del módulo */}
-          <label htmlFor="password">Contraseña:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        {error && <p className={styles.errorMessage}>{error}</p>} {/* Aplica la clase del módulo */}
-        <button type="submit" className={`${styles.btn} ${styles.btnPrimary} ${styles.btnBlock}`}> {/* Combina clases del módulo */}
-          Iniciar Sesión
-        </button>
-      </form>
-    </div>
+    <>
+        <div className={styles.formContainer}> {/* Aplica la clase del módulo */}
+          <h2>Iniciar Sesión</h2>
+          <form onSubmit={handleSubmit}>
+            <div className={styles.formGroup}> {/* Aplica la clase del módulo */}
+              <label htmlFor="email">Email:</label>
+              <input
+                type="email"
+                id="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </div>
+            <div className={styles.formGroup}> {/* Aplica la clase del módulo */}
+              <label htmlFor="password">Contraseña:</label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </div>
+            {error && <p className={styles.errorMessage}>{error}</p>} {/* Aplica la clase del módulo */}
+            <button type="submit" className={`${styles.btn} ${styles.btnPrimary} ${styles.btnBlock}`}> {/* Combina clases del módulo */}
+              Iniciar Sesión
+            </button>
+          </form>
+        </div>
+    <div className={styles.formContainer}>
+        <h3>Mesero</h3>
+        <ul>
+            <li><strong>Correo:</strong> <code>meserotest@gamil.com</code></li>
+            <li><strong>Contraseña:</strong> <code>123456</code></li>
+        </ul>
+
+        <h3>Cocinero</h3>
+        <ul>
+            <li><strong>Correo:</strong> <code>cocineroTest@gamil.com</code></li>
+            <li><strong>Contraseña:</strong> <code>123456</code></li>
+        </ul>
+
+        <h3>Gerente</h3>
+        <ul>
+            <li><strong>Correo:</strong> <code>gerente@gmail.com</code></li>
+            <li><strong>Contraseña:</strong> <code>123456</code></li>
+        </ul>
+    </div>
+
+    </>
   );
 };
 
