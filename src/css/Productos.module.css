@@ -96,11 +96,14 @@
 
 /* Botones de acción */
 .botonesAcciones {
-  position: absolute;
   top: 0.75rem;
   right: 0.75rem;
   display: flex;
   gap: 0.5rem;
+  align-content: end;
+  height: 100%;
+  width: 100%;
+  justify-content: end;
 }
 
 .editButton,
@@ -180,7 +183,10 @@
   margin-top: 0.5rem;
   box-sizing: border-box;
 }
-
+textarea{
+  background-color: var(--color-background-light);
+  color: black;
+}
 .modalActions {
   display: flex;
   justify-content: flex-end;

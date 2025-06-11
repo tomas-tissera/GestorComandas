@@ -1,5 +1,4 @@
-// Productos.jsx
-import React, { useState, useMemo, useEffect } from 'react'; // Import useEffect
+import React, { useState, useMemo, useEffect } from 'react';
 import CrearProducto from '../tareas/CrearProducto';
 import { useProductos } from '../../hooks/useProductos';
 import { useCategorias } from '../../hooks/useCategorias';
@@ -7,10 +6,9 @@ import { useComandas } from '../../hooks/useComandas';
 import styles from '../../css/Productos.module.css';
 import { FaEdit, FaTrash } from 'react-icons/fa';
 import Swal from 'sweetalert2';
-import { db, database, auth } from '../../firebase'; // Import auth
-import { doc, deleteDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { ref, remove, push } from 'firebase/database';
-import { onAuthStateChanged } from 'firebase/auth'; // Import onAuthStateChanged
+import { db, database, auth } from '../../firebase';
+import { ref, remove, push, update } from 'firebase/database';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const Productos = () => {
   const productos = useProductos() || [];
@@ -22,9 +20,8 @@ const Productos = () => {
   const [filtroCategoria, setFiltroCategoria] = useState('');
   const [productoEditando, setProductoEditando] = useState(null);
   const [formData, setFormData] = useState({});
-  const [user, setUser] = useState(null); // State to store the current user
+  const [user, setUser] = useState(null);
 
-  // Listen for Firebase Auth state changes
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
@@ -32,7 +29,6 @@ const Productos = () => {
     return () => unsubscribe();
   }, []);
 
-  // Calcular vecesVendidas
   const productosConVentas = useMemo(() => {
     const conteo = {};
 
@@ -49,7 +45,6 @@ const Productos = () => {
     }));
   }, [productos, comandas]);
 
-  // Aplicar filtros
   const productosFiltrados = useMemo(() => {
     return productosConVentas.filter(producto => {
       const cumpleBusqueda = producto.nombre.toLowerCase().includes(busqueda.toLowerCase());
@@ -74,10 +69,32 @@ const Productos = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const guardarCambios = () => {
-    console.log('Guardar cambios:', formData);
-    // Aquí iría lógica para guardar en Firestore
-    cerrarModal();
+  const guardarCambios = async () => {
+    if (!user) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Acceso denegado',
+        text: 'Debes iniciar sesión para editar productos.',
+      });
+      return;
+    }
+
+    try {
+      const productoRef = ref(database, `productos/${formData.id}`);
+      await update(productoRef, {
+        nombre: formData.nombre,
+        precio: parseFloat(formData.precio),
+        imagen: formData.imagen,
+        categoriaId: formData.categoriaId,
+        elementos: formData.elementos || '',
+      });
+
+      Swal.fire('Guardado', 'El producto se actualizó correctamente.', 'success');
+      cerrarModal();
+    } catch (error) {
+      console.error('Error al guardar producto:', error);
+      Swal.fire('Error', 'No se pudo actualizar el producto.', 'error');
+    }
   };
 
   const eliminarProducto = async (producto) => {
@@ -107,30 +124,21 @@ const Productos = () => {
       const historialRef = ref(database, 'historial/productos');
       await push(historialRef, {
         ...producto,
-        eliminadoPor: user.uid, // Save the user's ID
-        
+        eliminadoPor: user.uid,
         eliminadoEn: new Date().toISOString(),
       });
 
       await remove(ref(database, `productos/${producto.id}`));
-      Swal.fire(
-        'Eliminado!',
-        'El producto ha sido eliminado.',
-        'success'
-      );
+      Swal.fire('Eliminado!', 'El producto ha sido eliminado.', 'success');
     } catch (error) {
       console.error('Error al eliminar producto:', error);
-      Swal.fire(
-        'Error!',
-        'Hubo un error al eliminar el producto.',
-        'error'
-      );
+      Swal.fire('Error!', 'Hubo un error al eliminar el producto.', 'error');
     }
   };
 
   const nombreCategoria = (categoriaId) => {
-    const cat = categorias.find(c => c.id === categoriaId);
-    return cat ? cat.nombre : 'Sin categoría';
+    const categoria = categorias.find(c => c.id === categoriaId);
+    return categoria ? categoria.nombre : 'Sin categoría';
   };
 
   const resetearFiltros = () => {
@@ -159,8 +167,8 @@ const Productos = () => {
           className={styles.selectCategoria}
         >
           <option value="">Todas las categorías</option>
-          {categorias.map(cat => (
-            <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+          {categorias.map(categoria => (
+            <option key={categoria.id} value={categoria.id}>{categoria.nombre}</option>
           ))}
         </select>
 
@@ -183,30 +191,35 @@ const Productos = () => {
       ) : (
         <ul className={styles.productosList}>
           {productosFiltrados.map(producto => (
+            
             <li key={producto.id} className={styles.productoItem}>
+              <div className={styles.botonesAcciones}>
+                    <button
+                      className={styles.editButton}
+                      onClick={() => abrirModalEdicion(producto)}
+                      title="Editar producto"
+                    >
+                      <FaEdit />
+                    </button>
+                    <button
+                      className={styles.deleteButton}
+                      onClick={() => eliminarProducto(producto)}
+                      title="Eliminar producto"
+                    >
+                      <FaTrash />
+                    </button>
+                  </div>
               <img
                 src={producto.imagen}
                 alt={producto.nombre}
                 className={styles.productoImagen}
               />
               <div className={styles.productoInfo}>
-                <h4>{producto.nombre}</h4>
+                <div>
 
-                <div className={styles.botonesAcciones}>
-                  <button
-                    className={styles.editButton}
-                    onClick={() => abrirModalEdicion(producto)}
-                    title="Editar producto"
-                  >
-                    <FaEdit />
-                  </button>
-                  <button
-                    className={styles.deleteButton}
-                    onClick={() => eliminarProducto(producto)}
-                    title="Eliminar producto"
-                  >
-                    <FaTrash />
-                  </button>
+                  <h4>{producto.nombre}</h4>
+
+                  
                 </div>
 
                 <p>💵 Precio: ${parseFloat(producto.precio).toFixed(2)}</p>
@@ -258,11 +271,11 @@ const Productos = () => {
                 name="categoriaId"
                 value={formData.categoriaId || ''}
                 onChange={handleChange}
-                className={styles.select-cat}
+                className={styles.selectCategoria}
               >
                 <option value="">Selecciona una categoría</option>
-                {categorias.map(cat => (
-                  <option key={cat.id} value={cat.id}>{cat.nombre}</option>
+                {categorias.map(categoria => (
+                  <option key={categoria.id} value={categoria.id}>{categoria.nombre}</option>
                 ))}
               </select>
             </label>
